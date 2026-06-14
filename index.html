@@ -558,11 +558,8 @@ body {
   font-size: 10px;
   padding: 2px 6px;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s;
   line-height: 1.4;
 }
-.message:hover .copy-btn { opacity: 1; }
 .copy-btn:hover { border-color: var(--text-dim); color: var(--text); }
 .reg-btn {
   position: absolute;
@@ -576,11 +573,8 @@ body {
   font-size: 10px;
   padding: 2px 6px;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s;
   line-height: 1.4;
 }
-.message:hover .reg-btn { opacity: 1; }
 .reg-btn:hover { border-color: var(--text-dim); color: var(--text); }
 .message { position: relative; }
 /* Side panel */
@@ -1732,7 +1726,7 @@ async function sendMessage(userText) {
     apiMessages.push({ role: 'system', content: state.systemPrompt });
   }
   if (state.webSearch) {
-    apiMessages.push({ role: 'system', content: 'You have web search enabled. When the user asks for current data, prices, news, or any real-time information, use web search to find the latest information instead of relying on your training data. Always search for live data when the query asks for current/present information.' });
+    apiMessages.push({ role: 'system', content: 'You have web search enabled and must use it for any query asking for current/present information. When asked for stock prices, weather, news, or any real-time data: use web search to find the actual current value and return it directly. Do NOT write code to fetch the data — just search the web and quote the result with the source and timestamp.' });
   }
   for (const msg of state.messages.slice(-20)) { // last 20 for context
     apiMessages.push({ role: msg.role, content: msg.content });
