@@ -50,6 +50,11 @@ body {
   flex-direction: column;
   position: relative;
 }
+#chat-row {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
 #input-area {
   position: sticky;
   bottom: 0;
@@ -127,37 +132,7 @@ body {
   color: var(--text-dim);
   background: var(--surface2);
 }
-#status-bar {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 14px;
-  font-size: 11px;
-  color: var(--text-dim);
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  min-height: 24px;
-  font-family: var(--font);
-  gap: 8px;
-}
-#status-left {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-}
-#status-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-#status-tokens {
-  font-variant-numeric: tabular-nums;
-}
+#status-bar { display: none; }
 
 /* Main chat area */
 #chat {
@@ -531,14 +506,57 @@ body {
 .message:hover .copy-btn { opacity: 1; }
 .copy-btn:hover { border-color: var(--text-dim); color: var(--text); }
 .message { position: relative; }
+/* Side panel */
+#side-panel {
+  flex-shrink: 0;
+  width: 160px;
+  padding: 12px;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  font-size: 11px;
+}
+@media (max-width: 800px) {
+  #side-panel { display: none; }
+}
+#side-panel .sp-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+#side-panel .sp-desc {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+#side-panel .sp-section {
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+#side-panel .sp-section:first-child { border-top: none; padding-top: 0; }
+#side-panel .sp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+  font-size: 10px;
+}
+#side-panel .sp-row .sp-label { color: var(--text-dim); }
+#side-panel .sp-row .sp-value { color: var(--text-bright); font-weight: 500; }
+#side-panel .sp-bar { height: 3px; border-radius: 2px; background: var(--border); margin: 4px 0; overflow: hidden; }
+#side-panel .sp-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.3s; }
+#side-panel .sp-footer { margin-top: auto; font-size: 9px; color: var(--text-dim); padding-top: 8px; border-top: 1px solid var(--border); }
 /* Mobile responsive */
 @media (max-width: 600px) {
   :root { --font-size: 13px; }
   #banner { padding: 6px 10px; gap: 8px; }
   #banner pre { font-size: clamp(8px, 1.5vw, 13px); }
-  #banner .subtitle { font-size: 10px; }
-  #mode-badge, #persona-badge, #model-badge { font-size: 8px; padding: 1px 6px; }
-  #status-bar { padding: 3px 10px; font-size: 10px; gap: 6px; }
+  #side-panel { display: none; }
   #chat { padding: 8px; gap: 8px; }
   #input-area { padding: 6px 8px; gap: 6px; }
   #input { font-size: 13px; padding: 8px 10px; }
@@ -551,7 +569,6 @@ body {
 @media (max-width: 480px) {
   #banner pre { display: none; }
   #banner { padding: 8px 10px; gap: 6px; }
-  #banner .subtitle { font-size: 11px; }
   #chat { padding: 6px; gap: 6px; }
   #tips { font-size: 10px; padding: 8px 10px; }
   #tips code { font-size: 9px; }
@@ -599,7 +616,6 @@ body {
 <!-- Banner -->
 <div id="banner">
   <pre id="banner-art"></pre>
-  <div class="subtitle">AI chat at your terminal</div>
 </div>
 
 <!-- Status bar: badges + model + tokens -->
@@ -617,7 +633,8 @@ body {
   </span>
 </div>
 
-<!-- Chat messages -->
+<!-- Chat area + side panel -->
+<div id="chat-row">
 <div id="chat" role="log" aria-live="polite">
   <div id="tips">
     <strong>Plexus</strong> — AI chat powered by OpenRouter.<br>
@@ -627,6 +644,28 @@ body {
     Click <strong>⚙</strong> to set your API key. Type <code>/help</code> for all commands.
   </div>
 </div>
+
+<!-- Side panel -->
+<div id="side-panel">
+  <div class="sp-section">
+    <div class="sp-title">Plexus</div>
+    <div class="sp-desc">Terminal AI chat · OpenRouter</div>
+  </div>
+  <div class="sp-section">
+    <div class="sp-row"><span class="sp-label">Mode</span><span class="sp-value" id="sp-mode">general</span></div>
+    <div class="sp-row"><span class="sp-label">Model</span><span class="sp-value" id="sp-model">—</span></div>
+  </div>
+  <div class="sp-section">
+    <div class="sp-row"><span class="sp-label">Tokens in</span><span class="sp-value" id="sp-tokens-in">0</span></div>
+    <div class="sp-row"><span class="sp-label">Tokens out</span><span class="sp-value" id="sp-tokens-out">0</span></div>
+  </div>
+  <div class="sp-section">
+    <div class="sp-row"><span class="sp-label">Msgs</span><span class="sp-value" id="sp-msgs">0</span></div>
+    <div id="sp-context-bar" class="sp-bar"><div class="sp-bar-fill" id="sp-context-fill" style="width:0%"></div></div>
+  </div>
+  <div class="sp-footer"><span id="sp-cost">$0.00</span> est.</div>
+</div>
+</div><!-- /chat-row -->
 
 <!-- Input area -->
 <div id="input-area">
