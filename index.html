@@ -21,20 +21,21 @@
   --text: #e0e0e0;
   --text-dim: #666;
   --text-bright: #f0f0f0;
-  --cyan: #22c55e;
-  --blue: #22c55e;
-  --bright-blue: #4ade80;
-  --magenta: #22c55e;
-  --bright-magenta: #4ade80;
-  --green: #22c55e;
+  --cyan: #6b8f71;
+  --blue: #6b8f71;
+  --bright-blue: #6b8f71;
+  --magenta: #6b8f71;
+  --bright-magenta: #6b8f71;
+  --green: #6b8f71;
   --yellow: #eab308;
   --red: #ef4444;
-  --query-border: #22c55e;
-  --response-border: #333;
-  --accent: #22c55e;
-  --accent-dim: rgba(34,197,94,0.3);
-  --focus-border: #22c55e;
-  --focus-bg: rgba(34,197,94,0.06);
+  --query-border: #6b8f71;
+  --response-border: #4a5f4e;
+  --query-bg: rgba(107,143,113,0.08);
+  --accent: #6b8f71;
+  --accent-dim: rgba(107,143,113,0.25);
+  --focus-border: #6b8f71;
+  --focus-bg: rgba(107,143,113,0.08);
   --font: 'Courier New','Consolas',monospace;
   --font-size: 14px;
   --panel-font-size: 13px;
@@ -161,8 +162,8 @@ body {
 }
 #tips strong { color: var(--text); }
 #tips code {
-  color: var(--cyan);
-  background: rgba(0,212,170,0.1);
+  color: var(--accent);
+  background: var(--query-bg);
   padding: 0 4px;
   border-radius: 3px;
 }
@@ -171,7 +172,7 @@ body {
 .message.query .panel {
   border: 1px solid var(--query-border);
   border-radius: 8px;
-  background: rgba(59,130,246,0.05);
+  background: var(--query-bg);
 }
 .message.response .panel {
   border: 1px solid var(--response-border);
@@ -185,7 +186,7 @@ body {
   letter-spacing: 1px;
   padding: 6px 12px 0;
 }
-.message.query .panel-title { color: var(--blue); }
+.message.query .panel-title { color: var(--accent); }
 .message.response .panel-title { color: var(--text-dim); }
 .panel-body {
   padding: 8px 12px 12px;
@@ -441,7 +442,7 @@ body {
 #send-btn:disabled { opacity: 0.25; cursor: not-allowed; }
 #send-btn:not(:disabled):hover {
   opacity: 1;
-  background: rgba(0,212,170,0.1);
+  background: var(--focus-bg);
 }
 #stop-btn {
   display: none;
@@ -778,7 +779,7 @@ body {
   color: var(--text-dim);
 }
 .sp-sess:hover { background: rgba(255,255,255,0.04); }
-.sp-sess.active { color: var(--accent); background: rgba(34,197,94,0.08); }
+.sp-sess.active { color: var(--accent); background: var(--query-bg); }
 .sp-sess-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 .sp-sess-del { color: var(--red); font-size: 9px; padding: 0 4px; opacity: 0; }
 .sp-sess:hover .sp-sess-del { opacity: 1; }
@@ -840,10 +841,10 @@ body {
 .theme-crt #banner pre { font-family: 'Fira Code','Cascadia Code','Courier New',monospace; }
 .theme-crt #banner::after {
   content: '⚡ USER@CLI_CHAT:~/plexus';
-  color: #8bb9fe;
+  color: var(--accent);
   font-size: 12px;
   letter-spacing: 1px;
-  text-shadow: 0 0 4px #1e88e5;
+  text-shadow: 0 0 6px var(--accent-dim);
   font-family: 'Fira Code',monospace;
 }
 .theme-crt #side-panel {
@@ -854,16 +855,16 @@ body {
   background: #0b0e17;
 }
 .theme-crt #chat .message.query .panel {
-  background: rgba(15,18,31,0.4);
-  border-color: #6dffb0;
+  background: var(--query-bg);
+  border-color: var(--query-border);
 }
 .theme-crt #chat .message.response .panel {
   background: rgba(15,18,31,0.4);
-  border-color: #1e2a3a;
+  border-color: var(--response-border);
 }
 .theme-crt .panel-title { font-size: 10px; }
-.theme-crt .message.query .panel-title { color: #6dffb0; }
-.theme-crt .message.response .panel-title { color: #6ec8ff; }
+.theme-crt .message.query .panel-title { color: var(--accent); }
+.theme-crt .message.response .panel-title { color: var(--text-dim); }
 .theme-crt #input-area {
   background: #080c16;
   border-top: 1px solid #1f2b38;
@@ -875,7 +876,7 @@ body {
   color: #eef5ff;
   font-family: 'Fira Code',monospace;
   font-size: 13px;
-  caret-color: #6ec8ff;
+  caret-color: var(--accent);
   padding: 8px 0;
 }
 .theme-crt #input:focus {
@@ -911,17 +912,12 @@ body {
   font-size: 13px;
 }
 .theme-crt #stop-btn.active { display: flex; }
-.theme-crt #prompt { color: #6dffb0; font-size: 15px; }
+.theme-crt #prompt { color: var(--accent); font-size: 15px; }
 .theme-crt #status-bar { display: flex; background: #05080f; border-bottom: 1px solid #1e2a3a; padding: 4px 14px; font-size: 11px; min-height: 24px; gap: 8px; color: #5f789b; }
 .theme-crt #status-left .sp-label,
 .theme-crt #status-left .sp-value,
 .theme-crt #status-model,
-.theme-crt #status-tokens { color: #6e8fbb; }
-.theme-crt #side-panel .sp-title { color: #6ec8ff; }
-.theme-crt #side-panel .sp-row .sp-label { color: #6e8fbb; }
-.theme-crt #side-panel .sp-row .sp-value { color: #bee0ff; }
-.theme-crt #side-panel .sp-desc { color: #6ec8ff; }
-.theme-crt #side-panel .sp-footer { color: #5f789b; }
+.theme-crt #status-tokens { color: var(--text-dim); }
 .theme-crt .code-wrap { border-color: #1e2a3a; }
 .theme-crt .code-hdr { background: #0a0e18; border-color: #1e2a3a; }
 .theme-crt .panel-body pre { background: #0a0e18; }
@@ -1186,21 +1182,20 @@ body {
       </optgroup>
     </select>
 
-    <label for="theme-select">Theme</label>
+    <label for="theme-select" style="margin-top:16px">Theme</label>
     <select id="theme-select">
-      <optgroup label="Dark">
-        <option value="default">Default (green terminal)</option>
-        <option value="charm">Charm (indigo + fuchsia)</option>
-        <option value="dracula">Dracula (purple + green)</option>
-        <option value="catppuccin">Catppuccin (mauve + pink)</option>
-      </optgroup>
-      <optgroup label="Light">
-        <option value="paper">Paper (warm beige)</option>
-        <option value="linen">Linen (golden yellow)</option>
-        <option value="slate">Slate (cool gray)</option>
-        <option value="hazel">Hazel (warm brown)</option>
-        <option value="crt">CRT Terminal (blue glow)</option>
-      </optgroup>
+      <option value="cli">Plexus CLI</option>
+      <option value="crt">CRT Terminal</option>
+    </select>
+
+    <label for="color-select">Accent Color</label>
+    <select id="color-select">
+      <option value="sage">Sage</option>
+      <option value="sea">Sea</option>
+      <option value="dusk">Dusk</option>
+      <option value="clay">Clay</option>
+      <option value="mist">Mist</option>
+      <option value="heather">Heather</option>
     </select>
 
     <label for="system-prompt">System Prompt</label>
@@ -1235,6 +1230,25 @@ renderBanner();
 
 // ─── State ─────────────────────────────────────────────────────────────
 const STATE_KEY = 'plexus_state';
+
+const LEGACY_COLOR_MAP = {
+  green: 'sage', default: 'sage', charm: 'dusk', dracula: 'heather',
+  catppuccin: 'heather', paper: 'clay', linen: 'clay', slate: 'mist', hazel: 'clay',
+};
+const VALID_COLOR_SCHEMES = new Set(['sage', 'sea', 'dusk', 'clay', 'mist', 'heather']);
+
+function migrateColorScheme(name) {
+  if (name && VALID_COLOR_SCHEMES.has(name)) return name;
+  return LEGACY_COLOR_MAP[name] || 'sage';
+}
+
+function migrateTheme(data) {
+  if (data.theme === 'crt' || data.layout === 'crt') return 'crt';
+  if (data.theme === 'cli' || data.theme === 'default') return 'cli';
+  if (data.layout === 'default') return 'cli';
+  return 'cli';
+}
+
 function loadState() {
   try {
     const raw = localStorage.getItem(STATE_KEY);
@@ -1248,7 +1262,8 @@ function loadState() {
       persona: data.persona || 'none',
       fontSize: data.fontSize || '14px',
       fontFamily: data.fontFamily || '',
-      theme: data.theme || 'default',
+      colorScheme: migrateColorScheme(data.colorScheme || data.theme),
+      theme: migrateTheme(data),
       temperature: data.temperature ?? 0.7,
       topP: data.topP ?? 1.0,
       totalTokensIn: data.totalTokensIn || 0,
@@ -1256,7 +1271,7 @@ function loadState() {
       lifetimeTokensIn: data.lifetimeTokensIn || 0,
       lifetimeTokensOut: data.lifetimeTokensOut || 0,
     };
-  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', fontSize: '14px', fontFamily: '', theme: 'default', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0 }; }
+  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', fontSize: '14px', fontFamily: '', colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0 }; }
 }
 function saveState() {
   try {
@@ -1269,7 +1284,8 @@ function saveState() {
       persona: state.persona || 'none',
       fontSize: state.fontSize,
       fontFamily: state.fontFamily,
-      theme: state.theme || 'default',
+      colorScheme: state.colorScheme || 'sage',
+      theme: state.theme || 'cli',
       temperature: state.temperature ?? 0.7,
       topP: state.topP ?? 1.0,
       totalTokensIn: state.totalTokensIn || 0,
@@ -1434,6 +1450,7 @@ const exportChatBtn = document.getElementById('export-chat-btn');
 const fontSizeSelect = document.getElementById('font-size-select');
 const fontFamilySelect = document.getElementById('font-family-select');
 const themeSelect = document.getElementById('theme-select');
+const colorSelect = document.getElementById('color-select');
 const statusModel = document.getElementById('status-model');
 const statusTokens = document.getElementById('status-tokens');
 const stopBtn = document.getElementById('stop-btn');
@@ -1460,109 +1477,74 @@ function applyFontSettings() {
   }
 }
 
-// ─── Theme system (huh-inspired) ───────────────────────────────────────
-const THEMES = {
-  default: {
-    bg: '#0d0d0d', surface: '#141414', surface2: '#1a1a1a',
-    text: '#e0e0e0', textDim: '#666', textBright: '#f0f0f0',
-    border: '#2a2a2a', responseBorder: '#333',
-    accent: '#22c55e', accentDim: 'rgba(34,197,94,0.3)',
-    focusBorder: '#22c55e', focusBg: 'rgba(34,197,94,0.06)',
-    queryBorder: '#22c55e', magenta: '#22c55e', brightMagenta: '#4ade80',
+// ─── Accent colors (apply on top of any theme) ─────────────────────────
+const ACCENT_COLORS = {
+  sage: {
+    label: 'Sage',
+    accent: '#6b8f71', queryBorder: '#6b8f71', responseBorder: '#4a5f4e',
+    accentDim: 'rgba(107,143,113,0.25)', focusBorder: '#6b8f71',
+    focusBg: 'rgba(107,143,113,0.08)', queryBg: 'rgba(107,143,113,0.08)',
   },
-  charm: {
-    bg: '#0d0d0d', surface: '#141414', surface2: '#1a1a1a',
-    text: '#e0e0e0', textDim: '#666', textBright: '#f0f0f0',
-    border: '#2a2a2a', responseBorder: '#333',
-    accent: '#7571F9', accentDim: 'rgba(117,113,249,0.3)',
-    focusBorder: '#F780E2', focusBg: 'rgba(247,128,226,0.04)',
-    queryBorder: '#5A56E0', magenta: '#F780E2', brightMagenta: '#F780E2',
+  sea: {
+    label: 'Sea',
+    accent: '#5a8a8a', queryBorder: '#5a8a8a', responseBorder: '#3d5555',
+    accentDim: 'rgba(90,138,138,0.25)', focusBorder: '#5a8a8a',
+    focusBg: 'rgba(90,138,138,0.08)', queryBg: 'rgba(90,138,138,0.08)',
   },
-  dracula: {
-    bg: '#0d0d0d', surface: '#141414', surface2: '#1a1a1a',
-    text: '#e0e0e0', textDim: '#666', textBright: '#f0f0f0',
-    border: '#2a2a2a', responseBorder: '#333',
-    accent: '#50fa7b', accentDim: 'rgba(80,250,123,0.3)',
-    focusBorder: '#bd93f9', focusBg: 'rgba(189,147,249,0.04)',
-    queryBorder: '#bd93f9', magenta: '#bd93f9', brightMagenta: '#f1fa8c',
+  dusk: {
+    label: 'Dusk',
+    accent: '#8a7a9a', queryBorder: '#8a7a9a', responseBorder: '#5a5068',
+    accentDim: 'rgba(138,122,154,0.25)', focusBorder: '#8a7a9a',
+    focusBg: 'rgba(138,122,154,0.08)', queryBg: 'rgba(138,122,154,0.08)',
   },
-  catppuccin: {
-    bg: '#0d0d0d', surface: '#141414', surface2: '#1a1a1a',
-    text: '#e0e0e0', textDim: '#666', textBright: '#f0f0f0',
-    border: '#2a2a2a', responseBorder: '#333',
-    accent: '#f5c2e7', accentDim: 'rgba(245,194,231,0.3)',
-    focusBorder: '#cba6f7', focusBg: 'rgba(203,166,247,0.04)',
-    queryBorder: '#cba6f7', magenta: '#cba6f7', brightMagenta: '#f5c2e7',
+  clay: {
+    label: 'Clay',
+    accent: '#9a8068', queryBorder: '#9a8068', responseBorder: '#6a5848',
+    accentDim: 'rgba(154,128,104,0.25)', focusBorder: '#9a8068',
+    focusBg: 'rgba(154,128,104,0.08)', queryBg: 'rgba(154,128,104,0.08)',
   },
-  paper: {
-    bg: '#f5f0e8', surface: '#efe9dd', surface2: '#e8e1d3',
-    text: '#3a3a3a', textDim: '#888', textBright: '#1a1a1a',
-    border: '#d4cdbc', responseBorder: '#d4cdbc',
-    accent: '#8b7e6b', accentDim: 'rgba(139,126,107,0.3)',
-    focusBorder: '#6b5e4b', focusBg: 'rgba(107,94,75,0.06)',
-    queryBorder: '#6b5e4b', magenta: '#8b7e6b', brightMagenta: '#6b5e4b',
+  mist: {
+    label: 'Mist',
+    accent: '#6a8090', queryBorder: '#6a8090', responseBorder: '#4a5868',
+    accentDim: 'rgba(106,128,144,0.25)', focusBorder: '#6a8090',
+    focusBg: 'rgba(106,128,144,0.08)', queryBg: 'rgba(106,128,144,0.08)',
   },
-  linen: {
-    bg: '#faf3e0', surface: '#f5edd3', surface2: '#eee4c4',
-    text: '#4a4a4a', textDim: '#999', textBright: '#2a2a2a',
-    border: '#ddd0b0', responseBorder: '#ddd0b0',
-    accent: '#b8860b', accentDim: 'rgba(184,134,11,0.25)',
-    focusBorder: '#8b6508', focusBg: 'rgba(184,134,11,0.06)',
-    queryBorder: '#8b6508', magenta: '#b8860b', brightMagenta: '#8b6508',
-  },
-  slate: {
-    bg: '#e8ecf0', surface: '#dfe3e8', surface2: '#d2d7dd',
-    text: '#3a3a4a', textDim: '#888', textBright: '#1a1a2a',
-    border: '#c5c9cf', responseBorder: '#c5c9cf',
-    accent: '#5a6a7a', accentDim: 'rgba(90,106,122,0.3)',
-    focusBorder: '#3a4a5a', focusBg: 'rgba(90,106,122,0.06)',
-    queryBorder: '#3a4a5a', magenta: '#5a6a7a', brightMagenta: '#3a4a5a',
-  },
-  hazel: {
-    bg: '#f5ede0', surface: '#eee4d4', surface2: '#e5d9c5',
-    text: '#4a3a2a', textDim: '#999', textBright: '#2a1a0a',
-    border: '#d4c4aa', responseBorder: '#d4c4aa',
-    accent: '#8b6914', accentDim: 'rgba(139,105,20,0.25)',
-    focusBorder: '#6b4f10', focusBg: 'rgba(139,105,20,0.06)',
-    queryBorder: '#6b4f10', magenta: '#8b6914', brightMagenta: '#6b4f10',
-  },
-  crt: {
-    bg: 'radial-gradient(circle at 20% 30%, #0a0f1e, #03060c)', surface: '#0c0f1c', surface2: '#0e1422',
-    text: '#e0e6f0', textDim: '#5f789b', textBright: '#eef5ff',
-    border: '#1e2a3a', responseBorder: '#1f2b38',
-    accent: '#6dffb0', accentDim: 'rgba(109,255,176,0.3)',
-    focusBorder: '#6ec8ff', focusBg: 'rgba(110,200,255,0.06)',
-    queryBorder: '#6dffb0', magenta: '#6ec8ff', brightMagenta: '#8bb9fe',
-    font: "'Fira Code','Cascadia Code','Courier New',monospace",
-    bodyBg: 'radial-gradient(circle at 20% 30%, #0a0f1e, #03060c)',
+  heather: {
+    label: 'Heather',
+    accent: '#8a6a80', queryBorder: '#8a6a80', responseBorder: '#5a4858',
+    accentDim: 'rgba(138,106,128,0.25)', focusBorder: '#8a6a80',
+    focusBg: 'rgba(138,106,128,0.08)', queryBg: 'rgba(138,106,128,0.08)',
   },
 };
 
-function applyTheme() {
-  const t = THEMES[state.theme] || THEMES.default;
+// ─── Themes (layout & arrangement only) ────────────────────────────────
+const THEMES = {
+  cli: { class: '', label: 'Plexus CLI' },
+  crt: { class: 'theme-crt', label: 'CRT Terminal' },
+};
+
+function applyColor() {
+  const c = ACCENT_COLORS[state.colorScheme] || ACCENT_COLORS.sage;
   const root = document.documentElement;
-  for (const [key, val] of Object.entries(t)) {
-    if (key === 'bg') root.style.setProperty('--bg', val);
-    else if (key === 'surface') root.style.setProperty('--surface', val);
-    else if (key === 'surface2') root.style.setProperty('--surface2', val);
-    else if (key === 'text') root.style.setProperty('--text', val);
-    else if (key === 'textDim') root.style.setProperty('--text-dim', val);
-    else if (key === 'textBright') root.style.setProperty('--text-bright', val);
-    else if (key === 'border') root.style.setProperty('--border', val);
-    else if (key === 'responseBorder') root.style.setProperty('--response-border', val);
-    else if (key === 'accent') root.style.setProperty('--accent', val);
-    else if (key === 'accentDim') root.style.setProperty('--accent-dim', val);
-    else if (key === 'focusBorder') root.style.setProperty('--focus-border', val);
-    else if (key === 'focusBg') root.style.setProperty('--focus-bg', val);
-    else if (key === 'queryBorder') root.style.setProperty('--query-border', val);
-    else if (key === 'magenta') root.style.setProperty('--magenta', val);
-    else if (key === 'brightMagenta') root.style.setProperty('--bright-magenta', val);
-    else if (key === 'font') root.style.setProperty('--font', val);
-    else if (key === 'bodyBg') document.body.style.background = val;
-  }
-  // Toggle CRT holistic theme
-  document.body.classList.toggle('theme-crt', state.theme === 'crt');
-  // Toggle status bar visibility
+  root.style.setProperty('--accent', c.accent);
+  root.style.setProperty('--query-border', c.queryBorder);
+  root.style.setProperty('--response-border', c.responseBorder);
+  root.style.setProperty('--accent-dim', c.accentDim);
+  root.style.setProperty('--focus-border', c.focusBorder);
+  root.style.setProperty('--focus-bg', c.focusBg);
+  root.style.setProperty('--query-bg', c.queryBg);
+  root.style.setProperty('--cyan', c.accent);
+  root.style.setProperty('--blue', c.accent);
+  root.style.setProperty('--bright-blue', c.accent);
+  root.style.setProperty('--green', c.accent);
+  root.style.setProperty('--magenta', c.accent);
+  root.style.setProperty('--bright-magenta', c.accent);
+}
+
+function applyTheme() {
+  document.body.classList.remove('theme-crt');
+  const t = THEMES[state.theme] || THEMES.cli;
+  if (t.class) document.body.classList.add(t.class);
   const sb = document.getElementById('status-bar');
   if (sb) sb.style.display = state.theme === 'crt' ? 'flex' : 'none';
 }
@@ -2817,7 +2799,8 @@ function openSettings() {
   systemPromptInput.value = state.systemPrompt;
   fontSizeSelect.value = state.fontSize;
   fontFamilySelect.value = state.fontFamily || '';
-  themeSelect.value = state.theme || 'default';
+  themeSelect.value = state.theme || 'cli';
+  colorSelect.value = state.colorScheme || 'sage';
   settingsStatus.classList.remove('show');
   settingsOverlay.classList.add('active');
 }
@@ -2876,6 +2859,12 @@ fontFamilySelect.addEventListener('change', () => {
 themeSelect.addEventListener('change', () => {
   state.theme = themeSelect.value;
   applyTheme();
+  saveState();
+});
+
+colorSelect.addEventListener('change', () => {
+  state.colorScheme = colorSelect.value;
+  applyColor();
   saveState();
 });
 
@@ -2958,8 +2947,9 @@ if (personaName === 'none') {
   personaBadge.className = personaName;
 }
 
-// Apply font/theme settings and rebuild system prompt
+// Apply font, accent color, theme, and rebuild system prompt
 applyFontSettings();
+applyColor();
 applyTheme();
 updateStatusBar();
 rebuildSystemPrompt();
