@@ -542,6 +542,41 @@ body {
   #tips { font-size: 10px; padding: 8px 10px; }
   #tips code { font-size: 9px; }
 }
+/* Slash command autocomplete */
+#suggestions {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  background: rgba(13,13,13,0.95);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 4px;
+  display: none;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+#suggestions.active { display: block; }
+#suggestions .suggestion {
+  padding: 6px 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #22c55e;
+  transition: background 0.1s;
+}
+#suggestions .suggestion .desc {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+#suggestions .suggestion.selected {
+  background: rgba(34,197,94,0.12);
+}
 </style>
 </head>
 <body>
@@ -576,6 +611,7 @@ body {
 <div id="input-area">
   <span id="prompt">›</span>
   <div id="input-wrapper">
+    <div id="suggestions"></div>
     <textarea id="input" rows="1" placeholder="Type a message..." enterkeyhint="send"></textarea>
   </div>
   <button id="send-btn" disabled aria-label="Send">→</button>
@@ -1433,6 +1469,68 @@ function setPersona(name) {
   return true;
 }
 
+// ─── Slash command suggestions ─────────────────────────────────────────
+const SUGGESTIONS = [
+  { cmd: '/general', desc: 'General chat mode' },
+  { cmd: '/finance', desc: 'Financial analysis mode' },
+  { cmd: '/aidev', desc: 'AI tools & dev mode' },
+  { cmd: '/github', desc: 'GitHub discovery mode' },
+  { cmd: '/datascience', desc: 'Data science mode' },
+  { cmd: '/blog', desc: 'Blog writing mode' },
+  { cmd: '/deepresearch', desc: 'Deep research persona' },
+  { cmd: '/socratic', desc: 'Socratic questioning persona' },
+  { cmd: '/storyteller', desc: 'Storyteller persona' },
+  { cmd: '/deviladvocate', desc: 'Devil\'s advocate persona' },
+  { cmd: '/simplify', desc: 'Simplify persona' },
+  { cmd: '/nopersona', desc: 'Clear active persona' },
+  { cmd: '/clear', desc: 'Clear conversation history' },
+  { cmd: '/help', desc: 'Show all commands' },
+  { cmd: '/export', desc: 'Export conversation as Markdown' },
+  { cmd: '/research', desc: 'Multi-step deep research' },
+  { cmd: '/deep', desc: 'Shorthand for /research' },
+  { cmd: '/model', desc: 'Switch AI model' },
+  { cmd: '/key', desc: 'Set OpenRouter API key' },
+  { cmd: '/mode', desc: 'Switch theme mode' },
+  { cmd: '/modes', desc: 'List all modes' },
+  { cmd: '/persona', desc: 'Switch persona' },
+  { cmd: '/personas', desc: 'List all personas' },
+];
+
+const suggestionsEl = document.getElementById('suggestions');
+let suggestionIndex = -1;
+let filteredSuggestions = [];
+
+function closeSuggestions() {
+  suggestionsEl.classList.remove('active');
+  suggestionsEl.innerHTML = '';
+  suggestionIndex = -1;
+}
+
+function showSuggestions(filter) {
+  filteredSuggestions = SUGGESTIONS.filter(s => filter === '' || s.cmd.startsWith(filter));
+  if (filteredSuggestions.length === 0 || filteredSuggestions.length === SUGGESTIONS.length) {
+    closeSuggestions();
+    return;
+  }
+  suggestionIndex = 0;
+  suggestionsEl.innerHTML = filteredSuggestions.map((s, i) =>
+    `<div class="suggestion${i === 0 ? ' selected' : ''}" data-index="${i}">
+      <span>${s.cmd}</span>
+      <span class="desc">${s.desc}</span>
+    </div>`
+  ).join('');
+  suggestionsEl.classList.add('active');
+}
+
+function selectSuggestion(index) {
+  if (index < 0 || index >= filteredSuggestions.length) return;
+  inputEl.value = filteredSuggestions[index].cmd + ' ';
+  inputEl.selectionStart = inputEl.selectionEnd = inputEl.value.length;
+  closeSuggestions();
+  inputEl.focus();
+  autoResize();
+}
+
 // ─── Slash Commands ────────────────────────────────────────────────────
 function handleSlashCommand(cmd, args) {
   // Mode shortcuts
@@ -1613,8 +1711,8 @@ function handleSubmit() {
   if (!text || isStreaming) return;
   inputEl.value = '';
   inputEl.style.height = 'auto';
+  closeSuggestions();
 
-  // Check for slash commands
   if (text.startsWith('/')) {
     const spaceIdx = text.indexOf(' ');
     const cmd = spaceIdx === -1 ? text.toLowerCase() : text.slice(0, spaceIdx).toLowerCase();
@@ -1630,10 +1728,70 @@ function handleSubmit() {
   sendMessage(text);
 }
 
+inputEl.addEventListener('input', () => {
+  autoResize();
+  const val = inputEl.value;
+  if (val.startsWith('/') && !val.includes(' ')) {
+    showSuggestions(val.toLowerCase());
+  } else {
+    closeSuggestions();
+  }
+});
+
 inputEl.addEventListener('keydown', (e) => {
+  if (suggestionsEl.classList.contains('active')) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      suggestionIndex = Math.min(suggestionIndex + 1, filteredSuggestions.length - 1);
+      document.querySelectorAll('.suggestion').forEach((el, i) => {
+        el.classList.toggle('selected', i === suggestionIndex);
+      });
+      const sel = suggestionsEl.querySelector('.selected');
+      if (sel) sel.scrollIntoView({ block: 'nearest' });
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      suggestionIndex = Math.max(suggestionIndex - 1, 0);
+      document.querySelectorAll('.suggestion').forEach((el, i) => {
+        el.classList.toggle('selected', i === suggestionIndex);
+      });
+      const sel = suggestionsEl.querySelector('.selected');
+      if (sel) sel.scrollIntoView({ block: 'nearest' });
+      return;
+    }
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      if (suggestionIndex >= 0 && suggestionIndex < filteredSuggestions.length) {
+        selectSuggestion(suggestionIndex);
+      }
+      return;
+    }
+    if (e.key === 'Escape') {
+      closeSuggestions();
+      return;
+    }
+  }
+
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
     handleSubmit();
+  }
+});
+
+// Click on suggestion
+suggestionsEl.addEventListener('mousedown', (e) => {
+  const item = e.target.closest('.suggestion');
+  if (item) {
+    e.preventDefault();
+    selectSuggestion(parseInt(item.dataset.index));
+  }
+});
+
+// Close suggestions on click outside
+document.addEventListener('mousedown', (e) => {
+  if (!e.target.closest('#input-wrapper') && !e.target.closest('#suggestions')) {
+    closeSuggestions();
   }
 });
 
