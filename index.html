@@ -47,8 +47,21 @@ html, body {
 }
 body {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   position: relative;
+}
+#app-container {
+  display: flex;
+  width: 100%;
+  max-width: 1400px;
+  height: 100%;
+  height: 100dvh;
+}
+#app-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 #input-area {
   position: sticky;
@@ -161,6 +174,76 @@ body {
 }
 #status-tokens {
   font-variant-numeric: tabular-nums;
+}
+/* Side panel */
+#side-panel {
+  flex-shrink: 0;
+  width: 0;
+  overflow: hidden;
+  border-left: none;
+  background: var(--surface);
+  transition: width 0.2s;
+}
+@media (min-width: 1100px) {
+  #side-panel {
+    width: 200px;
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+}
+#side-panel .sp-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+#side-panel .sp-desc {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+#side-panel .sp-section {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+#side-panel .sp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding: 3px 0;
+}
+#side-panel .sp-row .sp-label {
+  color: var(--text-dim);
+}
+#side-panel .sp-row .sp-value {
+  color: var(--text-bright);
+  font-weight: 500;
+}
+#side-panel .sp-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  margin: 4px 0;
+  overflow: hidden;
+}
+#side-panel .sp-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+#side-panel .sp-footer {
+  margin-top: auto;
+  font-size: 10px;
+  color: var(--text-dim);
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 /* Main chat area */
 #chat {
@@ -598,6 +681,9 @@ body {
 </head>
 <body>
 
+<div id="app-container">
+<div id="app-main">
+
 <!-- Banner -->
 <div id="banner">
   <pre id="banner-art"></pre>
@@ -755,6 +841,62 @@ body {
     <div id="settings-status"></div>
   </div>
 </div>
+
+</div><!-- /app-main -->
+
+<!-- Side panel -->
+<div id="side-panel">
+  <div class="sp-title">Plexus</div>
+  <div class="sp-desc">Terminal-styled AI chat powered by OpenRouter. Themes, personas, multi-step research.</div>
+
+  <div class="sp-section">
+    <div class="sp-title">Session Stats</div>
+    <div class="sp-row">
+      <span class="sp-label">Tokens in</span>
+      <span class="sp-value" id="sp-tokens-in">0</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Tokens out</span>
+      <span class="sp-value" id="sp-tokens-out">0</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Total</span>
+      <span class="sp-value" id="sp-tokens-total">0</span>
+    </div>
+  </div>
+
+  <div class="sp-section">
+    <div class="sp-title">Context</div>
+    <div class="sp-row">
+      <span class="sp-label">Messages</span>
+      <span class="sp-value" id="sp-msgs">0</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Est. used</span>
+      <span class="sp-value" id="sp-usage">—</span>
+    </div>
+    <div id="sp-context-bar" class="sp-bar">
+      <div class="sp-bar-fill" id="sp-context-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="sp-section">
+    <div class="sp-row">
+      <span class="sp-label">Model</span>
+      <span class="sp-value" id="sp-model">—</span>
+    </div>
+    <div class="sp-row">
+      <span class="sp-label">Mode</span>
+      <span class="sp-value" id="sp-mode">general</span>
+    </div>
+  </div>
+
+  <div class="sp-footer">
+    <span id="sp-cost">$0.00</span> estimated cost
+  </div>
+</div>
+
+</div><!-- /app-container -->
 
 <script>
 // ─── Banner ────────────────────────────────────────────────────────────
@@ -920,6 +1062,35 @@ function updateStatusBar() {
   } else {
     statusTokens.textContent = '';
   }
+  updateSidePanel();
+}
+
+// ─── Side panel ────────────────────────────────────────────────────────
+function updateSidePanel() {
+  const tin = state.totalTokensIn || 0;
+  const tout = state.totalTokensOut || 0;
+  const total = tin + tout;
+  const msgs = state.messages.length;
+
+  document.getElementById('sp-tokens-in').textContent = tin.toLocaleString();
+  document.getElementById('sp-tokens-out').textContent = tout.toLocaleString();
+  document.getElementById('sp-tokens-total').textContent = total.toLocaleString();
+  document.getElementById('sp-msgs').textContent = msgs;
+
+  const short = state.model.split('/').pop()?.replace(/:free$/, '') || state.model;
+  document.getElementById('sp-model').textContent = short || '—';
+  document.getElementById('sp-mode').textContent = state.mode || 'general';
+
+  // Context bar: estimate usage against 8K window
+  const maxCtx = 8000;
+  const used = Math.min(total, maxCtx);
+  const pct = Math.round((used / maxCtx) * 100);
+  document.getElementById('sp-context-fill').style.width = pct + '%';
+  document.getElementById('sp-usage').textContent = pct + '%';
+
+  // Cost estimate: $0.15/M in, $0.60/M out
+  const cost = (tin / 1_000_000) * 0.15 + (tout / 1_000_000) * 0.60;
+  document.getElementById('sp-cost').textContent = cost < 0.01 ? '< $0.01' : '$' + cost.toFixed(4);
 }
 
 // ─── Auto-resize textarea ──────────────────────────────────────────────
