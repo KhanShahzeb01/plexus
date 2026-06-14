@@ -1597,7 +1597,7 @@ async function doDeepResearch(query) {
       const q = subQuestions[i];
       setProgress(`Researching step ${i + 1}/${maxSteps}: ${q.substring(0, 80)}...`);
       const answer = await callLLM([
-        { role: 'system', content: 'You are a thorough researcher. Provide detailed, factual information with specific examples and data where possible.' },
+        { role: 'system', content: (state.webSearch ? 'You have web search enabled. Use it to find current data and information.\n\n' : '') + 'You are a thorough researcher. Provide detailed, factual information with specific examples and data where possible.' },
         { role: 'user', content: q },
       ], 3000);
       results.push({ question: q, answer });
@@ -1612,7 +1612,7 @@ async function doDeepResearch(query) {
     });
 
     const synthesisMessages = [
-      { role: 'system', content: sys.length ? state.systemPrompt + '\n\nYou are also a research synthesis expert. Combine multiple research findings into one clear, comprehensive, well-structured answer. Use markdown with headings, bold, and organized sections.' : 'You are a research synthesis expert. Combine multiple research findings into one clear, comprehensive, well-structured answer. Use markdown with headings, bold, and organized sections.' },
+      { role: 'system', content: (sys.length ? state.systemPrompt + '\n\n' : '') + (state.webSearch ? 'You have web search enabled. Use it to get current information when relevant.\n\n' : '') + 'You are a research synthesis expert. Combine multiple research findings into one clear, comprehensive, well-structured answer. Use markdown with headings, bold, and organized sections.' },
       { role: 'user', content: `Original question: ${query}\n\nHere are the research findings from multiple angles:\n\n${contextParts.join('\n\n')}\n\nSynthesize these into one comprehensive answer to the original question. Structure it with sections. Include the most important facts, data, and insights.` },
     ];
 
@@ -1721,6 +1721,9 @@ async function sendMessage(userText) {
   const apiMessages = [];
   if (state.systemPrompt) {
     apiMessages.push({ role: 'system', content: state.systemPrompt });
+  }
+  if (state.webSearch) {
+    apiMessages.push({ role: 'system', content: 'You have web search enabled. When the user asks for current data, prices, news, or any real-time information, use web search to find the latest information instead of relying on your training data. Always search for live data when the query asks for current/present information.' });
   }
   for (const msg of state.messages.slice(-20)) { // last 20 for context
     apiMessages.push({ role: msg.role, content: msg.content });
