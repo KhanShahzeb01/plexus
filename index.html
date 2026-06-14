@@ -55,6 +55,12 @@ body {
   flex-direction: column;
   position: relative;
 }
+#app-row {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
 #chat-row {
   display: flex;
   flex: 1;
@@ -826,11 +832,14 @@ body {
 }
 .theme-crt #app-row {
   max-width: 1100px;
+  width: 100%;
   margin: 0 auto;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 25px 45px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(120,200,255,0.15);
   background: #0c0f1c;
+  flex: 1;
+  min-height: 0;
 }
 .theme-crt #banner {
   background: #05080f;
@@ -921,6 +930,261 @@ body {
 .theme-crt .code-wrap { border-color: #1e2a3a; }
 .theme-crt .code-hdr { background: #0a0e18; border-color: #1e2a3a; }
 .theme-crt .panel-body pre { background: #0a0e18; }
+
+/* Code CLI theme — Claude Code inspired terminal window */
+.theme-code-cli {
+  background: linear-gradient(145deg, #0c1117 0%, #080b0f 100%);
+  padding: 1.2rem;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+}
+.theme-code-cli::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(80, 180, 120, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(80, 180, 120, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+.theme-code-cli #app-row {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  background: #0c1015;
+  border-radius: 12px;
+  box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
+  overflow: hidden;
+}
+.theme-code-cli #banner {
+  background: #11161e;
+  padding: 0.7rem 1.2rem;
+  border-bottom: 1px solid #2a3a2a;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.theme-code-cli #banner::before {
+  content: '';
+  width: 52px;
+  height: 12px;
+  flex-shrink: 0;
+  background:
+    radial-gradient(circle, #ff5f56 5px, transparent 5px) 0 50%,
+    radial-gradient(circle, #ffbd2e 5px, transparent 5px) 20px 50%,
+    radial-gradient(circle, #27c93f 5px, transparent 5px) 40px 50%;
+  background-repeat: no-repeat;
+}
+.theme-code-cli #banner pre {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: clamp(8px, 1.4vw, 13px);
+  color: var(--accent);
+  flex: 1;
+  min-width: 0;
+}
+.theme-code-cli #banner::after {
+  content: '└─$ plexus · openrouter';
+  color: #b0e0c0;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  background: #1a2420;
+  padding: 0.2rem 1rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+.theme-code-cli #status-bar {
+  display: flex;
+  background: #11161e;
+  border-bottom: 1px solid #2a3a2a;
+  padding: 0.35rem 1.2rem;
+  font-size: 0.68rem;
+  min-height: 26px;
+  gap: 8px;
+  color: #5aae7a;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.theme-code-cli #status-bar #status-model,
+.theme-code-cli #status-bar #status-tokens { color: #617a6b; }
+.theme-code-cli #chat-row { min-height: 0; flex: 1; }
+.theme-code-cli #chat {
+  background: #0b0f14;
+  padding: 1.2rem 1.4rem;
+  gap: 0.9rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+.theme-code-cli #chat::-webkit-scrollbar { width: 7px; }
+.theme-code-cli #chat::-webkit-scrollbar-track { background: #141c1a; }
+.theme-code-cli #chat::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 55%, #1a2620);
+  border-radius: 6px;
+}
+.theme-code-cli #tips {
+  background: transparent;
+  border: none;
+  border-left: 2px solid #7a8e7d;
+  border-radius: 0;
+  padding: 0 0 0 12px;
+  color: #7a8e7d;
+  font-size: 0.82rem;
+}
+.theme-code-cli #tips strong { color: var(--accent); }
+.theme-code-cli #tips code {
+  background: #102418;
+  color: #abf0c5;
+  border-radius: 8px;
+}
+.theme-code-cli .message { margin-bottom: 0; animation: codeCliFade 0.15s ease; }
+@keyframes codeCliFade {
+  from { opacity: 0; transform: translateX(-5px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.theme-code-cli .message .panel {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  border-left: 2px solid;
+  padding-left: 12px;
+  margin: 2px 0;
+}
+.theme-code-cli .message.query .panel {
+  border-left-color: var(--query-border);
+  background: transparent;
+}
+.theme-code-cli .message.response .panel {
+  border-left-color: var(--response-border);
+  background: transparent;
+}
+.theme-code-cli .panel-title {
+  font-size: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 0 0 4px;
+  font-weight: 600;
+}
+.theme-code-cli .message.query .panel-title::before {
+  content: '┌─[user]─$';
+  font-size: 0.82rem;
+  color: var(--accent);
+}
+.theme-code-cli .message.response .panel-title::before {
+  content: '└─[plexus]─>';
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--accent) 70%, #d9954c);
+}
+.theme-code-cli .panel-body {
+  color: #d4e6dc;
+  font-size: 0.85rem;
+  line-height: 1.48;
+  padding: 4px 0 8px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+.theme-code-cli .message.query .panel-body { color: #d4e6dc; font-weight: 400; }
+.theme-code-cli .panel-body code {
+  background: #1a2620;
+  color: #bdf27e;
+  border-radius: 6px;
+}
+.theme-code-cli .panel-body a { color: var(--accent); }
+.theme-code-cli .panel-body pre { background: #1a2620; border-color: #2b4032; }
+.theme-code-cli .code-wrap { border-color: #2b4032; }
+.theme-code-cli .code-hdr { background: #111a16; border-color: #2b4032; }
+.theme-code-cli #loading .dot { background: var(--accent); }
+.theme-code-cli #side-panel {
+  background: #0a100e;
+  border-left: 1px solid #2b4032;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 11px;
+}
+.theme-code-cli #side-panel .sp-title {
+  color: var(--accent);
+  font-size: 9px;
+}
+.theme-code-cli #side-panel .sp-desc,
+.theme-code-cli #side-panel .sp-footer,
+.theme-code-cli #side-panel .sp-row .sp-value { color: var(--accent); }
+.theme-code-cli #side-panel .sp-row .sp-label { color: #7a8e7d; }
+.theme-code-cli #side-panel .sp-new-btn {
+  border-color: #2b4032;
+  color: var(--accent);
+}
+.theme-code-cli #side-panel .sp-new-btn:hover { border-color: var(--accent); }
+.theme-code-cli .sp-sess.active { background: var(--query-bg); color: var(--accent); }
+.theme-code-cli #input-area {
+  background: #0a0f12;
+  border-top: 1px solid #2b4032;
+  padding: 0.9rem 1.4rem;
+  gap: 10px;
+}
+.theme-code-cli #prompt {
+  font-size: 0;
+  line-height: 1;
+}
+.theme-code-cli #prompt::before {
+  content: '└─$';
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--accent);
+  background: #102016;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.theme-code-cli #input {
+  background: #0c1410;
+  border: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, #2b4032);
+  border-radius: 0;
+  color: #eaffef;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  padding: 10px 6px;
+  caret-color: var(--accent);
+}
+.theme-code-cli #input:focus {
+  border-bottom-color: var(--accent);
+  box-shadow: 0 1px 0 var(--accent);
+  background: #0c1410;
+  border-left: none;
+}
+.theme-code-cli #input::placeholder { color: #617a6b; }
+.theme-code-cli #send-btn {
+  background: #1a3328;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, #2b4032);
+  border-radius: 28px;
+  width: auto;
+  height: auto;
+  padding: 6px 18px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: color-mix(in srgb, var(--accent) 80%, #eaffef);
+}
+.theme-code-cli #send-btn:not(:disabled):hover {
+  background: #235b3e;
+  border-color: var(--accent);
+  opacity: 1;
+}
+.theme-code-cli #stop-btn {
+  border-radius: 28px;
+  width: auto;
+  height: auto;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+}
+.theme-code-cli #file-btn { color: #617a6b; }
+.theme-code-cli #file-btn:hover,
+.theme-code-cli #file-btn.has-file { color: var(--accent); }
+.theme-code-cli #settings-toggle {
+  background: #1a2420;
+  border: 1px solid #2b4032;
+  color: var(--accent);
+}
+.theme-code-cli #settings-toggle:hover { border-color: var(--accent); }
+
 /* Slash command autocomplete */
 #suggestions {
   position: absolute;
@@ -960,6 +1224,7 @@ body {
 </head>
 <body>
 
+<div id="app-row">
 
 <!-- Banner -->
 <div id="banner">
@@ -1050,6 +1315,8 @@ body {
   <button id="stop-btn" aria-label="Stop">⏹</button>
   <button id="send-btn" disabled aria-label="Send">→</button>
 </div>
+
+</div><!-- /app-row -->
 
 <!-- Settings gear -->
 <button id="settings-toggle" aria-label="Settings">⚙</button>
@@ -1185,6 +1452,7 @@ body {
     <label for="theme-select" style="margin-top:16px">Theme</label>
     <select id="theme-select">
       <option value="cli">Plexus CLI</option>
+      <option value="codecli">Code CLI</option>
       <option value="crt">CRT Terminal</option>
     </select>
 
@@ -1519,8 +1787,9 @@ const ACCENT_COLORS = {
 
 // ─── Themes (layout & arrangement only) ────────────────────────────────
 const THEMES = {
-  cli: { class: '', label: 'Plexus CLI' },
-  crt: { class: 'theme-crt', label: 'CRT Terminal' },
+  cli: { class: '', label: 'Plexus CLI', showStatusBar: false },
+  codecli: { class: 'theme-code-cli', label: 'Code CLI', showStatusBar: true },
+  crt: { class: 'theme-crt', label: 'CRT Terminal', showStatusBar: true },
 };
 
 function applyColor() {
@@ -1542,11 +1811,14 @@ function applyColor() {
 }
 
 function applyTheme() {
-  document.body.classList.remove('theme-crt');
+  Object.values(THEMES).forEach(th => {
+    if (th.class) document.body.classList.remove(th.class);
+  });
   const t = THEMES[state.theme] || THEMES.cli;
   if (t.class) document.body.classList.add(t.class);
   const sb = document.getElementById('status-bar');
-  if (sb) sb.style.display = state.theme === 'crt' ? 'flex' : 'none';
+  if (sb) sb.style.display = t.showStatusBar ? 'flex' : 'none';
+  sendBtn.textContent = state.theme === 'codecli' ? '⏎ send' : '→';
 }
 
 // ─── Status bar (model + tokens) ──────────────────────────────────────
