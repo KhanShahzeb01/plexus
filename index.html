@@ -2522,6 +2522,351 @@ body {
 .theme-stellar #suggestions .suggestion { color: color-mix(in srgb, var(--accent) 75%, #8db5ff); }
 .theme-stellar #suggestions .suggestion.selected { background: var(--query-bg); }
 
+/* Forest Canopy theme — biophilic terminal, full viewport */
+.theme-forest {
+  background: #1a2a1f;
+  background-image: radial-gradient(circle at 10% 20%, #2a3d25, #0e1a0c);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+.theme-forest::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" opacity="0.08"><path fill="none" stroke="%236aa84f" stroke-width="1" d="M100 20 L115 45 L100 70 L85 45 Z M40 80 L55 105 L40 130 L25 105 Z M160 80 L175 105 L160 130 L145 105 Z M70 150 L85 175 L70 200 L55 175 Z M130 150 L145 175 L130 200 L115 175 Z"/><path d="M100 10 Q110 30 100 50 Q90 30 100 10" fill="%235a9a3f" opacity="0.3"/></svg>');
+  background-repeat: repeat;
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes forestLeafFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(5deg); }
+}
+@keyframes forestGrowLeaf {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes forestLeafGrow {
+  0%, 100% { transform: scaleY(0.6); opacity: 0.5; }
+  50% { transform: scaleY(1.2); opacity: 1; }
+}
+.theme-forest #app-row {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  background: rgba(30, 45, 25, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--accent) 25%, rgba(180, 220, 140, 0.2));
+}
+.theme-forest #banner {
+  background: linear-gradient(135deg, #2d3d25, #1e2e18);
+  padding: 8px 16px;
+  border-bottom: 2px solid var(--accent);
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.theme-forest #banner::before {
+  content: '🌲🌿';
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px var(--accent-dim));
+  animation: forestLeafFloat 3s infinite ease-in-out;
+}
+.theme-forest #banner pre {
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: clamp(10px, 2vw, 16px);
+  line-height: 1.3;
+  white-space: pre;
+  letter-spacing: 0;
+  flex-shrink: 0;
+  flex: 0 1 auto;
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent-dim);
+}
+.theme-forest #banner::after {
+  content: '🍃 OPENROUTER · BIOPHILIC MODE 🍃';
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  padding: 0.3rem 1.2rem;
+  border-radius: 40px;
+  font-size: 10px;
+  color: color-mix(in srgb, var(--accent) 75%, #bde88a);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  font-family: monospace;
+  white-space: nowrap;
+  margin-left: auto;
+}
+.theme-forest #status-bar {
+  display: flex;
+  background: rgba(15, 22, 10, 0.8);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, #2a4520);
+  padding: 4px 16px;
+  font-size: 10px;
+  min-height: 24px;
+  gap: 8px;
+  color: color-mix(in srgb, var(--accent) 55%, #8ab86a);
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  font-family: monospace;
+}
+.theme-forest #status-bar #status-model,
+.theme-forest #status-bar #status-tokens { color: color-mix(in srgb, var(--accent) 75%, #bde88a); }
+.theme-forest #mode-badge,
+.theme-forest #persona-badge,
+.theme-forest #model-badge {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: color-mix(in srgb, var(--accent) 75%, #bde88a);
+}
+.theme-forest #chat-row { min-height: 0; flex: 1; }
+.theme-forest #chat {
+  background: rgba(20, 35, 18, 0.5);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.theme-forest #chat::-webkit-scrollbar { width: 7px; }
+.theme-forest #chat::-webkit-scrollbar-track { background: #1e2e18; border-radius: 10px; }
+.theme-forest #chat::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 10px;
+}
+.theme-forest #tips {
+  background: rgba(30, 45, 25, 0.7);
+  backdrop-filter: blur(6px);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 24px;
+  padding: 12px 16px;
+  color: color-mix(in srgb, var(--accent) 55%, #daf5c0);
+  text-align: center;
+  font-size: 12px;
+}
+.theme-forest #tips strong { color: color-mix(in srgb, var(--accent) 80%, #bde88a); }
+.theme-forest #tips code {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: color-mix(in srgb, var(--accent) 80%, #bde88a);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 8px;
+}
+.theme-forest .message {
+  animation: forestGrowLeaf 0.25s ease-out;
+  max-width: 88%;
+}
+.theme-forest .message.query { align-self: flex-end; }
+.theme-forest .message.response { align-self: flex-start; }
+.theme-forest .message .panel {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.theme-forest .message.query .panel {
+  background: color-mix(in srgb, var(--accent) 18%, rgba(40, 60, 30, 0.7));
+  border-color: color-mix(in srgb, var(--query-border) 45%, transparent);
+  border-bottom-right-radius: 6px;
+}
+.theme-forest .message.response .panel {
+  background: color-mix(in srgb, var(--response-border) 12%, rgba(50, 80, 40, 0.55));
+  border-color: color-mix(in srgb, var(--response-border) 40%, transparent);
+  border-bottom-left-radius: 6px;
+}
+.theme-forest .panel-title {
+  font-size: 0;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  padding: 0 0 4px;
+}
+.theme-forest .message.query .panel-title::before {
+  content: '🌿 forest wanderer · spoken';
+  font-size: 10px;
+  color: color-mix(in srgb, var(--accent) 55%, #8ab86a);
+}
+.theme-forest .message.response .panel-title::before {
+  content: '🍃 ancient tree · wisdom';
+  font-size: 10px;
+  color: color-mix(in srgb, var(--response-border) 65%, #8ab86a);
+}
+.theme-forest .panel-body {
+  color: color-mix(in srgb, var(--accent) 45%, #daf5c0);
+  line-height: 1.5;
+  font-size: 13px;
+}
+.theme-forest .panel-body code {
+  background: rgba(30, 50, 22, 0.6);
+  color: color-mix(in srgb, var(--accent) 80%, #bde88a);
+  border-radius: 6px;
+}
+.theme-forest .panel-body a { color: color-mix(in srgb, var(--accent) 75%, #bde88a); }
+.theme-forest .panel-body pre { background: rgba(30, 50, 22, 0.6); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.theme-forest .code-wrap { border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.theme-forest .code-hdr { background: rgba(30, 45, 25, 0.8); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.theme-forest #loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(35, 55, 28, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 40px;
+  padding: 8px 16px;
+  width: fit-content;
+}
+.theme-forest #loading::before {
+  content: '🌱 the forest is thinking 🌱';
+  font-size: 12px;
+  color: color-mix(in srgb, var(--accent) 75%, #bde88a);
+}
+.theme-forest #loading .dot {
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--accent);
+  animation: forestLeafGrow 1s infinite ease;
+}
+.theme-forest #loading .dot:nth-child(2) {
+  animation-delay: 0.15s;
+  background: color-mix(in srgb, var(--accent) 75%, #8bc46a);
+}
+.theme-forest #loading .dot:nth-child(3) {
+  animation-delay: 0.3s;
+  background: var(--accent);
+}
+.theme-forest #side-panel {
+  background: rgba(20, 30, 15, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: inset 4px 0 12px rgba(0, 0, 0, 0.2);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+.theme-forest #side-panel .sp-title {
+  color: color-mix(in srgb, var(--accent) 80%, #bde88a);
+  letter-spacing: 1px;
+}
+.theme-forest #side-panel .sp-row .sp-value { color: color-mix(in srgb, var(--accent) 70%, #daf5c0); }
+.theme-forest #side-panel .sp-row .sp-label { color: color-mix(in srgb, var(--accent) 50%, #8ab86a); }
+.theme-forest #side-panel .sp-desc,
+.theme-forest #side-panel .sp-footer { color: color-mix(in srgb, var(--accent) 55%, #8ab86a); }
+.theme-forest #side-panel .sp-footer { border-top-color: color-mix(in srgb, var(--accent) 30%, #2a4520); }
+.theme-forest #side-panel .sp-bar { background: #1e2e18; border-radius: 10px; }
+.theme-forest #side-panel .sp-bar-fill {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 60%, #3d6030), var(--accent));
+}
+.theme-forest #side-panel input[type="range"]::-webkit-slider-thumb {
+  background: var(--accent);
+}
+.theme-forest #side-panel input[type="range"]::-moz-range-thumb {
+  background: var(--accent);
+}
+.theme-forest #side-panel .sp-new-btn {
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  color: color-mix(in srgb, var(--accent) 75%, #bde88a);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-radius: 40px;
+}
+.theme-forest #side-panel .sp-new-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 75%, #8bc46a);
+  color: color-mix(in srgb, var(--accent) 85%, #daf5c0);
+  box-shadow: 0 0 10px var(--accent-dim);
+}
+.theme-forest .sp-sess:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.theme-forest .sp-sess.active {
+  color: color-mix(in srgb, var(--accent) 80%, #bde88a);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.theme-forest #input-area {
+  background: rgba(20, 30, 15, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  padding: 10px 12px;
+  gap: 8px;
+}
+.theme-forest #prompt {
+  font-size: 0;
+  line-height: 1;
+}
+.theme-forest #prompt::before {
+  content: '🌿 [ROOT]>';
+  font-size: 11px;
+  font-weight: bold;
+  color: color-mix(in srgb, var(--accent) 75%, #bde88a);
+  background: color-mix(in srgb, var(--accent) 12%, rgba(70, 110, 50, 0.3));
+  padding: 6px 14px;
+  border-radius: 40px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  font-family: monospace;
+  white-space: nowrap;
+}
+.theme-forest #input {
+  background: rgba(30, 50, 22, 0.5);
+  border: none;
+  border-bottom: 2px solid var(--accent);
+  border-radius: 4px;
+  color: color-mix(in srgb, var(--accent) 35%, #e0f5c8);
+  font-family: 'Segoe UI', monospace;
+  caret-color: var(--accent);
+}
+.theme-forest #input:focus {
+  border-bottom-color: color-mix(in srgb, var(--accent) 75%, #8bc46a);
+  background: rgba(40, 65, 30, 0.6);
+  border-left: none;
+}
+.theme-forest #input::placeholder { color: color-mix(in srgb, var(--accent) 40%, #8ab86a); }
+.theme-forest #send-btn {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 35%, #3d6030), color-mix(in srgb, var(--accent) 20%, #2a4520));
+  border: 1px solid var(--accent);
+  border-radius: 40px;
+  width: auto;
+  height: auto;
+  padding: 8px 24px;
+  font-size: 11px;
+  font-weight: bold;
+  color: color-mix(in srgb, var(--accent) 40%, #daf5c0);
+  font-family: monospace;
+}
+.theme-forest #send-btn:not(:disabled):hover {
+  background: color-mix(in srgb, var(--accent) 45%, #4a7a35);
+  border-color: color-mix(in srgb, var(--accent) 75%, #8bc46a);
+  box-shadow: 0 0 10px var(--accent-dim);
+  opacity: 1;
+}
+.theme-forest #stop-btn {
+  border: 1px solid #b85a3a;
+  color: #e2a87a;
+  border-radius: 40px;
+  width: auto;
+  height: auto;
+  padding: 8px 14px;
+  font-size: 11px;
+}
+.theme-forest #file-btn { color: color-mix(in srgb, var(--accent) 50%, #8ab86a); }
+.theme-forest #file-btn:hover,
+.theme-forest #file-btn.has-file { color: var(--accent); }
+.theme-forest #settings-toggle {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  color: color-mix(in srgb, var(--accent) 75%, #bde88a);
+}
+.theme-forest #settings-toggle:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-dim);
+}
+.theme-forest #suggestions {
+  background: rgba(20, 30, 15, 0.95);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 16px;
+  backdrop-filter: blur(8px);
+}
+.theme-forest #suggestions .suggestion { color: color-mix(in srgb, var(--accent) 75%, #bde88a); }
+.theme-forest #suggestions .suggestion.selected { background: var(--query-bg); }
+
 /* Slash command autocomplete */
 #suggestions {
   position: absolute;
@@ -2793,6 +3138,7 @@ body {
       <option value="cyber">Cyberpunk Neon</option>
       <option value="fantasy">Dark Fantasy</option>
       <option value="stellar">Stellar Nebula</option>
+      <option value="forest">Forest Canopy</option>
       <option value="crt">CRT Retro</option>
     </select>
 
@@ -2851,7 +3197,7 @@ function migrateColorScheme(name) {
 }
 
 function migrateTheme(data) {
-  const valid = new Set(['cli', 'codecli', 'cyber', 'fantasy', 'stellar', 'crt']);
+  const valid = new Set(['cli', 'codecli', 'cyber', 'fantasy', 'stellar', 'forest', 'crt']);
   if (data.theme === 'crt' || data.layout === 'crt') return 'crt';
   if (data.theme && valid.has(data.theme)) return data.theme;
   if (data.theme === 'cli' || data.theme === 'default') return 'cli';
@@ -3134,6 +3480,7 @@ const THEMES = {
   cyber: { class: 'theme-cyber', label: 'Cyberpunk Neon', showStatusBar: true, sendLabel: '⏎ TRANSMIT' },
   fantasy: { class: 'theme-fantasy', label: 'Dark Fantasy', showStatusBar: true, sendLabel: '⚔️ CAST ⚔️' },
   stellar: { class: 'theme-stellar', label: 'Stellar Nebula', showStatusBar: true, sendLabel: '⏎ TRANSMIT' },
+  forest: { class: 'theme-forest', label: 'Forest Canopy', showStatusBar: true, sendLabel: '🌱 SEND' },
   crt: { class: 'theme-crt', label: 'CRT Retro', showStatusBar: true, sendLabel: '[ SEND ]' },
 };
 
