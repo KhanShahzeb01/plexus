@@ -27,8 +27,9 @@
   --red: #ef4444;
   --query-border: #3b82f6;
   --response-border: #333;
-  --font: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  --font: 'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;
   --font-size: 14px;
+  --panel-font-size: 13px;
 }
 html, body {
   height: 100%;
@@ -166,7 +167,7 @@ body {
 .message.response .panel-title { color: var(--text-dim); }
 .panel-body {
   padding: 8px 12px 12px;
-  font-size: 13px;
+  font-size: var(--panel-font-size);
   line-height: 1.7;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -571,6 +572,25 @@ body {
       </optgroup>
     </select>
 
+    <label for="font-size-select" style="margin-top:16px">Font Size</label>
+    <select id="font-size-select">
+      <option value="12px">Small (12px)</option>
+      <option value="14px" selected>Normal (14px)</option>
+      <option value="16px">Large (16px)</option>
+      <option value="18px">Extra Large (18px)</option>
+    </select>
+
+    <label for="font-family-select">Font Style</label>
+    <select id="font-family-select">
+      <option value="'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace">JetBrains Mono (default)</option>
+      <option value="'Fira Code','Cascadia Code','Consolas',monospace">Fira Code</option>
+      <option value="'Cascadia Code','Consolas',monospace">Cascadia Code</option>
+      <option value="'Source Code Pro','monospace'">Source Code Pro</option>
+      <option value="'IBM Plex Mono','monospace'">IBM Plex Mono</option>
+      <option value="'Courier New','monospace'">Courier New</option>
+      <option value="monospace">System Monospace</option>
+    </select>
+
     <label for="system-prompt">System Prompt</label>
     <textarea id="system-prompt" rows="3" placeholder="Optional: set a custom system prompt..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;resize:vertical;margin-bottom:14px;transition:border-color 0.15s"></textarea>
 
@@ -621,8 +641,10 @@ function loadState() {
       messages: Array.isArray(data.messages) ? data.messages : [],
       mode: data.mode || 'general',
       persona: data.persona || 'none',
+      fontSize: data.fontSize || '14px',
+      fontFamily: data.fontFamily || '',
     };
-  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none' }; }
+  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', fontSize: '14px', fontFamily: '' }; }
 }
 function saveState() {
   try {
@@ -633,6 +655,8 @@ function saveState() {
       messages: state.messages,
       mode: state.mode || 'general',
       persona: state.persona || 'none',
+      fontSize: state.fontSize,
+      fontFamily: state.fontFamily,
     };
     localStorage.setItem(STATE_KEY, JSON.stringify(data));
   } catch {}
@@ -658,6 +682,18 @@ const clearKeyBtn = document.getElementById('clear-key-btn');
 const settingsClose = document.getElementById('settings-close');
 const clearChatBtn = document.getElementById('clear-chat-btn');
 const exportChatBtn = document.getElementById('export-chat-btn');
+const fontSizeSelect = document.getElementById('font-size-select');
+const fontFamilySelect = document.getElementById('font-family-select');
+
+// ─── Font settings ─────────────────────────────────────────────────────
+function applyFontSettings() {
+  const root = document.documentElement;
+  root.style.setProperty('--font-size', state.fontSize);
+  root.style.setProperty('--panel-font-size', state.fontSize === '18px' ? '16px' : state.fontSize === '16px' ? '14px' : state.fontSize === '12px' ? '12px' : '13px');
+  if (state.fontFamily) {
+    root.style.setProperty('--font', state.fontFamily);
+  }
+}
 
 // ─── Auto-resize textarea ──────────────────────────────────────────────
 function autoResize() {
@@ -1459,6 +1495,8 @@ function openSettings() {
   apiKeyInput.value = state.apiKey;
   modelSelect.value = state.model;
   systemPromptInput.value = state.systemPrompt;
+  fontSizeSelect.value = state.fontSize;
+  fontFamilySelect.value = state.fontFamily || '';
   settingsStatus.classList.remove('show');
   settingsOverlay.classList.add('active');
 }
@@ -1498,6 +1536,18 @@ clearKeyBtn.addEventListener('click', () => {
 modelSelect.addEventListener('change', () => {
   state.model = modelSelect.value;
   state.systemPrompt = systemPromptInput.value.trim();
+  saveState();
+});
+
+fontSizeSelect.addEventListener('change', () => {
+  state.fontSize = fontSizeSelect.value;
+  applyFontSettings();
+  saveState();
+});
+
+fontFamilySelect.addEventListener('change', () => {
+  state.fontFamily = fontFamilySelect.value;
+  applyFontSettings();
   saveState();
 });
 
@@ -1577,7 +1627,8 @@ if (personaName === 'none') {
   personaBadge.className = personaName;
 }
 
-// Rebuild combined system prompt from mode + persona
+// Apply font settings and rebuild system prompt
+applyFontSettings();
 rebuildSystemPrompt();
 
 // Auto-open settings on first visit if no API key
