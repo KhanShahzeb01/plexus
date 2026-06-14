@@ -27,6 +27,10 @@
   --red: #ef4444;
   --query-border: #3b82f6;
   --response-border: #333;
+  --accent: #00d4aa;
+  --accent-dim: rgba(0,212,170,0.3);
+  --focus-border: #7571F9;
+  --focus-bg: rgba(117,113,249,0.04);
   --font: 'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;
   --font-size: 14px;
   --panel-font-size: 13px;
@@ -80,7 +84,7 @@ body {
 }
 #banner .subtitle {
   font-size: clamp(11px, 2.5vw, 14px);
-  color: var(--bright-magenta);
+  color: var(--accent);
   font-weight: 500;
   padding-bottom: 6px;
   margin-top: -4px;
@@ -283,7 +287,7 @@ body {
 #loading.active { display: flex; }
 .dot {
   width: 8px; height: 8px;
-  background: var(--cyan);
+  background: var(--accent);
   border-radius: 50%;
   animation: pulse 1.4s infinite ease-in-out both;
 }
@@ -312,7 +316,7 @@ body {
   gap: 8px;
 }
 #prompt {
-  color: var(--cyan);
+  color: var(--accent);
   font-weight: 700;
   font-size: 16px;
   padding-bottom: 8px;
@@ -327,7 +331,8 @@ body {
   width: 100%;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-left: 3px solid var(--border);
+  border-radius: 0 8px 8px 0;
   padding: 10px 12px;
   color: var(--text);
   font-family: var(--font);
@@ -335,13 +340,17 @@ body {
   line-height: 1.5;
   resize: none;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, border-left-color 0.15s, background 0.15s;
   max-height: 120px;
 }
-#input:focus { border-color: var(--cyan); }
+#input:focus {
+  border-color: var(--border);
+  border-left-color: var(--focus-border);
+  background: var(--focus-bg);
+}
 #input::placeholder { color: var(--text-dim); font-size: 13px; }
 #send-btn {
-  background: var(--cyan);
+  background: var(--accent);
   color: #000;
   border: none;
   border-radius: 8px;
@@ -712,6 +721,14 @@ body {
       </optgroup>
     </select>
 
+    <label for="theme-select">Theme (huh-inspired)</label>
+    <select id="theme-select">
+      <option value="default">Default (cyan accent)</option>
+      <option value="charm">Charm (indigo + fuchsia)</option>
+      <option value="dracula">Dracula (purple + green)</option>
+      <option value="catppuccin">Catppuccin Mocha (mauve + pink)</option>
+    </select>
+
     <label for="system-prompt">System Prompt</label>
     <textarea id="system-prompt" rows="3" placeholder="Optional: set a custom system prompt..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;resize:vertical;margin-bottom:14px;transition:border-color 0.15s"></textarea>
 
@@ -764,10 +781,11 @@ function loadState() {
       persona: data.persona || 'none',
       fontSize: data.fontSize || '14px',
       fontFamily: data.fontFamily || '',
+      theme: data.theme || 'default',
       totalTokensIn: data.totalTokensIn || 0,
       totalTokensOut: data.totalTokensOut || 0,
     };
-  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', fontSize: '14px', fontFamily: '', totalTokensIn: 0, totalTokensOut: 0 }; }
+  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', fontSize: '14px', fontFamily: '', theme: 'default', totalTokensIn: 0, totalTokensOut: 0 }; }
 }
 function saveState() {
   try {
@@ -780,6 +798,7 @@ function saveState() {
       persona: state.persona || 'none',
       fontSize: state.fontSize,
       fontFamily: state.fontFamily,
+      theme: state.theme || 'default',
       totalTokensIn: state.totalTokensIn || 0,
       totalTokensOut: state.totalTokensOut || 0,
     };
@@ -809,6 +828,7 @@ const clearChatBtn = document.getElementById('clear-chat-btn');
 const exportChatBtn = document.getElementById('export-chat-btn');
 const fontSizeSelect = document.getElementById('font-size-select');
 const fontFamilySelect = document.getElementById('font-family-select');
+const themeSelect = document.getElementById('theme-select');
 const statusModel = document.getElementById('status-model');
 const statusTokens = document.getElementById('status-tokens');
 
@@ -821,6 +841,58 @@ function applyFontSettings() {
   if (state.fontFamily) {
     root.style.setProperty('--font', state.fontFamily);
   }
+}
+
+// ─── Theme system (huh-inspired) ───────────────────────────────────────
+const THEMES = {
+  default: {
+    accent: '#00d4aa',
+    accentDim: 'rgba(0,212,170,0.3)',
+    focusBorder: '#7571F9',
+    focusBg: 'rgba(117,113,249,0.04)',
+    queryBorder: '#3b82f6',
+    magenta: '#a855f7',
+    brightMagenta: '#c084fc',
+  },
+  charm: {
+    accent: '#7571F9',
+    accentDim: 'rgba(117,113,249,0.3)',
+    focusBorder: '#F780E2',
+    focusBg: 'rgba(247,128,226,0.04)',
+    queryBorder: '#5A56E0',
+    magenta: '#F780E2',
+    brightMagenta: '#F780E2',
+  },
+  dracula: {
+    accent: '#50fa7b',
+    accentDim: 'rgba(80,250,123,0.3)',
+    focusBorder: '#bd93f9',
+    focusBg: 'rgba(189,147,249,0.04)',
+    queryBorder: '#bd93f9',
+    magenta: '#bd93f9',
+    brightMagenta: '#f1fa8c',
+  },
+  catppuccin: {
+    accent: '#f5c2e7',
+    accentDim: 'rgba(245,194,231,0.3)',
+    focusBorder: '#cba6f7',
+    focusBg: 'rgba(203,166,247,0.04)',
+    queryBorder: '#cba6f7',
+    magenta: '#cba6f7',
+    brightMagenta: '#f5c2e7',
+  },
+};
+
+function applyTheme() {
+  const t = THEMES[state.theme] || THEMES.default;
+  const root = document.documentElement;
+  root.style.setProperty('--accent', t.accent);
+  root.style.setProperty('--accent-dim', t.accentDim);
+  root.style.setProperty('--focus-border', t.focusBorder);
+  root.style.setProperty('--focus-bg', t.focusBg);
+  root.style.setProperty('--query-border', t.queryBorder);
+  root.style.setProperty('--magenta', t.magenta);
+  root.style.setProperty('--bright-magenta', t.brightMagenta);
 }
 
 // ─── Status bar (model + tokens) ──────────────────────────────────────
@@ -1804,6 +1876,7 @@ function openSettings() {
   systemPromptInput.value = state.systemPrompt;
   fontSizeSelect.value = state.fontSize;
   fontFamilySelect.value = state.fontFamily || '';
+  themeSelect.value = state.theme || 'default';
   settingsStatus.classList.remove('show');
   settingsOverlay.classList.add('active');
 }
@@ -1856,6 +1929,12 @@ fontSizeSelect.addEventListener('change', () => {
 fontFamilySelect.addEventListener('change', () => {
   state.fontFamily = fontFamilySelect.value;
   applyFontSettings();
+  saveState();
+});
+
+themeSelect.addEventListener('change', () => {
+  state.theme = themeSelect.value;
+  applyTheme();
   saveState();
 });
 
@@ -1935,8 +2014,9 @@ if (personaName === 'none') {
   personaBadge.className = personaName;
 }
 
-// Apply font settings and rebuild system prompt
+// Apply font/theme settings and rebuild system prompt
 applyFontSettings();
+applyTheme();
 updateStatusBar();
 rebuildSystemPrompt();
 
