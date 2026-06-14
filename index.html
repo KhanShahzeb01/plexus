@@ -2867,6 +2867,244 @@ body {
 .theme-forest #suggestions .suggestion { color: color-mix(in srgb, var(--accent) 75%, #bde88a); }
 .theme-forest #suggestions .suggestion.selected { background: var(--query-bg); }
 
+/* All themes: keep default Plexus black/dark surfaces (borders/icons/accent only) */
+.theme-code-cli,
+.theme-cyber,
+.theme-fantasy,
+.theme-stellar,
+.theme-forest,
+.theme-crt {
+  background: var(--bg) !important;
+}
+.theme-stellar::after {
+  opacity: 0.12;
+}
+.theme-code-cli #app-row,
+.theme-cyber #app-row,
+.theme-fantasy #app-row,
+.theme-stellar #app-row,
+.theme-forest #app-row,
+.theme-crt #app-row {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.theme-code-cli #banner,
+.theme-cyber #banner,
+.theme-fantasy #banner,
+.theme-stellar #banner,
+.theme-forest #banner,
+.theme-crt #banner {
+  background: var(--surface) !important;
+}
+.theme-code-cli #status-bar,
+.theme-cyber #status-bar,
+.theme-fantasy #status-bar,
+.theme-stellar #status-bar,
+.theme-forest #status-bar,
+.theme-crt #status-bar {
+  background: var(--surface2) !important;
+}
+.theme-code-cli #chat,
+.theme-cyber #chat,
+.theme-fantasy #chat,
+.theme-stellar #chat,
+.theme-forest #chat,
+.theme-crt #chat {
+  background: transparent !important;
+}
+.theme-code-cli #side-panel,
+.theme-cyber #side-panel,
+.theme-fantasy #side-panel,
+.theme-stellar #side-panel,
+.theme-forest #side-panel,
+.theme-crt #side-panel {
+  background: var(--surface) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.theme-code-cli #input-area,
+.theme-cyber #input-area,
+.theme-fantasy #input-area,
+.theme-stellar #input-area,
+.theme-forest #input-area,
+.theme-crt #input-area {
+  background: var(--surface) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.theme-code-cli #input,
+.theme-cyber #input,
+.theme-fantasy #input,
+.theme-stellar #input,
+.theme-forest #input,
+.theme-crt #input {
+  background: var(--surface2) !important;
+  color: var(--text) !important;
+}
+.theme-code-cli #input:focus,
+.theme-cyber #input:focus,
+.theme-fantasy #input:focus,
+.theme-stellar #input:focus,
+.theme-forest #input:focus,
+.theme-crt #input:focus {
+  background: var(--focus-bg) !important;
+}
+.theme-code-cli #tips,
+.theme-cyber #tips,
+.theme-fantasy #tips,
+.theme-stellar #tips,
+.theme-forest #tips,
+.theme-crt #tips {
+  background: var(--surface2) !important;
+  color: var(--text-dim) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.theme-code-cli #tips strong,
+.theme-cyber #tips strong,
+.theme-fantasy #tips strong,
+.theme-stellar #tips strong,
+.theme-forest #tips strong,
+.theme-crt #tips strong {
+  color: var(--text) !important;
+}
+.theme-code-cli .message .panel,
+.theme-cyber .message .panel,
+.theme-fantasy .message .panel,
+.theme-stellar .message .panel,
+.theme-forest .message .panel,
+.theme-crt .message .panel {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.theme-code-cli .message.query .panel,
+.theme-cyber .message.query .panel,
+.theme-fantasy .message.query .panel,
+.theme-stellar .message.query .panel,
+.theme-forest .message.query .panel,
+.theme-crt .message.query .panel {
+  background: var(--query-bg) !important;
+}
+.theme-code-cli .message.response .panel,
+.theme-cyber .message.response .panel,
+.theme-fantasy .message.response .panel,
+.theme-stellar .message.response .panel,
+.theme-forest .message.response .panel,
+.theme-crt .message.response .panel {
+  background: var(--surface) !important;
+}
+.theme-code-cli .message.query .panel-body,
+.theme-cyber .message.query .panel-body,
+.theme-fantasy .message.query .panel-body,
+.theme-stellar .message.query .panel-body,
+.theme-forest .message.query .panel-body,
+.theme-crt .message.query .panel-body {
+  color: var(--text-bright) !important;
+}
+.theme-code-cli .message.response .panel-body,
+.theme-cyber .message.response .panel-body,
+.theme-fantasy .message.response .panel-body,
+.theme-stellar .message.response .panel-body,
+.theme-forest .message.response .panel-body,
+.theme-crt .message.response .panel-body {
+  color: var(--text) !important;
+}
+.theme-code-cli .panel-body pre,
+.theme-cyber .panel-body pre,
+.theme-fantasy .panel-body pre,
+.theme-stellar .panel-body pre,
+.theme-forest .panel-body pre,
+.theme-crt .panel-body pre {
+  background: #1d1f21 !important;
+}
+.theme-code-cli .code-hdr,
+.theme-cyber .code-hdr,
+.theme-fantasy .code-hdr,
+.theme-stellar .code-hdr,
+.theme-forest .code-hdr,
+.theme-crt .code-hdr {
+  background: #252729 !important;
+}
+.theme-code-cli #loading,
+.theme-cyber #loading,
+.theme-fantasy #loading,
+.theme-stellar #loading,
+.theme-forest #loading,
+.theme-crt #loading {
+  background: var(--surface2) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.theme-code-cli #side-panel .sp-bar,
+.theme-cyber #side-panel .sp-bar,
+.theme-fantasy #side-panel .sp-bar,
+.theme-stellar #side-panel .sp-bar,
+.theme-forest #side-panel .sp-bar,
+.theme-crt #side-panel .sp-bar {
+  background: var(--border) !important;
+}
+.theme-code-cli #chat::-webkit-scrollbar-track,
+.theme-cyber #chat::-webkit-scrollbar-track,
+.theme-fantasy #chat::-webkit-scrollbar-track,
+.theme-stellar #chat::-webkit-scrollbar-track,
+.theme-forest #chat::-webkit-scrollbar-track,
+.theme-crt #chat::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.theme-code-cli #banner::after,
+.theme-cyber #banner::after,
+.theme-fantasy #banner::after,
+.theme-stellar #banner::after,
+.theme-forest #banner::after,
+.theme-crt #banner::after,
+.theme-code-cli #prompt::before,
+.theme-cyber #prompt::before,
+.theme-fantasy #prompt::before,
+.theme-stellar #prompt::before,
+.theme-forest #prompt::before,
+.theme-crt #prompt::before {
+  background: var(--surface2) !important;
+}
+.theme-code-cli #mode-badge,
+.theme-cyber #mode-badge,
+.theme-fantasy #mode-badge,
+.theme-stellar #mode-badge,
+.theme-forest #mode-badge,
+.theme-crt #mode-badge,
+.theme-code-cli #persona-badge,
+.theme-cyber #persona-badge,
+.theme-fantasy #persona-badge,
+.theme-stellar #persona-badge,
+.theme-forest #persona-badge,
+.theme-crt #persona-badge,
+.theme-code-cli #model-badge,
+.theme-cyber #model-badge,
+.theme-fantasy #model-badge,
+.theme-stellar #model-badge,
+.theme-forest #model-badge,
+.theme-crt #model-badge {
+  background: var(--surface2) !important;
+}
+.theme-code-cli #settings-toggle,
+.theme-cyber #settings-toggle,
+.theme-fantasy #settings-toggle,
+.theme-stellar #settings-toggle,
+.theme-forest #settings-toggle,
+.theme-crt #settings-toggle {
+  background: var(--surface2) !important;
+}
+.theme-code-cli #suggestions,
+.theme-cyber #suggestions,
+.theme-fantasy #suggestions,
+.theme-stellar #suggestions,
+.theme-forest #suggestions,
+.theme-crt #suggestions {
+  background: rgba(13, 13, 13, 0.95) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 /* Slash command autocomplete */
 #suggestions {
   position: absolute;
