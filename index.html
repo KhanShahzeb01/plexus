@@ -63,6 +63,12 @@ body {
   border-bottom: 1px solid var(--border);
   background: var(--surface);
 }
+#banner-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
 #banner pre {
   font-family: var(--font);
   font-size: clamp(6px, 1.5vw, 11px);
@@ -71,6 +77,18 @@ body {
   text-align: left;
   white-space: pre;
   letter-spacing: 0;
+}
+#laptop-icon {
+  font-family: var(--font);
+  font-size: clamp(5px, 1vw, 9px);
+  line-height: 1.15;
+  display: inline-block;
+  text-align: left;
+  white-space: pre;
+  letter-spacing: 0;
+  color: var(--text-dim);
+  opacity: 0.7;
+  user-select: none;
 }
 #banner .subtitle {
   font-size: clamp(11px, 2.5vw, 14px);
@@ -81,11 +99,11 @@ body {
 }
 #mode-badge {
   display: inline-block;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding: 2px 10px;
+  padding: 3px 12px;
   border-radius: 4px;
   margin-bottom: 10px;
   border: 1px solid var(--border);
@@ -98,11 +116,11 @@ body {
 #mode-badge.blog { color: #f472b6; border-color: rgba(244,114,182,0.3); background: rgba(244,114,182,0.06); }
 #persona-badge {
   display: inline-block;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding: 2px 10px;
+  padding: 3px 12px;
   border-radius: 4px;
   margin-bottom: 10px;
   margin-left: 6px;
@@ -118,9 +136,9 @@ body {
 #persona-badge.none { display: none; }
 #model-badge {
   display: inline-block;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 500;
-  padding: 2px 8px;
+  padding: 3px 12px;
   border-radius: 4px;
   margin-bottom: 10px;
   margin-left: 6px;
@@ -133,8 +151,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 3px 12px;
-  font-size: 10px;
+  padding: 5px 14px;
+  font-size: 12px;
   color: var(--text-dim);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -357,13 +375,13 @@ body {
   position: fixed;
   top: 12px;
   right: 12px;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--text-dim);
-  font-size: 16px;
+  font-size: 22px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -516,8 +534,10 @@ body {
   :root { --font-size: 13px; }
   #banner { padding: 6px 8px 0; }
   #banner pre { font-size: clamp(4px, 1vw, 7px); }
+  #laptop-icon { font-size: clamp(4px, 0.8vw, 6px); }
+  #banner-top { gap: 6px; }
   #banner .subtitle { font-size: 10px; padding-bottom: 4px; }
-  #mode-badge, #persona-badge, #model-badge { font-size: 8px; padding: 1px 6px; margin-bottom: 6px; }
+  #mode-badge, #persona-badge, #model-badge { font-size: 9px; padding: 2px 8px; margin-bottom: 6px; }
   #chat { padding: 8px; gap: 8px; }
   #input-area { padding: 6px 8px; gap: 6px; }
   #input { font-size: 13px; padding: 8px 10px; }
@@ -529,6 +549,7 @@ body {
 }
 @media (max-width: 480px) {
   #banner pre { display: none; }
+  #laptop-icon { display: none; }
   #banner { padding: 4px 8px 0; }
   #banner .subtitle { font-size: 11px; padding-bottom: 2px; margin-top: 2px; }
   #chat { padding: 6px; gap: 6px; }
@@ -541,7 +562,15 @@ body {
 
 <!-- Banner -->
 <div id="banner">
-  <pre id="banner-art"></pre>
+  <div id="banner-top">
+    <pre id="banner-art"></pre>
+    <pre id="laptop-icon">┌───────────────────┐
+│ +++ --- @@@ ###  │
+│ ½½ %%% &&& 123   │
+│ ABC def GHI jkl  │
+└───────────────────┘
+   ═══╤═══╤═══╤═══</pre>
+  </div>
   <div class="subtitle">AI chat at your terminal</div>
   <div id="mode-badge" class="general">general</div><span id="persona-badge" class="none"></span><span id="model-badge"></span>
 </div>
