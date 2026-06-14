@@ -574,10 +574,22 @@ body {
 
     <label for="font-size-select" style="margin-top:16px">Font Size</label>
     <select id="font-size-select">
-      <option value="12px">Small (12px)</option>
-      <option value="14px" selected>Normal (14px)</option>
-      <option value="16px">Large (16px)</option>
-      <option value="18px">Extra Large (18px)</option>
+      <option value="10px">10</option>
+      <option value="12px">12</option>
+      <option value="14px" selected>14</option>
+      <option value="16px">16</option>
+      <option value="18px">18</option>
+      <option value="20px">20</option>
+      <option value="24px">24</option>
+      <option value="28px">28</option>
+      <option value="32px">32</option>
+      <option value="36px">36</option>
+      <option value="40px">40</option>
+      <option value="44px">44</option>
+      <option value="48px">48</option>
+      <option value="52px">52</option>
+      <option value="56px">56</option>
+      <option value="60px">60</option>
     </select>
 
     <label for="font-family-select">Font Style</label>
@@ -688,8 +700,9 @@ const fontFamilySelect = document.getElementById('font-family-select');
 // ─── Font settings ─────────────────────────────────────────────────────
 function applyFontSettings() {
   const root = document.documentElement;
+  const px = parseInt(state.fontSize) || 14;
   root.style.setProperty('--font-size', state.fontSize);
-  root.style.setProperty('--panel-font-size', state.fontSize === '18px' ? '16px' : state.fontSize === '16px' ? '14px' : state.fontSize === '12px' ? '12px' : '13px');
+  root.style.setProperty('--panel-font-size', Math.max(10, px - 1) + 'px');
   if (state.fontFamily) {
     root.style.setProperty('--font', state.fontFamily);
   }
