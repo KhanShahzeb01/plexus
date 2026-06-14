@@ -11,7 +11,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -271,34 +270,6 @@ body {
   cursor: pointer;
 }
 .table-copy:hover { border-color: var(--text-dim); color: var(--text); }
-.chart-wrap {
-  margin: 8px 0;
-  padding: 12px;
-  background: #0d0d0d;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  position: relative;
-}
-.chart-title {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-dim);
-  margin-bottom: 8px;
-  font-family: var(--font);
-}
-.chart-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--accent);
-  font-family: var(--font);
-  font-size: 10px;
-  padding: 2px 8px;
-  cursor: pointer;
-  margin-left: 4px;
-}
-.chart-btn:hover { border-color: var(--accent); }
 .panel-body pre code {
   background: none;
   padding: 0;
@@ -881,7 +852,7 @@ body {
   <div id="tips">
     <strong>Plexus</strong> — AI chat powered by OpenRouter.<br>
     Themes: <code>/finance</code> <code>/aidev</code> <code>/github</code> <code>/datascience</code> <code>/blog</code><br>
-    Quick: <code>/summarize</code> <code>/explain</code> <code>/translate</code> <code>/rephrase</code> <code>/bulletise</code> <code>/chart</code><br>
+    Quick: <code>/summarize</code> <code>/explain</code> <code>/translate</code> <code>/rephrase</code> <code>/bulletise</code><br>
     Click <strong>⚙</strong> to set your API key. Type <code>/help</code> for all commands.
   </div>
 </div>
@@ -2100,7 +2071,7 @@ const SUGGESTIONS = [
   { cmd: '/translate', desc: 'Translate text' },
   { cmd: '/rephrase', desc: 'Rewrite for clarity' },
   { cmd: '/bulletise', desc: 'Convert to bullet points' },
-  { cmd: '/chart', desc: 'Create a chart from data' },
+  { cmd: '/model', desc: 'Switch AI model' },
   { cmd: '/model', desc: 'Switch AI model' },
   { cmd: '/key', desc: 'Set OpenRouter API key' },
   { cmd: '/web', desc: 'Toggle web search on/off' },
@@ -2202,7 +2173,6 @@ function handleSlashCommand(cmd, args) {
         '| **Quick** | `/translate <text>` | `/translate ...` | Translate text (defaults to English) |',
         '| **Quick** | `/rephrase <text>` | `/rephrase ...` | Rewrite for clarity and polish |',
         '| **Quick** | `/bulletise <text>` | `/bulletise ...` | Convert to structured bullet points |',
-        '| **Visualize** | `/chart <labels\|vals>` | `/chart Q1,Q2\|100,200` | Interactive terminal-themed chart |',
         '| **System** | `/clear` | `/clear` | Clear conversation history |',
         '| **System** | `/export` | `/export` | Download chat as Markdown file |',
         '| **System** | `/model <name>` | `/model openai/gpt-4o` | Switch AI model |',
@@ -2328,14 +2298,6 @@ function handleSlashCommand(cmd, args) {
       runQuickCommand(cmd, args);
       return true;
 
-    case '/chart':
-      if (!args) {
-        addMessage('response', 'Usage: `/chart label1,label2,...|value1,value2,...`\ne.g. `/chart Q1,Q2,Q3,Q4|100,250,180,320`\nOr paste a table and I\'ll offer a chart button.');
-        return true;
-      }
-      renderChartFromCommand(args);
-      return true;
-
     default:
       return false;
   }
@@ -2364,88 +2326,6 @@ function runQuickCommand(cmd, args) {
   // Send as a query with the prompt + source text
   const fullQuery = `${prompt}\n\n---\n${sourceText}`;
   sendMessage(fullQuery);
-}
-
-// ─── Interactive Charts ────────────────────────────────────────────────
-let chartIdCounter = 0;
-const chartInstances = {};
-
-function renderChartFromCommand(args) {
-  const parts = args.split('|');
-  if (parts.length < 2) {
-    addMessage('response', 'Format: `/chart label1,label2|value1,value2`\ne.g. `/chart Q1,Q2,Q3,Q4|100,250,180,320`');
-    return;
-  }
-  const labels = parts[0].split(',').map(s => s.trim()).filter(Boolean);
-  const values = parts[1].split(',').map(s => parseFloat(s.trim())).filter(v => !isNaN(v));
-  if (labels.length < 2 || values.length < 2 || labels.length !== values.length) {
-    addMessage('response', 'Need at least 2 labels and matching values.\nFormat: `/chart label1,label2|value1,value2`');
-    return;
-  }
-  renderChart(labels, values);
-}
-
-function renderChart(labels, data, title = '') {
-  const id = 'chart-' + (++chartIdCounter);
-  const html = `<div class="chart-wrap"><div class="chart-title">${title || 'Data'} <button class="chart-btn" onclick="toggleChartType('${id}')">toggle</button></div><canvas id="${id}"></canvas></div>`;
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  chatEl.appendChild(div);
-  chatEl.scrollTop = chatEl.scrollHeight;
-
-  const ctx = document.getElementById(id).getContext('2d');
-  const isDark = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() === '#0d0d0d' || true;
-
-  const config = {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: title || 'Values',
-        data,
-        backgroundColor: 'rgba(0,212,170,0.5)',
-        borderColor: '#00d4aa',
-        borderWidth: 1,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1a1a1a',
-          titleColor: '#e0e0e0',
-          bodyColor: '#00d4aa',
-          borderColor: '#333',
-          borderWidth: 1,
-          titleFont: { family: 'JetBrains Mono, monospace', size: 11 },
-          bodyFont: { family: 'JetBrains Mono, monospace', size: 11 },
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#666', font: { family: 'JetBrains Mono, monospace', size: 10 } },
-          grid: { color: 'rgba(255,255,255,0.04)' }
-        },
-        y: {
-          ticks: { color: '#666', font: { family: 'JetBrains Mono, monospace', size: 10 } },
-          grid: { color: 'rgba(255,255,255,0.06)' }
-        }
-      }
-    }
-  };
-
-  chartInstances[id] = new Chart(ctx, config);
-}
-
-function toggleChartType(id) {
-  const c = chartInstances[id];
-  if (!c) return;
-  const types = ['bar', 'line', 'doughnut', 'radar', 'polarArea'];
-  const idx = types.indexOf(c.config.type);
-  c.config.type = types[(idx + 1) % types.length];
-  c.update();
 }
 
 // ─── Auto-scroll lock ─────────────────────────────────────────────────
