@@ -509,8 +509,8 @@ body {
 /* Side panel */
 #side-panel {
   flex-shrink: 0;
-  width: 170px;
-  padding: 12px;
+  width: 220px;
+  padding: 14px;
   border-left: 2px solid var(--text-dim);
   background: var(--surface);
   display: flex;
@@ -1807,10 +1807,13 @@ function handleSlashCommand(cmd, args) {
   switch (cmd) {
     case '/clear':
       state.messages = [];
+      state.totalTokensIn = 0;
+      state.totalTokensOut = 0;
       saveState();
       tipsEl.style.display = 'block';
       chatEl.querySelectorAll('.message').forEach(el => el.remove());
       chatEl.querySelectorAll('.error-msg').forEach(el => el.remove());
+      updateSidePanel();
       addMessage('response', 'Chat cleared. Start a new conversation.');
       return true;
 
@@ -2136,8 +2139,11 @@ function checkApiKey() {
 
 clearChatBtn.addEventListener('click', () => {
   state.messages = [];
+  state.totalTokensIn = 0;
+  state.totalTokensOut = 0;
   saveState();
   restoreMessages();
+  updateSidePanel();
   showSettingsStatus('Chat cleared', 'info');
 });
 
