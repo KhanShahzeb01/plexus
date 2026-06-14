@@ -778,16 +778,15 @@ const BANNER_LINES = [
   "╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝",
 ];
 const bannerEl = document.getElementById('banner-art');
-let bannerColors = ['#00d4aa', '#3b82f6', '#60a5fa', '#00d4aa', '#a855f7', '#c084fc'];
 
 function renderBanner() {
-  const t = THEMES[state.theme];
-  const isLight = t && t.textBright !== '#f0f0f0';
-  bannerColors = isLight
-    ? ['#5a4a3a', '#7a5a3a', '#9a7a5a', '#5a4a3a', '#7a5a3a', '#9a7a5a']
-    : ['#00d4aa', '#3b82f6', '#60a5fa', '#00d4aa', '#a855f7', '#c084fc'];
+  let colors = ['#00d4aa', '#3b82f6', '#60a5fa', '#00d4aa', '#a855f7', '#c084fc'];
+  try {
+    const t = THEMES[state.theme];
+    if (t && t.textBright !== '#f0f0f0') colors = ['#5a4a3a', '#7a5a3a', '#9a7a5a', '#5a4a3a', '#7a5a3a', '#9a7a5a'];
+  } catch {}
   const colored = BANNER_LINES.map((line, i) => {
-    const color = bannerColors[i % bannerColors.length];
+    const color = colors[i % colors.length];
     return `<span style="color:${color};font-weight:700">${line}</span>`;
   }).join('\n');
   bannerEl.innerHTML = colored;
