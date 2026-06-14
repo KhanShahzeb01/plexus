@@ -1182,6 +1182,7 @@ async function doDeepResearch(query) {
           }
         } catch {}
       }
+    }
 
     if (!fullResponse.trim()) throw new Error('Empty synthesis response');
     state.messages.push({ role: 'assistant', content: fullResponse.trim() });
