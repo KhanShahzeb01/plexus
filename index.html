@@ -78,18 +78,6 @@ body {
   white-space: pre;
   letter-spacing: 0;
 }
-#laptop-icon {
-  font-family: var(--font);
-  font-size: clamp(5px, 1vw, 9px);
-  line-height: 1.15;
-  display: inline-block;
-  text-align: left;
-  white-space: pre;
-  letter-spacing: 0;
-  color: var(--text-dim);
-  opacity: 0.7;
-  user-select: none;
-}
 #banner .subtitle {
   font-size: clamp(11px, 2.5vw, 14px);
   color: var(--bright-magenta);
@@ -534,7 +522,6 @@ body {
   :root { --font-size: 13px; }
   #banner { padding: 6px 8px 0; }
   #banner pre { font-size: clamp(4px, 1vw, 7px); }
-  #laptop-icon { font-size: clamp(4px, 0.8vw, 6px); }
   #banner-top { gap: 6px; }
   #banner .subtitle { font-size: 10px; padding-bottom: 4px; }
   #mode-badge, #persona-badge, #model-badge { font-size: 9px; padding: 2px 8px; margin-bottom: 6px; }
@@ -549,7 +536,6 @@ body {
 }
 @media (max-width: 480px) {
   #banner pre { display: none; }
-  #laptop-icon { display: none; }
   #banner { padding: 4px 8px 0; }
   #banner .subtitle { font-size: 11px; padding-bottom: 2px; margin-top: 2px; }
   #chat { padding: 6px; gap: 6px; }
@@ -564,15 +550,6 @@ body {
 <div id="banner">
   <div id="banner-top">
     <pre id="banner-art"></pre>
-    <pre id="laptop-icon"> @@@@@@@@@@@@@@@@@
- @  ½½½ ABC 123  @
- @  ### def 789  @
- @  %%% &&& GHI  @
- @@@@@@@@@@@@@@@@@
-   +++ +++ +++ +++
-   +++ +++ +++ +++
-   --------------
-      %%%%%%%%</pre>
   </div>
   <div class="subtitle">AI chat at your terminal</div>
   <div id="mode-badge" class="general">general</div><span id="persona-badge" class="none"></span><span id="model-badge"></span>
