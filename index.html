@@ -6,7 +6,7 @@
 <title>Plexus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Share+Tech+Mono&family=MedievalSharp&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Share+Tech+Mono&family=MedievalSharp&family=VT323&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -825,105 +825,371 @@ body {
   #tips { font-size: 10px; padding: 8px 10px; }
   #tips code { font-size: 9px; }
 }
-/* CRT Terminal theme — full holistic overhaul */
+/* CRT Retro theme — vintage phosphor terminal, full viewport */
 .theme-crt {
-  background: radial-gradient(circle at 20% 30%, #0a0f1e, #03060c);
+  background: #0a0a0a;
+  font-family: 'IBM Plex Mono', 'VT323', 'Courier New', monospace;
+}
+.theme-crt::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(20, 20, 20, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes crtScanlines {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(5px); }
+}
+@keyframes crtTypewriter {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes crtBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@keyframes crtFlicker {
+  0%, 100% { opacity: 1; }
+  95% { opacity: 0.95; }
+  96% { opacity: 0.88; }
+  97% { opacity: 0.96; }
 }
 .theme-crt #app-row {
+  position: relative;
+  z-index: 2;
   width: 100%;
   flex: 1;
   min-height: 0;
-  background: #0c0f1c;
+  background: #1a1a1a;
+  box-shadow:
+    inset 0 0 0 2px #4a4a4a,
+    inset 0 0 0 6px #2a2a2a,
+    inset 0 0 30px rgba(0, 0, 0, 0.8);
+}
+.theme-crt #app-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15) 0px, rgba(0, 0, 0, 0.15) 2px, transparent 2px, transparent 5px);
+  pointer-events: none;
+  z-index: 5;
+  animation: crtScanlines 8s linear infinite;
 }
 .theme-crt #banner {
-  background: #05080f;
-  border-bottom: 1px solid #1e2a3a;
-  padding: 10px 16px;
-  justify-content: space-between;
+  background: #111111;
+  padding: 8px 16px;
+  border-bottom: 2px solid var(--accent);
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 6;
 }
-.theme-crt #banner pre { font-family: 'Fira Code','Cascadia Code','Courier New',monospace; }
-.theme-crt #banner::after {
-  content: '⚡ USER@CLI_CHAT:~/plexus';
+.theme-crt #banner::before {
+  content: '[CRT]';
+  font-size: 1.2rem;
+  flex-shrink: 0;
   color: var(--accent);
-  font-size: 12px;
+  filter: drop-shadow(0 0 3px var(--accent-dim));
+  font-family: monospace;
+}
+.theme-crt #banner pre {
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: clamp(10px, 2vw, 16px);
+  line-height: 1.3;
+  white-space: pre;
+  letter-spacing: 0;
+  flex-shrink: 0;
+  flex: 0 1 auto;
+  color: var(--accent);
+  text-shadow: 0 0 3px var(--accent-dim);
+}
+.theme-crt #banner::after {
+  content: '● OPENROUTER · PHOSPHOR MODE ●';
+  background: #0a0a0a;
+  padding: 0.25rem 1rem;
+  border-radius: 20px;
+  font-size: 10px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
   letter-spacing: 1px;
-  text-shadow: 0 0 6px var(--accent-dim);
-  font-family: 'Fira Code',monospace;
+  white-space: nowrap;
+  margin-left: auto;
+  font-family: monospace;
 }
-.theme-crt #side-panel {
-  background: #0a0e18;
-  border-left: 1px solid #1e2a3a;
+.theme-crt #status-bar {
+  display: flex;
+  background: #050505;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 25%, #1a3a1a);
+  padding: 4px 16px;
+  font-size: 10px;
+  min-height: 24px;
+  gap: 8px;
+  color: color-mix(in srgb, var(--accent) 55%, #4aae6a);
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  letter-spacing: 1px;
+  font-family: monospace;
+  position: relative;
+  z-index: 6;
 }
+.theme-crt #status-bar #status-model,
+.theme-crt #status-bar #status-tokens { color: color-mix(in srgb, var(--accent) 75%, #5eff9e); }
+.theme-crt #mode-badge,
+.theme-crt #persona-badge,
+.theme-crt #model-badge {
+  background: #0a0a0a;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.theme-crt #chat-row { min-height: 0; flex: 1; position: relative; z-index: 6; }
 .theme-crt #chat {
-  background: #0b0e17;
+  background: linear-gradient(180deg, #0a0f0a, #0a0c0a);
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  animation: crtFlicker 0.3s infinite;
 }
-.theme-crt #chat .message.query .panel {
-  background: var(--query-bg);
-  border-color: var(--query-border);
+.theme-crt #chat::-webkit-scrollbar { width: 8px; }
+.theme-crt #chat::-webkit-scrollbar-track { background: #0a0a0a; }
+.theme-crt #chat::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+  box-shadow: 0 0 4px var(--accent-dim);
 }
-.theme-crt #chat .message.response .panel {
-  background: rgba(15,18,31,0.4);
-  border-color: var(--response-border);
+.theme-crt #tips {
+  background: #0f140f;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 12px 16px;
+  color: color-mix(in srgb, var(--accent) 65%, #86f0a8);
+  text-shadow: 0 0 2px var(--accent-dim);
 }
-.theme-crt .panel-title { font-size: 10px; }
-.theme-crt .message.query .panel-title { color: var(--accent); }
-.theme-crt .message.response .panel-title { color: var(--text-dim); }
+.theme-crt #tips strong { color: color-mix(in srgb, var(--accent) 80%, #5eff9e); }
+.theme-crt #tips code {
+  background: #0a0a0a;
+  color: color-mix(in srgb, var(--accent) 85%, #5eff9e);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 4px;
+}
+.theme-crt .message {
+  animation: crtTypewriter 0.2s steps(40, end);
+  border-left: 2px solid var(--accent);
+  padding-left: 14px;
+  margin-bottom: 0;
+}
+.theme-crt .message .panel {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding-left: 0;
+}
+.theme-crt .panel-title {
+  font-size: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 0 0 5px;
+}
+.theme-crt .message.query .panel-title::before {
+  content: '[USER] $>';
+  font-size: 12px;
+  font-weight: bold;
+  color: color-mix(in srgb, var(--accent) 85%, #5aee8a);
+  text-shadow: 0 0 2px var(--accent-dim);
+  font-family: monospace;
+}
+.theme-crt .message.response .panel-title::before {
+  content: '[AI] $>';
+  font-size: 12px;
+  font-weight: bold;
+  color: color-mix(in srgb, var(--accent) 75%, #4ae87a);
+  text-shadow: 0 0 2px var(--accent-dim);
+  font-family: monospace;
+}
+.theme-crt .panel-body {
+  color: color-mix(in srgb, var(--accent) 60%, #86f0a8);
+  font-size: 13px;
+  line-height: 1.5;
+  text-shadow: 0 0 2px var(--accent-dim);
+  animation: crtFlicker 0.3s infinite;
+}
+.theme-crt .panel-body code {
+  background: #0a0a0a;
+  color: color-mix(in srgb, var(--accent) 85%, #5eff9e);
+  border-radius: 4px;
+}
+.theme-crt .panel-body a { color: color-mix(in srgb, var(--accent) 85%, #5eff9e); }
+.theme-crt .panel-body pre { background: #0a0a0a; border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.theme-crt .code-wrap { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.theme-crt .code-hdr { background: #0f140f; border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.theme-crt #loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #0f140f;
+  padding: 8px 16px;
+  border-radius: 4px;
+  width: fit-content;
+  border: 1px solid var(--accent);
+}
+.theme-crt #loading::before {
+  content: '✦ processing request ✦';
+  font-size: 12px;
+  color: color-mix(in srgb, var(--accent) 70%, #6ae89a);
+  font-family: monospace;
+}
+.theme-crt #loading .dot {
+  width: 10px;
+  height: 16px;
+  border-radius: 0;
+  background: var(--accent);
+  animation: crtBlink 1s step-end infinite;
+  box-shadow: 0 0 4px var(--accent-dim);
+}
+.theme-crt #loading .dot:nth-child(2),
+.theme-crt #loading .dot:nth-child(3) { display: none; }
+.theme-crt #side-panel {
+  background: #0a0a0a;
+  border-left: 2px solid var(--accent);
+  box-shadow: inset 4px 0 12px rgba(0, 0, 0, 0.5);
+  font-family: 'IBM Plex Mono', monospace;
+  position: relative;
+  z-index: 6;
+}
+.theme-crt #side-panel .sp-title {
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-shadow: 0 0 3px var(--accent-dim);
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+}
+.theme-crt #side-panel .sp-row .sp-value { color: color-mix(in srgb, var(--accent) 75%, #5eff9e); }
+.theme-crt #side-panel .sp-row .sp-label { color: color-mix(in srgb, var(--accent) 50%, #4aae6a); }
+.theme-crt #side-panel .sp-desc,
+.theme-crt #side-panel .sp-footer { color: color-mix(in srgb, var(--accent) 55%, #4aae6a); }
+.theme-crt #side-panel .sp-footer { border-top-color: color-mix(in srgb, var(--accent) 25%, #1a3a1a); }
+.theme-crt #side-panel .sp-bar { background: #0a0a0a; }
+.theme-crt #side-panel .sp-bar-fill {
+  background: var(--accent);
+  box-shadow: 0 0 4px var(--accent-dim);
+}
+.theme-crt #side-panel input[type="range"]::-webkit-slider-thumb {
+  background: var(--accent);
+  box-shadow: 0 0 4px var(--accent-dim);
+}
+.theme-crt #side-panel input[type="range"]::-moz-range-thumb {
+  background: var(--accent);
+  box-shadow: 0 0 4px var(--accent-dim);
+}
+.theme-crt #side-panel .sp-new-btn {
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  background: #0a0a0a;
+  border-radius: 4px;
+}
+.theme-crt #side-panel .sp-new-btn:hover {
+  background: color-mix(in srgb, var(--accent) 12%, #1a2a1a);
+  border-color: color-mix(in srgb, var(--accent) 85%, #5eff9e);
+  color: color-mix(in srgb, var(--accent) 85%, #5eff9e);
+  box-shadow: 0 0 6px var(--accent-dim);
+}
+.theme-crt .sp-sess:hover { background: color-mix(in srgb, var(--accent) 8%, #0f140f); }
+.theme-crt .sp-sess.active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, #0f140f);
+}
 .theme-crt #input-area {
-  background: #080c16;
-  border-top: 1px solid #1f2b38;
+  background: #0a0a0a;
+  border-top: 2px solid var(--accent);
+  padding: 10px 12px;
+  gap: 8px;
+  position: relative;
+  z-index: 6;
+}
+.theme-crt #prompt {
+  font-size: 0;
+  line-height: 1;
+}
+.theme-crt #prompt::before {
+  content: '❯❯ [$]>';
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--accent);
+  background: #0f120f;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-family: monospace;
+  white-space: nowrap;
 }
 .theme-crt #input {
-  background: transparent;
+  background: #0a0a0a;
   border: none;
-  border-left: none;
-  color: #eef5ff;
-  font-family: 'Fira Code',monospace;
+  border-bottom: 2px solid var(--accent);
+  border-radius: 0;
+  color: var(--accent);
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 13px;
   caret-color: var(--accent);
-  padding: 8px 0;
+  padding: 8px 6px;
 }
 .theme-crt #input:focus {
-  background: transparent;
+  border-bottom-color: color-mix(in srgb, var(--accent) 85%, #5eff9e);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 85%, #5eff9e);
+  background: #0a0a0a;
   border-left: none;
 }
-.theme-crt #input::placeholder { color: #3f4a66; }
+.theme-crt #input::placeholder { color: color-mix(in srgb, var(--accent) 35%, #3aae5a); }
 .theme-crt #send-btn {
-  background: #142433;
-  border: 1px solid #2e5d8a;
-  color: #bee0ff;
-  border-radius: 40px;
+  background: #0a0a0a;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
   width: auto;
   height: auto;
-  padding: 6px 16px;
-  font-size: 13px;
-  font-weight: 400;
+  padding: 8px 22px;
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--accent);
+  text-transform: uppercase;
+  font-family: monospace;
 }
 .theme-crt #send-btn:not(:disabled):hover {
-  background: #1e3b58;
-  border-color: #5fa9ee;
-  color: white;
-  box-shadow: 0 0 6px #2f6ea2;
+  background: color-mix(in srgb, var(--accent) 12%, #1a2a1a);
+  border-color: color-mix(in srgb, var(--accent) 85%, #5eff9e);
+  color: color-mix(in srgb, var(--accent) 85%, #5eff9e);
+  box-shadow: 0 0 6px var(--accent-dim);
+  opacity: 1;
 }
 .theme-crt #stop-btn {
   background: transparent;
-  border: 1px solid #ff5f56;
-  color: #ff5f56;
-  border-radius: 40px;
+  border: 2px solid #ff8866;
+  color: #ff8866;
+  border-radius: 4px;
   width: auto;
   height: auto;
-  padding: 6px 12px;
-  font-size: 13px;
+  padding: 8px 14px;
+  font-size: 11px;
 }
 .theme-crt #stop-btn.active { display: flex; }
-.theme-crt #prompt { color: var(--accent); font-size: 15px; }
-.theme-crt #status-bar { display: flex; background: #05080f; border-bottom: 1px solid #1e2a3a; padding: 4px 14px; font-size: 11px; min-height: 24px; gap: 8px; color: #5f789b; }
-.theme-crt #status-left .sp-label,
-.theme-crt #status-left .sp-value,
-.theme-crt #status-model,
-.theme-crt #status-tokens { color: var(--text-dim); }
-.theme-crt .code-wrap { border-color: #1e2a3a; }
-.theme-crt .code-hdr { background: #0a0e18; border-color: #1e2a3a; }
-.theme-crt .panel-body pre { background: #0a0e18; }
+.theme-crt #file-btn { color: color-mix(in srgb, var(--accent) 50%, #4aae6a); }
+.theme-crt #file-btn:hover,
+.theme-crt #file-btn.has-file { color: var(--accent); text-shadow: 0 0 4px var(--accent-dim); }
+.theme-crt #settings-toggle {
+  background: #0a0a0a;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+.theme-crt #settings-toggle:hover {
+  border-color: color-mix(in srgb, var(--accent) 85%, #5eff9e);
+  box-shadow: 0 0 6px var(--accent-dim);
+}
+.theme-crt #suggestions {
+  background: rgba(10, 10, 10, 0.98);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+}
+.theme-crt #suggestions .suggestion { color: color-mix(in srgb, var(--accent) 75%, #5eff9e); }
+.theme-crt #suggestions .suggestion.selected { background: var(--query-bg); }
 
 /* Code CLI theme — Claude Code inspired, full-viewport layout */
 .theme-code-cli {
@@ -2527,7 +2793,7 @@ body {
       <option value="cyber">Cyberpunk Neon</option>
       <option value="fantasy">Dark Fantasy</option>
       <option value="stellar">Stellar Nebula</option>
-      <option value="crt">CRT Terminal</option>
+      <option value="crt">CRT Retro</option>
     </select>
 
     <label for="color-select">Accent Color</label>
@@ -2868,7 +3134,7 @@ const THEMES = {
   cyber: { class: 'theme-cyber', label: 'Cyberpunk Neon', showStatusBar: true, sendLabel: '⏎ TRANSMIT' },
   fantasy: { class: 'theme-fantasy', label: 'Dark Fantasy', showStatusBar: true, sendLabel: '⚔️ CAST ⚔️' },
   stellar: { class: 'theme-stellar', label: 'Stellar Nebula', showStatusBar: true, sendLabel: '⏎ TRANSMIT' },
-  crt: { class: 'theme-crt', label: 'CRT Terminal', showStatusBar: true, sendLabel: '→' },
+  crt: { class: 'theme-crt', label: 'CRT Retro', showStatusBar: true, sendLabel: '[ SEND ]' },
 };
 
 function applyColor() {
