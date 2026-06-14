@@ -21,21 +21,21 @@
   --text: #e0e0e0;
   --text-dim: #666;
   --text-bright: #f0f0f0;
-  --cyan: #00d4aa;
-  --blue: #3b82f6;
-  --bright-blue: #60a5fa;
-  --magenta: #a855f7;
-  --bright-magenta: #c084fc;
+  --cyan: #22c55e;
+  --blue: #22c55e;
+  --bright-blue: #4ade80;
+  --magenta: #22c55e;
+  --bright-magenta: #4ade80;
   --green: #22c55e;
   --yellow: #eab308;
   --red: #ef4444;
-  --query-border: #3b82f6;
+  --query-border: #22c55e;
   --response-border: #333;
-  --accent: #00d4aa;
-  --accent-dim: rgba(0,212,170,0.3);
-  --focus-border: #7571F9;
-  --focus-bg: rgba(117,113,249,0.04);
-  --font: 'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;
+  --accent: #22c55e;
+  --accent-dim: rgba(34,197,94,0.3);
+  --focus-border: #22c55e;
+  --focus-bg: rgba(34,197,94,0.06);
+  --font: 'Courier New','Consolas',monospace;
   --font-size: 14px;
   --panel-font-size: 13px;
 }
@@ -676,7 +676,7 @@ body {
   flex-direction: column;
   gap: 8px;
   overflow-y: auto;
-  font-size: 11px;
+  font-size: 12px;
 }
 @media (max-width: 800px) {
   #side-panel { display: none; }
@@ -1049,7 +1049,7 @@ body {
     <label for="theme-select">Theme</label>
     <select id="theme-select">
       <optgroup label="Dark">
-        <option value="default">Default (cyan)</option>
+        <option value="default">Default (green terminal)</option>
         <option value="charm">Charm (indigo + fuchsia)</option>
         <option value="dracula">Dracula (purple + green)</option>
         <option value="catppuccin">Catppuccin (mauve + pink)</option>
@@ -1196,9 +1196,9 @@ const THEMES = {
     bg: '#0d0d0d', surface: '#141414', surface2: '#1a1a1a',
     text: '#e0e0e0', textDim: '#666', textBright: '#f0f0f0',
     border: '#2a2a2a', responseBorder: '#333',
-    accent: '#00d4aa', accentDim: 'rgba(0,212,170,0.3)',
-    focusBorder: '#7571F9', focusBg: 'rgba(117,113,249,0.04)',
-    queryBorder: '#3b82f6', magenta: '#a855f7', brightMagenta: '#c084fc',
+    accent: '#22c55e', accentDim: 'rgba(34,197,94,0.3)',
+    focusBorder: '#22c55e', focusBg: 'rgba(34,197,94,0.06)',
+    queryBorder: '#22c55e', magenta: '#22c55e', brightMagenta: '#4ade80',
   },
   charm: {
     bg: '#0d0d0d', surface: '#141414', surface2: '#1a1a1a',
