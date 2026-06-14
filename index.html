@@ -870,11 +870,6 @@ body {
       <span class="sp-label">Temp</span>
       <input type="range" id="sp-temp" min="0" max="2" step="0.05" style="flex:1;height:3px;margin:0 4px;-webkit-appearance:none;appearance:none;background:var(--border);border-radius:2px;outline:none;cursor:pointer">
       <span class="sp-value" id="sp-temp-val" style="min-width:28px;text-align:right">0.70</span>
-    </div>
-    <div class="sp-row" id="sp-web-row" style="cursor:pointer;padding-top:2px;user-select:none">
-      <span class="sp-label">Web</span>
-      <span class="sp-value" id="sp-web-status" style="color:var(--text-dim)">off</span>
-    </div>
   </div>
   <div class="sp-section">
     <div class="sp-chart-row">
@@ -1114,13 +1109,12 @@ function loadState() {
       theme: data.theme || 'default',
       temperature: data.temperature ?? 0.7,
       topP: data.topP ?? 1.0,
-      webSearch: data.webSearch ?? false,
       totalTokensIn: data.totalTokensIn || 0,
       totalTokensOut: data.totalTokensOut || 0,
       lifetimeTokensIn: data.lifetimeTokensIn || 0,
       lifetimeTokensOut: data.lifetimeTokensOut || 0,
     };
-  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', fontSize: '14px', fontFamily: '', theme: 'default', temperature: 0.7, topP: 1.0, webSearch: false, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0 }; }
+  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', fontSize: '14px', fontFamily: '', theme: 'default', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0 }; }
 }
 function saveState() {
   try {
@@ -1136,7 +1130,6 @@ function saveState() {
       theme: state.theme || 'default',
       temperature: state.temperature ?? 0.7,
       topP: state.topP ?? 1.0,
-      webSearch: state.webSearch ?? false,
       totalTokensIn: state.totalTokensIn || 0,
       totalTokensOut: state.totalTokensOut || 0,
       lifetimeTokensIn: state.lifetimeTokensIn || 0,
@@ -1346,11 +1339,6 @@ function updateSidePanel() {
   // Side panel temp slider
   if (el('sp-temp')) el('sp-temp').value = state.temperature ?? 0.7;
   if (el('sp-temp-val')) el('sp-temp-val').textContent = (state.temperature ?? 0.7).toFixed(2);
-  // Web search status
-  if (el('sp-web-status')) {
-    el('sp-web-status').textContent = state.webSearch ? 'on' : 'off';
-    el('sp-web-status').style.color = state.webSearch ? 'var(--accent)' : 'var(--text-dim)';
-  }
 }
 
 // ─── Auto-resize textarea ──────────────────────────────────────────────
@@ -1626,7 +1614,6 @@ async function callLLM(messages, maxTokens = 2000) {
       max_tokens: maxTokens,
       temperature: state.temperature ?? 0.7,
       top_p: state.topP ?? 1.0,
-      web_search: state.webSearch ? true : undefined,
     }),
   });
   if (!response.ok) {
@@ -1706,7 +1693,7 @@ async function doDeepResearch(query) {
       const q = subQuestions[i];
       setProgress(`Researching step ${i + 1}/${maxSteps}: ${q.substring(0, 80)}...`);
       const answer = await callLLM([
-        { role: 'system', content: (state.webSearch ? 'You have web search enabled. Use it to find current data and information.\n\n' : '') + 'You are a thorough researcher. Provide detailed, factual information with specific examples and data where possible.' },
+        { role: 'system', content: 'You are a thorough researcher. Provide detailed, factual information with specific examples and data where possible.' },
         { role: 'user', content: q },
       ], 3000);
       results.push({ question: q, answer });
@@ -1721,7 +1708,7 @@ async function doDeepResearch(query) {
     });
 
     const synthesisMessages = [
-      { role: 'system', content: (sys.length ? state.systemPrompt + '\n\n' : '') + (state.webSearch ? 'You have web search enabled. Use it to get current information when relevant.\n\n' : '') + 'You are a research synthesis expert. Combine multiple research findings into one clear, comprehensive, well-structured answer. Use markdown with headings, bold, and organized sections.' },
+      { role: 'system', content: (sys.length ? state.systemPrompt + '\n\n' : '') + 'You are a research synthesis expert. Combine multiple research findings into one clear, comprehensive, well-structured answer. Use markdown with headings, bold, and organized sections.' },
       { role: 'user', content: `Original question: ${query}\n\nHere are the research findings from multiple angles:\n\n${contextParts.join('\n\n')}\n\nSynthesize these into one comprehensive answer to the original question. Structure it with sections. Include the most important facts, data, and insights.` },
     ];
 
@@ -1744,7 +1731,6 @@ async function doDeepResearch(query) {
         max_tokens: 8000,
         temperature: state.temperature ?? 0.7,
         top_p: state.topP ?? 1.0,
-        web_search: state.webSearch ? true : undefined,
       }),
     });
 
@@ -1831,9 +1817,6 @@ async function sendMessage(userText) {
   if (state.systemPrompt) {
     apiMessages.push({ role: 'system', content: state.systemPrompt });
   }
-  if (state.webSearch) {
-    apiMessages.push({ role: 'system', content: 'You have web search enabled and must use it for any query asking for current/present information. When asked for stock prices, weather, news, or any real-time data: use web search to find the actual current value and return it directly. Do NOT write code to fetch the data — just search the web and quote the result with the source and timestamp.' });
-  }
   if (uploadedText.trim()) {
     const fname = uploadedFile ? uploadedFile.name : 'attached file';
     apiMessages.push({ role: 'system', content: `The user attached a file (${fname}). Its content is:\n\n${uploadedText.trim().substring(0, 50000)}` });
@@ -1860,7 +1843,6 @@ async function sendMessage(userText) {
         max_tokens: 8000,
         temperature: state.temperature ?? 0.7,
         top_p: state.topP ?? 1.0,
-        web_search: state.webSearch ? true : undefined,
       }),
       signal: abortController.signal,
     });
@@ -2072,9 +2054,7 @@ const SUGGESTIONS = [
   { cmd: '/rephrase', desc: 'Rewrite for clarity' },
   { cmd: '/bulletise', desc: 'Convert to bullet points' },
   { cmd: '/model', desc: 'Switch AI model' },
-  { cmd: '/model', desc: 'Switch AI model' },
   { cmd: '/key', desc: 'Set OpenRouter API key' },
-  { cmd: '/web', desc: 'Toggle web search on/off' },
   { cmd: '/mode', desc: 'Switch theme mode' },
   { cmd: '/modes', desc: 'List all modes' },
   { cmd: '/persona', desc: 'Switch persona' },
@@ -2177,7 +2157,6 @@ function handleSlashCommand(cmd, args) {
         '| **System** | `/export` | `/export` | Download chat as Markdown file |',
         '| **System** | `/model <name>` | `/model openai/gpt-4o` | Switch AI model |',
         '| **System** | `/key <key>` | `/key sk-or-v1-...` | Set OpenRouter API key |',
-        '| **System** | `/web` | `/web` | Toggle web search on/off |',
         '| **System** | `/help` | `/help` | Show this table |',
         '',
         '---',
@@ -2280,13 +2259,6 @@ function handleSlashCommand(cmd, args) {
       saveState();
       checkApiKey();
       addMessage('response', 'API key saved.');
-      return true;
-
-    case '/web':
-      state.webSearch = !state.webSearch;
-      saveState();
-      updateWebStatus();
-      addMessage('response', `Web search turned ${state.webSearch ? 'on' : 'off'}.${state.webSearch ? ' The AI will search the web when needed.' : ''}`);
       return true;
 
     // Quick commands
@@ -2538,23 +2510,6 @@ if (spTemp) {
     const v = parseFloat(spTemp.value);
     state.temperature = v;
     spTempVal.textContent = v.toFixed(2);
-    saveState();
-  });
-}
-
-// Web search toggle
-const spWebRow = document.getElementById('sp-web-row');
-const spWebStatus = document.getElementById('sp-web-status');
-function updateWebStatus() {
-  if (spWebStatus) {
-    spWebStatus.textContent = state.webSearch ? 'on' : 'off';
-    spWebStatus.style.color = state.webSearch ? 'var(--accent)' : 'var(--text-dim)';
-  }
-}
-if (spWebRow) {
-  spWebRow.addEventListener('click', () => {
-    state.webSearch = !state.webSearch;
-    updateWebStatus();
     saveState();
   });
 }
