@@ -594,13 +594,40 @@ body {
 
     <label for="font-family-select">Font Style</label>
     <select id="font-family-select">
-      <option value="'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace">JetBrains Mono (default)</option>
-      <option value="'Fira Code','Cascadia Code','Consolas',monospace">Fira Code</option>
-      <option value="'Cascadia Code','Consolas',monospace">Cascadia Code</option>
-      <option value="'Source Code Pro','monospace'">Source Code Pro</option>
-      <option value="'IBM Plex Mono','monospace'">IBM Plex Mono</option>
-      <option value="'Courier New','monospace'">Courier New</option>
-      <option value="monospace">System Monospace</option>
+      <optgroup label="Monospace">
+        <option value="'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace">JetBrains Mono (default)</option>
+        <option value="'Fira Code','Cascadia Code','Consolas',monospace">Fira Code</option>
+        <option value="'Cascadia Code','Consolas',monospace">Cascadia Code</option>
+        <option value="'Source Code Pro',monospace">Source Code Pro</option>
+        <option value="'IBM Plex Mono',monospace">IBM Plex Mono</option>
+        <option value="'Courier New',monospace">Courier New</option>
+        <option value="'Consolas',monospace">Consolas</option>
+        <option value="'SF Mono','Menlo','Monaco',monospace">SF Mono / Menlo</option>
+        <option value="monospace">System Monospace</option>
+      </optgroup>
+      <optgroup label="Sans-Serif">
+        <option value="Arial,'Helvetica Neue',Helvetica,sans-serif">Arial</option>
+        <option value="'Helvetica Neue',Helvetica,Arial,sans-serif">Helvetica Neue</option>
+        <option value="'Segoe UI','Roboto','Helvetica Neue',Arial,sans-serif">Segoe UI</option>
+        <option value="'Roboto','Helvetica Neue',Arial,sans-serif">Roboto</option>
+        <option value="'Open Sans','Helvetica Neue',Arial,sans-serif">Open Sans</option>
+        <option value="'Inter','Roboto','Helvetica Neue',Arial,sans-serif">Inter</option>
+        <option value="'SF Pro Display','-apple-system','BlinkMacSystemFont','Segoe UI',Roboto,sans-serif">SF Pro / System</option>
+        <option value="'Trebuchet MS','Helvetica Neue',Arial,sans-serif">Trebuchet MS</option>
+        <option value="'Verdana',Geneva,sans-serif">Verdana</option>
+        <option value="'Lucida Grande','Lucida Sans Unicode',Geneva,Verdana,sans-serif">Lucida Grande</option>
+        <option value="'Calibri','Candara','Segoe','Segoe UI',Optima,sans-serif">Calibri</option>
+        <option value="sans-serif">System Sans-Serif</option>
+      </optgroup>
+      <optgroup label="Serif">
+        <option value="'Times New Roman',Times,serif">Times New Roman</option>
+        <option value="Georgia,'Times New Roman',Times,serif">Georgia</option>
+        <option value="'Palatino Linotype','Book Antiqua',Palatino,serif">Palatino</option>
+        <option value="'Garamond','EB Garamond','Times New Roman',serif">Garamond</option>
+        <option value="'Bookman','Palatino Linotype',Palatino,serif">Bookman</option>
+        <option value="'Cambria','Georgia','Times New Roman',serif">Cambria</option>
+        <option value="serif">System Serif</option>
+      </optgroup>
     </select>
 
     <label for="system-prompt">System Prompt</label>
