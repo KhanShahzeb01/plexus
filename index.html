@@ -62,21 +62,22 @@ body {
 /* Banner */
 #banner {
   flex-shrink: 0;
-  padding: 16px 20px;
+  padding: 8px 16px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
 }
 #banner pre {
   font-family: var(--font);
-  font-size: clamp(13px, 2.5vw, 28px);
-  line-height: 1.25;
+  font-size: clamp(7px, 1.6vw, 12px);
+  line-height: 1.2;
   text-align: left;
   white-space: pre;
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
   flex-shrink: 0;
+  color: var(--text-bright);
 }
 #banner .subtitle {
   font-size: clamp(12px, 2.5vw, 16px);
@@ -779,16 +780,7 @@ const BANNER_LINES = [
 const bannerEl = document.getElementById('banner-art');
 
 function renderBanner() {
-  let colors = ['#00ffaa', '#5b9aff', '#8bb8ff', '#00ffaa', '#c084fc', '#e0aaff'];
-  try {
-    const t = THEMES[state.theme];
-    if (t && t.textBright !== '#f0f0f0') colors = ['#5a3a1a', '#8b5a2a', '#b07a4a', '#5a3a1a', '#8b5a2a', '#b07a4a'];
-  } catch {}
-  const colored = BANNER_LINES.map((line, i) => {
-    const color = colors[i % colors.length];
-    return `<span style="color:${color};font-weight:900">${line}</span>`;
-  }).join('\n');
-  bannerEl.innerHTML = colored;
+  bannerEl.textContent = BANNER_LINES.join('\n');
 }
 renderBanner();
 
@@ -957,7 +949,6 @@ function applyTheme() {
     else if (key === 'magenta') root.style.setProperty('--magenta', val);
     else if (key === 'brightMagenta') root.style.setProperty('--bright-magenta', val);
   }
-  renderBanner();
 }
 
 // ─── Status bar (model + tokens) ──────────────────────────────────────
