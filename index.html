@@ -68,6 +68,24 @@ body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+/* Terminal chrome (CRT theme) */
+#terminal-chrome {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #05080f;
+  border-bottom: 1px solid #1e2a3a;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.win-dots { display: flex; gap: 8px; }
+.win-dots .dot { width: 13px; height: 13px; border-radius: 50%; }
+.win-dots .dot.red { background: #ff5f56; }
+.win-dots .dot.yellow { background: #ffbd2e; }
+.win-dots .dot.green { background: #27c93f; }
+.win-title { color: #8bb9fe; font-size: 14px; letter-spacing: 1px; font-weight: 500; text-shadow: 0 0 4px #1e88e5; }
+.win-badge { margin-left: auto; font-size: 11px; color: #6e8fbb; padding: 2px 10px; border-radius: 20px; border: 1px solid #2c3f55; }
 /* Banner */
 #banner {
   flex-shrink: 0;
@@ -858,6 +876,17 @@ body {
 <body>
 
 
+<!-- Terminal chrome (CRT theme) -->
+<div id="terminal-chrome" style="display:none">
+  <div class="win-dots">
+    <div class="dot red"></div>
+    <div class="dot yellow"></div>
+    <div class="dot green"></div>
+  </div>
+  <div class="win-title">⚡ USER@CLI_CHAT:~/plexus</div>
+  <div class="win-badge">OpenRouter · Terminal</div>
+</div>
+
 <!-- Banner -->
 <div id="banner">
   <pre id="banner-art"></pre>
@@ -1092,6 +1121,7 @@ body {
         <option value="linen">Linen (golden yellow)</option>
         <option value="slate">Slate (cool gray)</option>
         <option value="hazel">Hazel (warm brown)</option>
+        <option value="crt">CRT Terminal (blue glow)</option>
       </optgroup>
     </select>
 
@@ -1418,6 +1448,16 @@ const THEMES = {
     focusBorder: '#6b4f10', focusBg: 'rgba(139,105,20,0.06)',
     queryBorder: '#6b4f10', magenta: '#8b6914', brightMagenta: '#6b4f10',
   },
+  crt: {
+    bg: 'radial-gradient(circle at 20% 30%, #0a0f1e, #03060c)', surface: '#0c0f1c', surface2: '#0e1422',
+    text: '#e0e6f0', textDim: '#5f789b', textBright: '#eef5ff',
+    border: '#1e2a3a', responseBorder: '#1f2b38',
+    accent: '#6dffb0', accentDim: 'rgba(109,255,176,0.3)',
+    focusBorder: '#6ec8ff', focusBg: 'rgba(110,200,255,0.06)',
+    queryBorder: '#6dffb0', magenta: '#6ec8ff', brightMagenta: '#8bb9fe',
+    font: "'Fira Code','Cascadia Code','Courier New',monospace",
+    bodyBg: 'radial-gradient(circle at 20% 30%, #0a0f1e, #03060c)',
+  },
 };
 
 function applyTheme() {
@@ -1439,7 +1479,12 @@ function applyTheme() {
     else if (key === 'queryBorder') root.style.setProperty('--query-border', val);
     else if (key === 'magenta') root.style.setProperty('--magenta', val);
     else if (key === 'brightMagenta') root.style.setProperty('--bright-magenta', val);
+    else if (key === 'font') root.style.setProperty('--font', val);
+    else if (key === 'bodyBg') document.body.style.background = val;
   }
+  // Toggle terminal chrome
+  const chrome = document.getElementById('terminal-chrome');
+  if (chrome) chrome.style.display = state.theme === 'crt' ? 'flex' : 'none';
 }
 
 // ─── Status bar (model + tokens) ──────────────────────────────────────
