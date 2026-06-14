@@ -6,7 +6,7 @@
 <title>Plexus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -1165,6 +1165,375 @@ body {
 }
 .theme-code-cli #settings-toggle:hover { border-color: var(--accent); }
 
+/* Cyberpunk / Neon theme — synthwave terminal, full viewport */
+.theme-cyber {
+  background: radial-gradient(ellipse at 20% 30%, #0a0015, #020005);
+  font-family: 'Share Tech Mono', 'Fira Code', 'Courier New', monospace;
+}
+.theme-cyber::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 255, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+  animation: cyberGridPulse 4s infinite;
+}
+.theme-cyber::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15) 0px, rgba(0, 0, 0, 0.15) 2px, transparent 2px, transparent 6px);
+  pointer-events: none;
+  z-index: 4;
+}
+@keyframes cyberGridPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+@keyframes cyberNeonSweep {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+@keyframes cyberFlicker {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px #0ff); }
+  50% { opacity: 0.8; filter: drop-shadow(0 0 15px #f0f); }
+}
+@keyframes cyberGlitchFade {
+  0% { opacity: 0; transform: translateX(-8px); filter: blur(1px); }
+  100% { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+@keyframes cyberNeonBlink {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+.theme-cyber #app-row {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  background: rgba(8, 0, 20, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid #0ff;
+  box-shadow:
+    0 0 20px rgba(0, 255, 255, 0.3),
+    0 0 40px rgba(255, 0, 255, 0.2),
+    inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+.theme-cyber #banner {
+  background: linear-gradient(95deg, #0a0018, #1a0030);
+  padding: 8px 16px;
+  border-bottom: 2px solid #ff00ff;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.theme-cyber #banner::before {
+  content: '⚡⟁⚡';
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  animation: cyberFlicker 3s infinite;
+}
+.theme-cyber #banner pre {
+  font-family: 'Share Tech Mono', 'Fira Code', monospace;
+  background: linear-gradient(135deg, #0ff, #f0f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  flex: 1;
+  min-width: 0;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.4));
+}
+.theme-cyber #banner::after {
+  content: '● OPENROUTER ● SYNTHWAVE';
+  background: rgba(0, 255, 255, 0.15);
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  font-size: 10px;
+  color: #0ff;
+  border: 1px solid #0ff;
+  box-shadow: 0 0 5px #0ff;
+  white-space: nowrap;
+  margin-left: auto;
+}
+.theme-cyber #status-bar {
+  display: flex;
+  background: #02000a;
+  border-bottom: 1px solid #0ff;
+  padding: 4px 16px;
+  font-size: 10px;
+  min-height: 24px;
+  gap: 8px;
+  color: #6a6aff;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  position: relative;
+}
+.theme-cyber #status-bar::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #0ff, #f0f, #0ff);
+  animation: cyberNeonSweep 3s infinite;
+}
+.theme-cyber #status-bar #status-model,
+.theme-cyber #status-bar #status-tokens { color: #0ff; text-shadow: 0 0 4px rgba(0, 255, 255, 0.4); }
+.theme-cyber #mode-badge,
+.theme-cyber #persona-badge,
+.theme-cyber #model-badge {
+  background: rgba(0, 255, 255, 0.12);
+  border-color: #0ff;
+  color: #0ff;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.3);
+}
+.theme-cyber #chat-row { min-height: 0; flex: 1; }
+.theme-cyber #chat {
+  background: rgba(2, 0, 10, 0.7);
+  font-family: 'Share Tech Mono', 'Fira Code', monospace;
+}
+.theme-cyber #chat::-webkit-scrollbar { width: 6px; }
+.theme-cyber #chat::-webkit-scrollbar-track { background: #1a0030; }
+.theme-cyber #chat::-webkit-scrollbar-thumb {
+  background: #0ff;
+  border-radius: 10px;
+  box-shadow: 0 0 5px #0ff;
+}
+.theme-cyber #tips {
+  background: transparent;
+  border: none;
+  border-left: 3px solid #ffaa44;
+  border-radius: 0;
+  padding: 12px 16px 12px 14px;
+  color: #d0eaff;
+  text-shadow: 0 0 2px rgba(0, 255, 255, 0.3);
+}
+.theme-cyber #tips strong { color: #0ff; }
+.theme-cyber #tips code {
+  background: rgba(0, 255, 255, 0.15);
+  color: #0ff;
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  border-radius: 6px;
+}
+.theme-cyber .message { animation: cyberGlitchFade 0.2s ease-out; margin-bottom: 0; }
+.theme-cyber .message .panel {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  border-left: 3px solid;
+  padding-left: 14px;
+  margin: 4px 0;
+}
+.theme-cyber .message.query .panel { border-left-color: #0ff; }
+.theme-cyber .message.response .panel { border-left-color: #f0f; }
+.theme-cyber .panel-title {
+  font-size: 0;
+  text-transform: none;
+  letter-spacing: 1px;
+  padding: 0 0 6px;
+  font-weight: bold;
+}
+.theme-cyber .message.query .panel-title::before {
+  content: '[USER::INPUT]';
+  font-size: 10px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: rgba(0, 255, 255, 0.2);
+  color: #0ff;
+  border: 1px solid #0ff;
+  box-shadow: 0 0 4px #0ff;
+}
+.theme-cyber .message.response .panel-title::before {
+  content: '[AI::RESPONSE]';
+  font-size: 10px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: rgba(255, 0, 255, 0.2);
+  color: #f0f;
+  border: 1px solid #f0f;
+  box-shadow: 0 0 4px #f0f;
+}
+.theme-cyber .panel-body {
+  color: #d0eaff;
+  text-shadow: 0 0 2px rgba(0, 255, 255, 0.3);
+  font-family: 'Share Tech Mono', monospace;
+}
+.theme-cyber .message.query .panel-body { font-weight: 400; }
+.theme-cyber .panel-body code {
+  background: rgba(0, 20, 30, 0.8);
+  color: #0ff;
+  border-radius: 6px;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.2);
+}
+.theme-cyber .panel-body a { color: #f0f; }
+.theme-cyber .panel-body pre { background: rgba(0, 0, 0, 0.6); border-color: #0ff; }
+.theme-cyber .code-wrap { border-color: #0ff; box-shadow: 0 0 8px rgba(0, 255, 255, 0.15); }
+.theme-cyber .code-hdr { background: rgba(10, 0, 24, 0.9); border-color: #f0f; }
+.theme-cyber #loading {
+  background: rgba(0, 20, 30, 0.6);
+  border: 1px solid #0ff;
+  border-radius: 30px;
+  padding: 8px 16px;
+  width: fit-content;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+}
+.theme-cyber #loading .dot {
+  background: #0ff;
+  box-shadow: 0 0 4px #0ff;
+  animation: cyberNeonBlink 0.9s infinite;
+}
+.theme-cyber #loading .dot:nth-child(2) {
+  background: #f0f;
+  box-shadow: 0 0 4px #f0f;
+  animation-delay: 0.15s;
+}
+.theme-cyber #loading .dot:nth-child(3) { animation-delay: 0.3s; }
+.theme-cyber #side-panel {
+  background: rgba(2, 0, 10, 0.85);
+  border-left: 1px solid #0ff;
+  box-shadow: inset 0 0 24px rgba(0, 255, 255, 0.06);
+  font-family: 'Share Tech Mono', monospace;
+}
+.theme-cyber #side-panel .sp-title {
+  color: #0ff;
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.5);
+  letter-spacing: 1px;
+}
+.theme-cyber #side-panel .sp-row .sp-value { color: #f0f; text-shadow: 0 0 4px rgba(255, 0, 255, 0.4); }
+.theme-cyber #side-panel .sp-row .sp-label { color: #6a6aff; }
+.theme-cyber #side-panel .sp-desc,
+.theme-cyber #side-panel .sp-footer { color: #6a6aff; }
+.theme-cyber #side-panel .sp-footer { border-top-color: #0ff; }
+.theme-cyber #side-panel .sp-bar { background: #1a0030; }
+.theme-cyber #side-panel .sp-bar-fill {
+  background: linear-gradient(90deg, #0ff, #f0f);
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.5);
+}
+.theme-cyber #side-panel .sp-ring {
+  background: conic-gradient(#0ff 0deg, #f0f 180deg, #1a0030 180deg) !important;
+}
+.theme-cyber #side-panel input[type="range"]::-webkit-slider-thumb {
+  background: #0ff;
+  box-shadow: 0 0 6px #0ff;
+}
+.theme-cyber #side-panel input[type="range"]::-moz-range-thumb {
+  background: #0ff;
+  box-shadow: 0 0 6px #0ff;
+}
+.theme-cyber #side-panel .sp-new-btn {
+  border-color: #0ff;
+  color: #0ff;
+  box-shadow: 0 0 4px rgba(0, 255, 255, 0.3);
+}
+.theme-cyber #side-panel .sp-new-btn:hover {
+  border-color: #f0f;
+  color: #f0f;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.4);
+}
+.theme-cyber .sp-sess:hover { background: rgba(0, 255, 255, 0.08); }
+.theme-cyber .sp-sess.active {
+  color: #0ff;
+  background: rgba(0, 255, 255, 0.15);
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.25);
+}
+.theme-cyber #input-area {
+  background: rgba(2, 0, 15, 0.9);
+  border-top: 1px solid #f0f;
+  padding: 10px 12px;
+  gap: 8px;
+}
+.theme-cyber #prompt {
+  font-size: 0;
+  line-height: 1;
+}
+.theme-cyber #prompt::before {
+  content: '❯❯ [root@neon]';
+  font-size: 11px;
+  font-weight: bold;
+  color: #0ff;
+  background: #0a0020;
+  padding: 6px 14px;
+  border-radius: 30px;
+  border: 1px solid #0ff;
+  box-shadow: 0 0 6px #0ff;
+  white-space: nowrap;
+}
+.theme-cyber #input {
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-bottom: 2px solid #0ff;
+  border-radius: 0;
+  color: #0ff;
+  font-family: 'Share Tech Mono', monospace;
+  caret-color: #0ff;
+}
+.theme-cyber #input:focus {
+  border-bottom-color: #f0f;
+  box-shadow: 0 2px 8px rgba(255, 0, 255, 0.3);
+  background: rgba(0, 0, 0, 0.6);
+  border-left: none;
+}
+.theme-cyber #input::placeholder { color: rgba(0, 255, 255, 0.35); }
+.theme-cyber #send-btn {
+  background: linear-gradient(135deg, #0ff, #f0f);
+  border: none;
+  border-radius: 40px;
+  width: auto;
+  height: auto;
+  padding: 8px 22px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.theme-cyber #send-btn:not(:disabled):hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 15px #0ff;
+  opacity: 1;
+  background: linear-gradient(135deg, #0ff, #f0f);
+}
+.theme-cyber #stop-btn {
+  border: 1px solid #ff3366;
+  color: #ff3366;
+  border-radius: 40px;
+  width: auto;
+  height: auto;
+  padding: 8px 14px;
+  font-size: 11px;
+  box-shadow: 0 0 6px rgba(255, 51, 102, 0.4);
+}
+.theme-cyber #file-btn { color: #6a6aff; }
+.theme-cyber #file-btn:hover,
+.theme-cyber #file-btn.has-file { color: #0ff; text-shadow: 0 0 6px #0ff; }
+.theme-cyber #settings-toggle {
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid #0ff;
+  color: #0ff;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+}
+.theme-cyber #settings-toggle:hover {
+  border-color: #f0f;
+  color: #f0f;
+  box-shadow: 0 0 12px rgba(255, 0, 255, 0.4);
+}
+.theme-cyber #suggestions {
+  background: rgba(8, 0, 20, 0.95);
+  border: 1px solid #0ff;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.25);
+}
+.theme-cyber #suggestions .suggestion { color: #0ff; }
+.theme-cyber #suggestions .suggestion.selected { background: rgba(0, 255, 255, 0.12); }
+
 /* Slash command autocomplete */
 #suggestions {
   position: absolute;
@@ -1433,6 +1802,7 @@ body {
     <select id="theme-select">
       <option value="cli">Plexus CLI</option>
       <option value="codecli">Code CLI</option>
+      <option value="cyber">Cyberpunk Neon</option>
       <option value="crt">CRT Terminal</option>
     </select>
 
@@ -1767,9 +2137,10 @@ const ACCENT_COLORS = {
 
 // ─── Themes (layout & arrangement only) ────────────────────────────────
 const THEMES = {
-  cli: { class: '', label: 'Plexus CLI', showStatusBar: false },
-  codecli: { class: 'theme-code-cli', label: 'Code CLI', showStatusBar: true },
-  crt: { class: 'theme-crt', label: 'CRT Terminal', showStatusBar: true },
+  cli: { class: '', label: 'Plexus CLI', showStatusBar: false, sendLabel: '→' },
+  codecli: { class: 'theme-code-cli', label: 'Code CLI', showStatusBar: true, sendLabel: '⏎ send' },
+  cyber: { class: 'theme-cyber', label: 'Cyberpunk Neon', showStatusBar: true, sendLabel: '⏎ TRANSMIT' },
+  crt: { class: 'theme-crt', label: 'CRT Terminal', showStatusBar: true, sendLabel: '→' },
 };
 
 function applyColor() {
@@ -1798,7 +2169,7 @@ function applyTheme() {
   if (t.class) document.body.classList.add(t.class);
   const sb = document.getElementById('status-bar');
   if (sb) sb.style.display = t.showStatusBar ? 'flex' : 'none';
-  sendBtn.textContent = state.theme === 'codecli' ? '⏎ send' : '→';
+  sendBtn.textContent = t.sendLabel || '→';
 }
 
 // ─── Status bar (model + tokens) ──────────────────────────────────────
