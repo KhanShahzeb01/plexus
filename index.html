@@ -347,6 +347,23 @@ body {
 }
 #send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 #send-btn:not(:disabled):hover { opacity: 0.85; }
+#stop-btn {
+  display: none;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font);
+}
+#stop-btn.active { display: flex; }
+#stop-btn:hover { opacity: 0.85; }
 /* Settings panel */
 #settings-toggle {
   position: fixed;
@@ -420,6 +437,40 @@ body {
 }
 #settings-panel input:focus,
 #settings-panel select:focus { border-color: var(--cyan); }
+#settings-panel input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+  padding: 0;
+  margin: 4px 0 14px;
+  border: none;
+  cursor: pointer;
+}
+#settings-panel input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--surface);
+}
+#settings-panel .range-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+#settings-panel .range-row label { margin-bottom: 0; }
+#settings-panel .range-value {
+  font-size: 12px;
+  color: var(--text-bright);
+  font-weight: 600;
+  font-family: var(--font);
+}
 #settings-panel .btn-row {
   display: flex;
   gap: 8px;
@@ -505,6 +556,24 @@ body {
 }
 .message:hover .copy-btn { opacity: 1; }
 .copy-btn:hover { border-color: var(--text-dim); color: var(--text); }
+.reg-btn {
+  position: absolute;
+  top: 4px;
+  right: 48px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 2px 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  line-height: 1.4;
+}
+.message:hover .reg-btn { opacity: 1; }
+.reg-btn:hover { border-color: var(--text-dim); color: var(--text); }
 .message { position: relative; }
 /* Side panel */
 #side-panel {
@@ -711,6 +780,10 @@ body {
     <div id="sp-context-bar" class="sp-bar"><div class="sp-bar-fill" id="sp-context-fill" style="width:0%"></div></div>
     <div class="sp-row"><span class="sp-label">Context</span><span class="sp-value" id="sp-usage">0%</span></div>
   </div>
+  <div class="sp-section">
+    <div class="sp-row"><span class="sp-label">Lifetime in</span><span class="sp-value" id="sp-lt-in">0</span></div>
+    <div class="sp-row"><span class="sp-label">Lifetime out</span><span class="sp-value" id="sp-lt-out">0</span></div>
+  </div>
   <div class="sp-footer"><span id="sp-cost">$0.00</span> est.</div>
 </div>
 </div><!-- /chat-row -->
@@ -722,6 +795,7 @@ body {
     <div id="suggestions"></div>
     <textarea id="input" rows="1" placeholder="Type a message..." enterkeyhint="send"></textarea>
   </div>
+  <button id="stop-btn" aria-label="Stop">⏹</button>
   <button id="send-btn" disabled aria-label="Send">→</button>
 </div>
 
@@ -836,6 +910,18 @@ body {
       </optgroup>
     </select>
 
+    <div class="range-row">
+      <label for="temperature-slider">Temperature</label>
+      <span class="range-value" id="temp-value">0.7</span>
+    </div>
+    <input type="range" id="temperature-slider" min="0" max="2" step="0.05" value="0.7">
+
+    <div class="range-row">
+      <label for="topp-slider">Top-P</label>
+      <span class="range-value" id="topp-value">1.0</span>
+    </div>
+    <input type="range" id="topp-slider" min="0" max="1" step="0.05" value="1.0">
+
     <label for="system-prompt">System Prompt</label>
     <textarea id="system-prompt" rows="3" placeholder="Optional: set a custom system prompt..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;resize:vertical;margin-bottom:14px;transition:border-color 0.15s"></textarea>
 
@@ -882,10 +968,14 @@ function loadState() {
       fontSize: data.fontSize || '14px',
       fontFamily: data.fontFamily || '',
       theme: data.theme || 'default',
+      temperature: data.temperature ?? 0.7,
+      topP: data.topP ?? 1.0,
       totalTokensIn: data.totalTokensIn || 0,
       totalTokensOut: data.totalTokensOut || 0,
+      lifetimeTokensIn: data.lifetimeTokensIn || 0,
+      lifetimeTokensOut: data.lifetimeTokensOut || 0,
     };
-  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', fontSize: '14px', fontFamily: '', theme: 'default', totalTokensIn: 0, totalTokensOut: 0 }; }
+  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', fontSize: '14px', fontFamily: '', theme: 'default', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0 }; }
 }
 function saveState() {
   try {
@@ -899,8 +989,12 @@ function saveState() {
       fontSize: state.fontSize,
       fontFamily: state.fontFamily,
       theme: state.theme || 'default',
+      temperature: state.temperature ?? 0.7,
+      topP: state.topP ?? 1.0,
       totalTokensIn: state.totalTokensIn || 0,
       totalTokensOut: state.totalTokensOut || 0,
+      lifetimeTokensIn: state.lifetimeTokensIn || 0,
+      lifetimeTokensOut: state.lifetimeTokensOut || 0,
     };
     localStorage.setItem(STATE_KEY, JSON.stringify(data));
   } catch {}
@@ -909,6 +1003,8 @@ function saveState() {
 let state = loadState();
 let isStreaming = false;
 let abortController = null;
+let autoScroll = true;
+let lastQuery = '';
 
 // ─── DOM refs ──────────────────────────────────────────────────────────
 const chatEl = document.getElementById('chat');
@@ -931,6 +1027,11 @@ const fontFamilySelect = document.getElementById('font-family-select');
 const themeSelect = document.getElementById('theme-select');
 const statusModel = document.getElementById('status-model');
 const statusTokens = document.getElementById('status-tokens');
+const stopBtn = document.getElementById('stop-btn');
+const tempSlider = document.getElementById('temperature-slider');
+const toppSlider = document.getElementById('topp-slider');
+const tempValue = document.getElementById('temp-value');
+const toppValue = document.getElementById('topp-value');
 
 // ─── Font settings ─────────────────────────────────────────────────────
 function applyFontSettings() {
@@ -1080,6 +1181,12 @@ function updateSidePanel() {
     ring.style.background = `conic-gradient(var(--accent) 0deg ${deg}deg, var(--border) ${deg}deg 360deg)`;
     if (el('sp-ring-label')) el('sp-ring-label').textContent = Math.round(ratio * 100) + '%';
   }
+
+  // Lifetime tokens
+  const ltIn = state.lifetimeTokensIn || 0;
+  const ltOut = state.lifetimeTokensOut || 0;
+  if (el('sp-lt-in')) el('sp-lt-in').textContent = ltIn.toLocaleString();
+  if (el('sp-lt-out')) el('sp-lt-out').textContent = ltOut.toLocaleString();
 
   const cost = (tin / 1_000_000) * 0.15 + (tout / 1_000_000) * 0.60;
   if (el('sp-cost')) el('sp-cost').textContent = cost < 0.01 ? '< $0.01' : '$' + cost.toFixed(4);
@@ -1249,7 +1356,6 @@ function addMessage(type, content, isLoading = false) {
       e.stopPropagation();
       const text = type === 'query' ? content : (isLoading ? '' : content);
       if (!text) return;
-      // Write both plain text and HTML to clipboard
       const htmlContent = type === 'query' ? escapeHtml(content) : renderMarkdown(content);
       const blob = new Blob([htmlContent], { type: 'text/html' });
       const textBlob = new Blob([text], { type: 'text/plain' });
@@ -1262,7 +1368,6 @@ function addMessage(type, content, isLoading = false) {
         copyBtn.textContent = 'done';
         setTimeout(() => { copyBtn.textContent = 'copy'; }, 1500);
       }).catch(() => {
-        // Fallback: plain text only
         navigator.clipboard.writeText(text).then(() => {
           copyBtn.textContent = 'done';
           setTimeout(() => { copyBtn.textContent = 'copy'; }, 1500);
@@ -1273,6 +1378,27 @@ function addMessage(type, content, isLoading = false) {
       });
     };
     div.appendChild(copyBtn);
+
+    // Regenerate button for responses
+    if (type === 'response') {
+      const regBtn = document.createElement('button');
+      regBtn.className = 'reg-btn';
+      regBtn.textContent = '↻';
+      regBtn.title = 'Regenerate';
+      regBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (isStreaming) return;
+        // Find last user message
+        for (let i = state.messages.length - 1; i >= 0; i--) {
+          if (state.messages[i].role === 'user') {
+            inputEl.value = state.messages[i].content;
+            handleSubmit();
+            break;
+          }
+        }
+      };
+      div.appendChild(regBtn);
+    }
   }
 
   chatEl.appendChild(div);
@@ -1282,7 +1408,7 @@ function addMessage(type, content, isLoading = false) {
 
 function updateResponseBody(bodyEl, text) {
   bodyEl.innerHTML = renderMarkdown(text);
-  chatEl.scrollTop = chatEl.scrollHeight;
+  scrollToBottom();
 }
 
 function addErrorMessage(text) {
@@ -1327,7 +1453,8 @@ async function callLLM(messages, maxTokens = 2000) {
       messages,
       stream: false,
       max_tokens: maxTokens,
-      temperature: 0.5,
+      temperature: state.temperature ?? 0.7,
+      top_p: state.topP ?? 1.0,
     }),
   });
   if (!response.ok) {
@@ -1338,8 +1465,12 @@ async function callLLM(messages, maxTokens = 2000) {
   const data = await response.json();
   // Track tokens
   if (data.usage) {
-    state.totalTokensIn = (state.totalTokensIn || 0) + (data.usage.prompt_tokens || 0);
-    state.totalTokensOut = (state.totalTokensOut || 0) + (data.usage.completion_tokens || 0);
+    const pi = data.usage.prompt_tokens || 0;
+    const co = data.usage.completion_tokens || 0;
+    state.totalTokensIn = (state.totalTokensIn || 0) + pi;
+    state.totalTokensOut = (state.totalTokensOut || 0) + co;
+    state.lifetimeTokensIn = (state.lifetimeTokensIn || 0) + pi;
+    state.lifetimeTokensOut = (state.lifetimeTokensOut || 0) + co;
     saveState();
     updateStatusBar();
   }
@@ -1358,6 +1489,7 @@ async function doDeepResearch(query) {
   const progressEl = progressBody.querySelector('#loading');
   isStreaming = true;
   sendBtn.disabled = true;
+  stopBtn.classList.add('active');
 
   function setProgress(text) {
     if (progressEl) progressEl.classList.remove('active');
@@ -1438,7 +1570,8 @@ async function doDeepResearch(query) {
         messages: synthesisMessages,
         stream: true,
         max_tokens: 8000,
-        temperature: 0.5,
+        temperature: state.temperature ?? 0.7,
+        top_p: state.topP ?? 1.0,
       }),
     });
 
@@ -1465,8 +1598,12 @@ async function doDeepResearch(query) {
         try {
           const chunk = JSON.parse(d);
           if (chunk.usage) {
-            state.totalTokensIn = (state.totalTokensIn || 0) + (chunk.usage.prompt_tokens || 0);
-            state.totalTokensOut = (state.totalTokensOut || 0) + (chunk.usage.completion_tokens || 0);
+            const pi = chunk.usage.prompt_tokens || 0;
+            const co = chunk.usage.completion_tokens || 0;
+            state.totalTokensIn = (state.totalTokensIn || 0) + pi;
+            state.totalTokensOut = (state.totalTokensOut || 0) + co;
+            state.lifetimeTokensIn = (state.lifetimeTokensIn || 0) + pi;
+            state.lifetimeTokensOut = (state.lifetimeTokensOut || 0) + co;
             saveState();
           }
           const delta = chunk.choices?.[0]?.delta?.content;
@@ -1491,9 +1628,11 @@ async function doDeepResearch(query) {
     progressBody.innerHTML = `<div style="color:var(--red);font-size:12px">⚠ ${msg}</div>`;
   } finally {
     isStreaming = false;
+    stopBtn.classList.remove('active');
     sendBtn.disabled = false;
   }
 }
+
 
 // ─── OpenRouter API call ───────────────────────────────────────────────
 async function sendMessage(userText) {
@@ -1510,6 +1649,7 @@ async function sendMessage(userText) {
 
   isStreaming = true;
   sendBtn.disabled = true;
+  stopBtn.classList.add('active');
   abortController = new AbortController();
 
   // Build messages array
@@ -1537,7 +1677,8 @@ async function sendMessage(userText) {
         messages: apiMessages,
         stream: true,
         max_tokens: 8000,
-        temperature: 0.7,
+        temperature: state.temperature ?? 0.7,
+        top_p: state.topP ?? 1.0,
       }),
       signal: abortController.signal,
     });
@@ -1586,8 +1727,12 @@ async function sendMessage(userText) {
 
     // Track tokens from streaming response
     if (state._lastUsage) {
-      state.totalTokensIn = (state.totalTokensIn || 0) + (state._lastUsage.prompt_tokens || 0);
-      state.totalTokensOut = (state.totalTokensOut || 0) + (state._lastUsage.completion_tokens || 0);
+      const pi = state._lastUsage.prompt_tokens || 0;
+      const co = state._lastUsage.completion_tokens || 0;
+      state.totalTokensIn = (state.totalTokensIn || 0) + pi;
+      state.totalTokensOut = (state.totalTokensOut || 0) + co;
+      state.lifetimeTokensIn = (state.lifetimeTokensIn || 0) + pi;
+      state.lifetimeTokensOut = (state.lifetimeTokensOut || 0) + co;
       delete state._lastUsage;
       saveState();
     }
@@ -1613,11 +1758,12 @@ async function sendMessage(userText) {
     else if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) msg = 'Network error. Check your connection.';
     else if (msg.includes('Empty response')) {
       // Streaming ended without content — may have usage in last chunk
-      try { if (state._lastUsage) { state.totalTokensIn = (state.totalTokensIn || 0) + (state._lastUsage.prompt_tokens || 0); state.totalTokensOut = (state.totalTokensOut || 0) + (state._lastUsage.completion_tokens || 0); saveState(); updateStatusBar(); } } catch {}
+      try { if (state._lastUsage) { const pi = state._lastUsage.prompt_tokens || 0; const co = state._lastUsage.completion_tokens || 0; state.totalTokensIn = (state.totalTokensIn || 0) + pi; state.totalTokensOut = (state.totalTokensOut || 0) + co; state.lifetimeTokensIn = (state.lifetimeTokensIn || 0) + pi; state.lifetimeTokensOut = (state.lifetimeTokensOut || 0) + co; saveState(); updateStatusBar(); } } catch {}
     }
     addErrorMessage(msg);
   } finally {
     isStreaming = false;
+    stopBtn.classList.remove('active');
     sendBtn.disabled = false;
     updateStatusBar();
     abortController = null;
@@ -1957,6 +2103,16 @@ function handleSlashCommand(cmd, args) {
   }
 }
 
+// ─── Auto-scroll lock ─────────────────────────────────────────────────
+chatEl.addEventListener('scroll', () => {
+  const threshold = 50;
+  autoScroll = (chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight) < threshold;
+});
+
+function scrollToBottom() {
+  if (autoScroll) chatEl.scrollTop = chatEl.scrollHeight;
+}
+
 // ─── Input handling ────────────────────────────────────────────────────
 function handleSubmit() {
   const text = inputEl.value.trim();
@@ -2029,6 +2185,40 @@ inputEl.addEventListener('keydown', (e) => {
     e.preventDefault();
     handleSubmit();
   }
+
+  // ↑ key: pull last query into input
+  if (e.key === 'ArrowUp' && !inputEl.value) {
+    for (let i = state.messages.length - 1; i >= 0; i--) {
+      if (state.messages[i].role === 'user') {
+        inputEl.value = state.messages[i].content;
+        inputEl.selectionStart = inputEl.selectionEnd = inputEl.value.length;
+        autoResize();
+        break;
+      }
+    }
+  }
+});
+
+// Global keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === 'k' || e.key === 'K') {
+      e.preventDefault();
+      settingsOverlay.classList.contains('active') ? closeSettings() : openSettings();
+    }
+    if (e.key === 'l' || e.key === 'L') {
+      e.preventDefault();
+      state.messages = [];
+      state.totalTokensIn = 0;
+      state.totalTokensOut = 0;
+      saveState();
+      tipsEl.style.display = 'block';
+      chatEl.querySelectorAll('.message').forEach(el => el.remove());
+      chatEl.querySelectorAll('.error-msg').forEach(el => el.remove());
+      updateSidePanel();
+      addMessage('response', 'Chat cleared. Use /help for commands.');
+    }
+  }
 });
 
 // Click on suggestion
@@ -2049,6 +2239,15 @@ document.addEventListener('mousedown', (e) => {
 
 sendBtn.addEventListener('click', handleSubmit);
 
+// Stop button
+stopBtn.addEventListener('click', () => {
+  if (abortController) {
+    abortController.abort();
+    abortController = null;
+  }
+  stopBtn.classList.remove('active');
+});
+
 // ─── Settings ──────────────────────────────────────────────────────────
 function openSettings() {
   apiKeyInput.value = state.apiKey;
@@ -2057,6 +2256,14 @@ function openSettings() {
   fontSizeSelect.value = state.fontSize;
   fontFamilySelect.value = state.fontFamily || '';
   themeSelect.value = state.theme || 'default';
+  if (tempSlider) {
+    tempSlider.value = state.temperature ?? 0.7;
+    tempValue.textContent = (state.temperature ?? 0.7).toFixed(2);
+  }
+  if (toppSlider) {
+    toppSlider.value = state.topP ?? 1.0;
+    toppValue.textContent = (state.topP ?? 1.0).toFixed(2);
+  }
   settingsStatus.classList.remove('show');
   settingsOverlay.classList.add('active');
 }
@@ -2115,6 +2322,20 @@ fontFamilySelect.addEventListener('change', () => {
 themeSelect.addEventListener('change', () => {
   state.theme = themeSelect.value;
   applyTheme();
+  saveState();
+});
+
+tempSlider.addEventListener('input', () => {
+  const v = parseFloat(tempSlider.value);
+  state.temperature = v;
+  tempValue.textContent = v.toFixed(2);
+  saveState();
+});
+
+toppSlider.addEventListener('input', () => {
+  const v = parseFloat(toppSlider.value);
+  state.topP = v;
+  toppValue.textContent = v.toFixed(2);
   saveState();
 });
 
