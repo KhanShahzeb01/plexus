@@ -764,6 +764,38 @@ body {
   margin-right: 4px;
 }
 #side-panel .sp-footer { margin-top: auto; font-size: 9px; color: var(--accent); padding-top: 8px; border-top: 1px solid var(--border); }
+/* Sessions list */
+#sp-sessions { margin-bottom: 4px; max-height: 120px; overflow-y: auto; }
+.sp-sess {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 6px;
+  font-size: 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  margin-bottom: 1px;
+  color: var(--text-dim);
+}
+.sp-sess:hover { background: rgba(255,255,255,0.04); }
+.sp-sess.active { color: var(--accent); background: rgba(34,197,94,0.08); }
+.sp-sess-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.sp-sess-del { color: var(--red); font-size: 9px; padding: 0 4px; opacity: 0; }
+.sp-sess:hover .sp-sess-del { opacity: 1; }
+.sp-new-btn {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 3px;
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+.sp-new-btn:hover { border-color: var(--accent); }
 /* Mobile responsive */
 @media (max-width: 600px) {
   :root { --font-size: 13px; }
@@ -860,8 +892,9 @@ body {
 <!-- Side panel -->
 <div id="side-panel">
   <div class="sp-section">
-    <div class="sp-title">Plexus</div>
-    <div class="sp-desc">Terminal AI chat · OpenRouter</div>
+    <div class="sp-title">Chats</div>
+    <button class="sp-new-btn" id="sp-new-sess">+ New</button>
+    <div id="sp-sessions"></div>
   </div>
   <div class="sp-section">
     <div class="sp-row"><span class="sp-label">Mode</span><span class="sp-value" id="sp-mode">general</span></div>
@@ -1137,10 +1170,138 @@ function saveState() {
       lifetimeTokensOut: state.lifetimeTokensOut || 0,
     };
     localStorage.setItem(STATE_KEY, JSON.stringify(data));
+    // Update session store
+    saveSessionStore();
   } catch {}
 }
 
+// ─── Sessions ──────────────────────────────────────────────────────────
+const SESSION_KEY = 'plexus_sessions';
+function loadSessionStore() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    const data = raw ? JSON.parse(raw) : {};
+    return { sessions: data.sessions || {}, activeId: data.activeId || 'default' };
+  } catch { return { sessions: {}, activeId: 'default' }; }
+}
+function saveSessionStore() {
+  try {
+    const store = loadSessionStore();
+    // Update current session's data
+    store.sessions[store.activeId] = {
+      name: store.sessions[store.activeId]?.name || getSessionName(state.messages),
+      messages: state.messages,
+      mode: state.mode,
+      persona: state.persona,
+      model: state.model,
+      temperature: state.temperature,
+      topP: state.topP,
+      totalTokensIn: state.totalTokensIn,
+      totalTokensOut: state.totalTokensOut,
+      systemPrompt: state.systemPrompt,
+      updatedAt: Date.now(),
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(store));
+  } catch {}
+}
+function getSessionName(msgs) {
+  for (const m of msgs) {
+    if (m.role === 'user') return m.content.substring(0, 40);
+  }
+  return 'New Chat';
+}
+function loadSession(sessionId) {
+  const store = loadSessionStore();
+  const s = store.sessions[sessionId];
+  if (!s) { newSession(); return; }
+  // Save current session first
+  saveSessionStore();
+  // Load target session
+  state.messages = s.messages || [];
+  state.mode = s.mode || 'general';
+  state.persona = s.persona || 'none';
+  state.model = s.model || state.model;
+  state.temperature = s.temperature ?? 0.7;
+  state.topP = s.topP ?? 1.0;
+  state.totalTokensIn = s.totalTokensIn || 0;
+  state.totalTokensOut = s.totalTokensOut || 0;
+  state.systemPrompt = s.systemPrompt || '';
+  store.activeId = sessionId;
+  localStorage.setItem(SESSION_KEY, JSON.stringify(store));
+  saveState();
+  restoreMessages();
+  renderSessionList();
+}
+function newSession() {
+  saveSessionStore();
+  const store = loadSessionStore();
+  const id = 'sess_' + Date.now();
+  store.sessions[id] = { name: 'New Chat', messages: [], mode: 'general', persona: 'none', model: state.model, temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, systemPrompt: '', updatedAt: Date.now() };
+  store.activeId = id;
+  localStorage.setItem(SESSION_KEY, JSON.stringify(store));
+  state.messages = [];
+  state.totalTokensIn = 0;
+  state.totalTokensOut = 0;
+  saveState();
+  restoreMessages();
+  renderSessionList();
+}
+function renderSessionList() {
+  const el = document.getElementById('sp-sessions');
+  if (!el) return;
+  const store = loadSessionStore();
+  const sorted = Object.entries(store.sessions).sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0));
+  el.innerHTML = sorted.map(([id, s]) =>
+    `<div class="sp-sess ${id === store.activeId ? 'active' : ''}" data-id="${id}">
+      <span class="sp-sess-name">${(s.name || 'Chat').substring(0, 30)}</span>
+      <span class="sp-sess-del" data-id="${id}">✕</span>
+    </div>`
+  ).join('');
+  // Click to switch
+  el.querySelectorAll('.sp-sess').forEach(d => {
+    d.addEventListener('click', (e) => {
+      if (e.target.classList.contains('sp-sess-del')) return;
+      if (isStreaming) return;
+      const id = d.dataset.id;
+      if (id === store.activeId) return;
+      loadSession(id);
+    });
+  });
+  // Delete
+  el.querySelectorAll('.sp-sess-del').forEach(d => {
+    d.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = d.dataset.id;
+      const store2 = loadSessionStore();
+      if (Object.keys(store2.sessions).length <= 1) return;
+      delete store2.sessions[id];
+      if (store2.activeId === id) {
+        const remaining = Object.keys(store2.sessions);
+        store2.activeId = remaining[0];
+      }
+      localStorage.setItem(SESSION_KEY, JSON.stringify(store2));
+      if (store2.activeId === id) { /* already changed */ }
+      // Reload if active was deleted
+      if (state.sessionId === id) {
+        const newStore = loadSessionStore();
+        loadSession(newStore.activeId);
+      } else {
+        renderSessionList();
+      }
+    });
+  });
+}
 let state = loadState();
+// Initialize session store with default if needed
+(function initSessions() {
+  const store = loadSessionStore();
+  if (!store.sessions[store.activeId]) {
+    store.sessions[store.activeId] = { name: getSessionName(state.messages), messages: state.messages, mode: state.mode, persona: state.persona, model: state.model, temperature: state.temperature, topP: state.topP, totalTokensIn: state.totalTokensIn, totalTokensOut: state.totalTokensOut, systemPrompt: state.systemPrompt, updatedAt: Date.now() };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(store));
+  }
+  state.sessionId = store.activeId;
+  renderSessionList();
+})();
 let isStreaming = false;
 let abortController = null;
 let autoScroll = true;
@@ -1171,6 +1332,7 @@ const stopBtn = document.getElementById('stop-btn');
 const fileBtn = document.getElementById('file-btn');
 const fileInput = document.getElementById('file-input');
 const fileInfo = document.getElementById('file-info');
+const newSessBtn = document.getElementById('sp-new-sess');
 const spTemp = document.getElementById('sp-temp');
 const spTempVal = document.getElementById('sp-temp-val');
 
@@ -2498,6 +2660,14 @@ fileInput.addEventListener('change', async () => {
     fileInfo.querySelector('.fremove').onclick = clearFile;
   }
 });
+
+// New session button
+if (newSessBtn) {
+  newSessBtn.addEventListener('click', () => {
+    if (isStreaming) return;
+    newSession();
+  });
+}
 
 function clearFile() {
   uploadedFile = null;
