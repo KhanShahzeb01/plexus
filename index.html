@@ -623,6 +623,23 @@ body {
 #side-panel .sp-row .sp-value { color: var(--text-bright); font-weight: 500; }
 #side-panel .sp-bar { height: 4px; border-radius: 2px; background: var(--border); margin: 4px 0; overflow: hidden; }
 #side-panel .sp-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.3s; }
+#side-panel input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--surface);
+}
+#side-panel input[type="range"]::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--surface);
+}
 #side-panel .sp-ring {
   width: 48px;
   height: 48px;
@@ -764,6 +781,11 @@ body {
   <div class="sp-section">
     <div class="sp-row"><span class="sp-label">Mode</span><span class="sp-value" id="sp-mode">general</span></div>
     <div class="sp-row"><span class="sp-label">Model</span><span class="sp-value" id="sp-model">—</span></div>
+    <div class="sp-row" style="padding-top:4px">
+      <span class="sp-label">Temp</span>
+      <input type="range" id="sp-temp" min="0" max="2" step="0.05" style="flex:1;height:3px;margin:0 4px;-webkit-appearance:none;appearance:none;background:var(--border);border-radius:2px;outline:none;cursor:pointer">
+      <span class="sp-value" id="sp-temp-val" style="min-width:28px;text-align:right">0.70</span>
+    </div>
   </div>
   <div class="sp-section">
     <div class="sp-chart-row">
@@ -914,18 +936,6 @@ body {
       </optgroup>
     </select>
 
-    <div class="range-row">
-      <label for="temperature-slider">Temperature</label>
-      <span class="range-value" id="temp-value">0.7</span>
-    </div>
-    <input type="range" id="temperature-slider" min="0" max="2" step="0.05" value="0.7">
-
-    <div class="range-row">
-      <label for="topp-slider">Top-P</label>
-      <span class="range-value" id="topp-value">1.0</span>
-    </div>
-    <input type="range" id="topp-slider" min="0" max="1" step="0.05" value="1.0">
-
     <label for="system-prompt">System Prompt</label>
     <textarea id="system-prompt" rows="3" placeholder="Optional: set a custom system prompt..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;resize:vertical;margin-bottom:14px;transition:border-color 0.15s"></textarea>
 
@@ -1032,10 +1042,8 @@ const themeSelect = document.getElementById('theme-select');
 const statusModel = document.getElementById('status-model');
 const statusTokens = document.getElementById('status-tokens');
 const stopBtn = document.getElementById('stop-btn');
-const tempSlider = document.getElementById('temperature-slider');
-const toppSlider = document.getElementById('topp-slider');
-const tempValue = document.getElementById('temp-value');
-const toppValue = document.getElementById('topp-value');
+const spTemp = document.getElementById('sp-temp');
+const spTempVal = document.getElementById('sp-temp-val');
 
 // ─── Font settings ─────────────────────────────────────────────────────
 function applyFontSettings() {
@@ -1194,6 +1202,10 @@ function updateSidePanel() {
 
   const cost = (tin / 1_000_000) * 0.15 + (tout / 1_000_000) * 0.60;
   if (el('sp-cost')) el('sp-cost').textContent = cost < 0.01 ? '< $0.01' : '$' + cost.toFixed(4);
+
+  // Side panel temp slider
+  if (el('sp-temp')) el('sp-temp').value = state.temperature ?? 0.7;
+  if (el('sp-temp-val')) el('sp-temp-val').textContent = (state.temperature ?? 0.7).toFixed(2);
 }
 
 // ─── Auto-resize textarea ──────────────────────────────────────────────
@@ -2252,6 +2264,16 @@ stopBtn.addEventListener('click', () => {
   stopBtn.classList.remove('active');
 });
 
+// Side panel temperature slider
+if (spTemp) {
+  spTemp.addEventListener('input', () => {
+    const v = parseFloat(spTemp.value);
+    state.temperature = v;
+    spTempVal.textContent = v.toFixed(2);
+    saveState();
+  });
+}
+
 // ─── Settings ──────────────────────────────────────────────────────────
 function openSettings() {
   apiKeyInput.value = state.apiKey;
@@ -2260,14 +2282,6 @@ function openSettings() {
   fontSizeSelect.value = state.fontSize;
   fontFamilySelect.value = state.fontFamily || '';
   themeSelect.value = state.theme || 'default';
-  if (tempSlider) {
-    tempSlider.value = state.temperature ?? 0.7;
-    tempValue.textContent = (state.temperature ?? 0.7).toFixed(2);
-  }
-  if (toppSlider) {
-    toppSlider.value = state.topP ?? 1.0;
-    toppValue.textContent = (state.topP ?? 1.0).toFixed(2);
-  }
   settingsStatus.classList.remove('show');
   settingsOverlay.classList.add('active');
 }
@@ -2326,20 +2340,6 @@ fontFamilySelect.addEventListener('change', () => {
 themeSelect.addEventListener('change', () => {
   state.theme = themeSelect.value;
   applyTheme();
-  saveState();
-});
-
-tempSlider.addEventListener('input', () => {
-  const v = parseFloat(tempSlider.value);
-  state.temperature = v;
-  tempValue.textContent = v.toFixed(2);
-  saveState();
-});
-
-toppSlider.addEventListener('input', () => {
-  const v = parseFloat(toppSlider.value);
-  state.topP = v;
-  toppValue.textContent = v.toFixed(2);
   saveState();
 });
 
