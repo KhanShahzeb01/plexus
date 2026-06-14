@@ -6,7 +6,7 @@
 <title>Plexus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Share+Tech+Mono&family=MedievalSharp&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -1534,6 +1534,352 @@ body {
 .theme-cyber #suggestions .suggestion { color: #0ff; }
 .theme-cyber #suggestions .suggestion.selected { background: rgba(0, 255, 255, 0.12); }
 
+/* Dark Fantasy theme — castle & runes, full viewport */
+.theme-fantasy {
+  background: #1a0f0a;
+  background-image:
+    radial-gradient(circle at 25% 40%, rgba(60, 30, 15, 0.6) 0%, #0d0704 100%),
+    repeating-linear-gradient(45deg, rgba(80, 40, 20, 0.1) 0px, rgba(80, 40, 20, 0.1) 2px, transparent 2px, transparent 8px);
+  font-family: 'MedievalSharp', 'Courier New', 'Times New Roman', serif;
+}
+.theme-fantasy::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" opacity="0.12"><path fill="none" stroke="%238b5a2b" stroke-width="0.5" d="M0 0 L400 0 L400 300 L0 300 Z"/><path d="M30 50 L370 50 M20 100 L380 100 M40 150 L360 150 M25 200 L375 200 M35 250 L365 250" stroke="%236b3e1a" stroke-width="0.4"/><circle cx="200" cy="150" r="40" fill="none" stroke="%237a4a1e" stroke-width="0.6"/><path d="M160 140 L240 140 M195 110 L205 110 M195 190 L205 190" stroke="%23663311" stroke-width="0.5"/></svg>');
+  background-repeat: repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes fantasyFadeRune {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fantasyRuneFlicker {
+  0%, 100% { opacity: 0.4; transform: scaleY(0.6); }
+  50% { opacity: 1; transform: scaleY(1.2); }
+}
+.theme-fantasy #app-row {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  background: linear-gradient(145deg, #261b0f, #140d06);
+  box-shadow:
+    inset 0 1px 0 rgba(200, 160, 100, 0.15),
+    0 0 0 2px #3d2a18,
+    0 0 0 4px #1f140a;
+}
+.theme-fantasy #app-row::after {
+  content: "ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ ᚷ ᚹ ᚺ ᚾ ᛁ ᛃ ᛇ ᛈ ᛉ ᛊ ᛏ ᛒ ᛖ ᛗ ᛚ ᛝ ᛟ ᛞ";
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 8px;
+  letter-spacing: 4px;
+  color: #b87c4a;
+  opacity: 0.35;
+  font-family: monospace;
+  pointer-events: none;
+}
+.theme-fantasy #banner {
+  background: linear-gradient(95deg, #1f1408, #2a1c0e);
+  padding: 8px 16px;
+  border-bottom: 3px solid #aa7c48;
+  box-shadow: inset 0 -1px 0 #5a3a1a, 0 2px 8px rgba(0,0,0,0.5);
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.theme-fantasy #banner::before {
+  content: 'ᚱᚢᚾᛖ';
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 2px #d4a259);
+  font-family: monospace;
+}
+.theme-fantasy #banner pre {
+  font-family: 'MedievalSharp', 'Courier New', serif;
+  background: linear-gradient(135deg, #e8c48a, #b87c3a);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  flex: 1;
+  min-width: 0;
+  filter: drop-shadow(0 0 6px rgba(180, 100, 30, 0.3));
+}
+.theme-fantasy #banner::after {
+  content: '⚔️ OPENROUTER · ORACLE ⚔️';
+  background: #2a1a0c;
+  padding: 0.3rem 1rem;
+  border-radius: 30px;
+  font-size: 10px;
+  color: #e2b87a;
+  border: 1px solid #9a6a2e;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  margin-left: auto;
+  font-family: monospace;
+}
+.theme-fantasy #status-bar {
+  display: flex;
+  background: #0d0905;
+  border-bottom: 1px solid #4a3018;
+  padding: 4px 16px;
+  font-size: 10px;
+  min-height: 24px;
+  gap: 8px;
+  color: #9a7a4a;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+.theme-fantasy #status-bar #status-model,
+.theme-fantasy #status-bar #status-tokens { color: #e2b87a; }
+.theme-fantasy #mode-badge,
+.theme-fantasy #persona-badge,
+.theme-fantasy #model-badge {
+  background: #2a1a0c;
+  border-color: #9a6a2e;
+  color: #e2b87a;
+}
+.theme-fantasy #chat-row { min-height: 0; flex: 1; }
+.theme-fantasy #chat {
+  background: linear-gradient(180deg, #20170e, #140f08);
+  font-family: 'Courier New', monospace;
+}
+.theme-fantasy #chat::-webkit-scrollbar { width: 7px; }
+.theme-fantasy #chat::-webkit-scrollbar-track { background: #2a1c0e; border-radius: 10px; }
+.theme-fantasy #chat::-webkit-scrollbar-thumb {
+  background: #b87c3a;
+  border-radius: 10px;
+}
+.theme-fantasy #tips {
+  background: rgba(30, 20, 10, 0.4);
+  border: none;
+  border-left: 3px solid #b89a6a;
+  border-radius: 0 12px 12px 0;
+  padding: 12px 16px 12px 14px;
+  color: #eeddbc;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+.theme-fantasy #tips strong { color: #e8c48a; }
+.theme-fantasy #tips code {
+  background: #1e2a1a;
+  color: #b8c48a;
+  border-radius: 6px;
+}
+.theme-fantasy .message { animation: fantasyFadeRune 0.25s ease-out; margin-bottom: 0; }
+.theme-fantasy .message .panel {
+  border: none;
+  border-left: 3px solid;
+  border-radius: 0 12px 12px 0;
+  background: rgba(30, 20, 10, 0.4);
+  padding-left: 14px;
+  margin: 4px 0;
+}
+.theme-fantasy .message.query .panel { border-left-color: #c9a87b; }
+.theme-fantasy .message.response .panel { border-left-color: #cfa668; }
+.theme-fantasy .panel-title {
+  font-size: 0;
+  text-transform: none;
+  letter-spacing: 1px;
+  padding: 0 0 6px;
+  font-weight: bold;
+}
+.theme-fantasy .message.query .panel-title::before {
+  content: '[⚔️ WARRIOR]';
+  font-size: 10px;
+  padding: 3px 12px;
+  border-radius: 20px;
+  background: #2a3a1a;
+  color: #bdd48a;
+  border: 1px solid #8aaa4a;
+  font-family: monospace;
+}
+.theme-fantasy .message.response .panel-title::before {
+  content: '[🐉 ORACLE]';
+  font-size: 10px;
+  padding: 3px 12px;
+  border-radius: 20px;
+  background: #3a1e2a;
+  color: #e2a87a;
+  border: 1px solid #b85a3a;
+  font-family: monospace;
+}
+.theme-fantasy .panel-body {
+  color: #eeddbc;
+  text-shadow: 0 0 2px rgba(0,0,0,0.5);
+  font-family: 'Courier New', monospace;
+}
+.theme-fantasy .message.query .panel-body { font-weight: 400; }
+.theme-fantasy .panel-body code {
+  background: #2a1c0e;
+  color: #e8b87a;
+  border-radius: 4px;
+}
+.theme-fantasy .panel-body a { color: #e8a85a; }
+.theme-fantasy .panel-body pre { background: #1f150c; border-color: #9a6a2e; }
+.theme-fantasy .code-wrap { border-color: #9a6a2e; }
+.theme-fantasy .code-hdr { background: #2a1c0e; border-color: #aa7c48; }
+.theme-fantasy #loading {
+  background: #1f150c;
+  border: 1px solid #b87c3a;
+  border-radius: 40px;
+  padding: 8px 16px;
+  width: fit-content;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.5), 0 0 8px rgba(184,124,58,0.2);
+}
+.theme-fantasy #loading .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 1px;
+  background: #d49a4a;
+  animation: fantasyRuneFlicker 0.9s infinite;
+}
+.theme-fantasy #loading .dot:nth-child(2) {
+  animation-delay: 0.2s;
+  background: #e8aa5a;
+}
+.theme-fantasy #loading .dot:nth-child(3) {
+  animation-delay: 0.4s;
+  background: #c48a3a;
+}
+.theme-fantasy #side-panel {
+  background: linear-gradient(180deg, #20170e, #140f08);
+  border-left: 2px solid #9a6a2e;
+  box-shadow: inset 4px 0 12px rgba(0,0,0,0.4);
+  font-family: 'Courier New', monospace;
+}
+.theme-fantasy #side-panel .sp-title {
+  color: #e8c48a;
+  letter-spacing: 1px;
+  text-shadow: 0 0 4px rgba(180, 100, 30, 0.3);
+}
+.theme-fantasy #side-panel .sp-row .sp-value { color: #e2b87a; }
+.theme-fantasy #side-panel .sp-row .sp-label { color: #9a7a4a; }
+.theme-fantasy #side-panel .sp-desc,
+.theme-fantasy #side-panel .sp-footer { color: #b87c4a; }
+.theme-fantasy #side-panel .sp-footer { border-top-color: #4a3018; }
+.theme-fantasy #side-panel .sp-bar { background: #2a1c0e; }
+.theme-fantasy #side-panel .sp-bar-fill {
+  background: linear-gradient(90deg, #9a6a2e, #e8c48a);
+}
+.theme-fantasy #side-panel input[type="range"]::-webkit-slider-thumb {
+  background: #b87c3a;
+  border-color: #2a1c0e;
+}
+.theme-fantasy #side-panel input[type="range"]::-moz-range-thumb {
+  background: #b87c3a;
+  border-color: #2a1c0e;
+}
+.theme-fantasy #side-panel .sp-new-btn {
+  border-color: #9a6a2e;
+  color: #e2b87a;
+}
+.theme-fantasy #side-panel .sp-new-btn:hover {
+  border-color: #e8a85a;
+  color: #f5e2b0;
+  background: rgba(90, 64, 32, 0.3);
+}
+.theme-fantasy .sp-sess:hover { background: rgba(90, 64, 32, 0.2); }
+.theme-fantasy .sp-sess.active {
+  color: #e8c48a;
+  background: rgba(184, 124, 58, 0.15);
+}
+.theme-fantasy #input-area {
+  background: #120c06;
+  border-top: 2px solid #9a6a2e;
+  padding: 10px 12px;
+  gap: 8px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+}
+.theme-fantasy #prompt {
+  font-size: 0;
+  line-height: 1;
+}
+.theme-fantasy #prompt::before {
+  content: '❄️ [$]>';
+  font-size: 11px;
+  font-weight: bold;
+  color: #e8b87a;
+  background: #1f150a;
+  padding: 6px 15px;
+  border-radius: 30px;
+  border: 1px solid #9a6a2e;
+  letter-spacing: 1px;
+  font-family: monospace;
+  white-space: nowrap;
+}
+.theme-fantasy #input {
+  background: #1f150c;
+  border: none;
+  border-bottom: 2px solid #9a6a2e;
+  border-radius: 0;
+  color: #f5e6cc;
+  font-family: 'Courier New', monospace;
+  caret-color: #e8a85a;
+}
+.theme-fantasy #input:focus {
+  border-bottom-color: #e8a85a;
+  box-shadow: 0 1px 0 #e8a85a;
+  background: #1f150c;
+  border-left: none;
+}
+.theme-fantasy #input::placeholder { color: rgba(154, 122, 74, 0.6); }
+.theme-fantasy #send-btn {
+  background: #3a2a18;
+  border: 1px solid #c89a4a;
+  border-radius: 40px;
+  width: auto;
+  height: auto;
+  padding: 6px 22px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #f5e2b0;
+  font-family: 'MedievalSharp', monospace;
+}
+.theme-fantasy #send-btn:not(:disabled):hover {
+  background: #5a4020;
+  border-color: #e8b86a;
+  box-shadow: 0 0 8px #c89a4a;
+  opacity: 1;
+}
+.theme-fantasy #stop-btn {
+  border: 1px solid #b85a3a;
+  color: #e2a87a;
+  border-radius: 40px;
+  width: auto;
+  height: auto;
+  padding: 6px 14px;
+  font-size: 11px;
+}
+.theme-fantasy #file-btn { color: #9a7a4a; }
+.theme-fantasy #file-btn:hover,
+.theme-fantasy #file-btn.has-file { color: #e8c48a; }
+.theme-fantasy #settings-toggle {
+  background: #2a1a0c;
+  border: 1px solid #9a6a2e;
+  color: #e2b87a;
+}
+.theme-fantasy #settings-toggle:hover {
+  border-color: #e8a85a;
+  color: #f5e2b0;
+  box-shadow: 0 0 8px rgba(184, 124, 58, 0.3);
+}
+.theme-fantasy #suggestions {
+  background: rgba(26, 17, 8, 0.95);
+  border: 1px solid #9a6a2e;
+}
+.theme-fantasy #suggestions .suggestion { color: #e2b87a; }
+.theme-fantasy #suggestions .suggestion.selected { background: rgba(184, 124, 58, 0.15); }
+
 /* Slash command autocomplete */
 #suggestions {
   position: absolute;
@@ -1803,6 +2149,7 @@ body {
       <option value="cli">Plexus CLI</option>
       <option value="codecli">Code CLI</option>
       <option value="cyber">Cyberpunk Neon</option>
+      <option value="fantasy">Dark Fantasy</option>
       <option value="crt">CRT Terminal</option>
     </select>
 
@@ -2140,6 +2487,7 @@ const THEMES = {
   cli: { class: '', label: 'Plexus CLI', showStatusBar: false, sendLabel: '→' },
   codecli: { class: 'theme-code-cli', label: 'Code CLI', showStatusBar: true, sendLabel: '⏎ send' },
   cyber: { class: 'theme-cyber', label: 'Cyberpunk Neon', showStatusBar: true, sendLabel: '⏎ TRANSMIT' },
+  fantasy: { class: 'theme-fantasy', label: 'Dark Fantasy', showStatusBar: true, sendLabel: '⚔️ CAST ⚔️' },
   crt: { class: 'theme-crt', label: 'CRT Terminal', showStatusBar: true, sendLabel: '→' },
 };
 
