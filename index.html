@@ -32,6 +32,7 @@
 }
 html, body {
   height: 100%;
+  height: 100dvh;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
@@ -42,6 +43,12 @@ html, body {
 body {
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+#input-area {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
 }
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
@@ -475,18 +482,26 @@ body {
 /* Mobile responsive */
 @media (max-width: 600px) {
   :root { --font-size: 13px; }
-  #banner { padding: 10px 10px 0; }
-  #banner pre { font-size: clamp(5px, 1.2vw, 9px); }
-  #chat { padding: 12px; gap: 10px; }
-  #input-area { padding: 8px 10px; }
+  #banner { padding: 6px 8px 0; }
+  #banner pre { font-size: clamp(4px, 1vw, 7px); }
+  #banner .subtitle { font-size: 10px; padding-bottom: 4px; }
+  #mode-badge, #persona-badge { font-size: 8px; padding: 1px 6px; margin-bottom: 6px; }
+  #chat { padding: 8px; gap: 8px; }
+  #input-area { padding: 6px 8px; gap: 6px; }
   #input { font-size: 13px; padding: 8px 10px; }
   #send-btn { width: 36px; height: 36px; font-size: 16px; }
   .panel-body { font-size: 12px; padding: 6px 10px 10px; }
   #settings-panel { padding: 16px; }
-  #settings-toggle { top: 8px; right: 8px; width: 32px; height: 32px; font-size: 14px; }
+  #settings-toggle { top: 6px; right: 6px; width: 30px; height: 30px; font-size: 13px; }
+  #prompt { font-size: 14px; }
 }
-@media (max-width: 400px) {
-  #banner pre { font-size: clamp(4px, 0.9vw, 7px); }
+@media (max-width: 480px) {
+  #banner pre { display: none; }
+  #banner { padding: 4px 8px 0; }
+  #banner .subtitle { font-size: 11px; padding-bottom: 2px; margin-top: 2px; }
+  #chat { padding: 6px; gap: 6px; }
+  #tips { font-size: 10px; padding: 8px 10px; }
+  #tips code { font-size: 9px; }
 }
 </style>
 </head>
@@ -1534,16 +1549,10 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ─── Mobile keyboard handling ──────────────────────────────────────────
+// ─── Mobile keyboard: scroll chat down when keyboard opens ─────────────
 if (window.visualViewport) {
-  let vpHeight = window.visualViewport.height;
   window.visualViewport.addEventListener('resize', () => {
-    const diff = vpHeight - window.visualViewport.height;
-    if (diff > 100) {
-      document.body.style.height = window.visualViewport.height + 'px';
-      setTimeout(() => chatEl.scrollTop = chatEl.scrollHeight, 100);
-    }
-    vpHeight = window.visualViewport.height;
+    chatEl.scrollTop = chatEl.scrollHeight;
   });
 }
 
