@@ -62,43 +62,38 @@ body {
 /* Banner */
 #banner {
   flex-shrink: 0;
-  padding: 16px 16px 0;
-  text-align: center;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
 }
-#banner-top {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-}
 #banner pre {
   font-family: var(--font);
-  font-size: clamp(6px, 1.5vw, 11px);
+  font-size: clamp(8px, 1.8vw, 14px);
   line-height: 1.15;
-  display: inline-block;
   text-align: left;
   white-space: pre;
   letter-spacing: 0;
+  flex-shrink: 0;
 }
 #banner .subtitle {
-  font-size: clamp(11px, 2.5vw, 14px);
+  font-size: clamp(12px, 2.5vw, 16px);
   color: var(--accent);
   font-weight: 500;
-  padding-bottom: 6px;
-  margin-top: -4px;
+  white-space: nowrap;
 }
 #mode-badge {
   display: inline-block;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding: 3px 12px;
-  border-radius: 4px;
-  margin-bottom: 10px;
+  padding: 2px 10px;
+  border-radius: 3px;
   border: 1px solid var(--border);
+  margin-right: 4px;
 }
 #mode-badge.general { color: var(--cyan); border-color: rgba(0,212,170,0.3); background: rgba(0,212,170,0.06); }
 #mode-badge.finance { color: var(--green); border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.06); }
@@ -108,14 +103,13 @@ body {
 #mode-badge.blog { color: #f472b6; border-color: rgba(244,114,182,0.3); background: rgba(244,114,182,0.06); }
 #persona-badge {
   display: inline-block;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding: 3px 12px;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  margin-left: 6px;
+  padding: 2px 10px;
+  border-radius: 3px;
+  margin-right: 4px;
   border: 1px dashed var(--border);
   color: var(--text-dim);
   background: transparent;
@@ -128,12 +122,11 @@ body {
 #persona-badge.none { display: none; }
 #model-badge {
   display: inline-block;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
-  padding: 3px 12px;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  margin-left: 6px;
+  padding: 2px 10px;
+  border-radius: 3px;
+  margin-right: 4px;
   border: 1px solid var(--border);
   color: var(--text-dim);
   background: var(--surface2);
@@ -143,13 +136,28 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 14px;
-  font-size: 12px;
+  padding: 4px 14px;
+  font-size: 11px;
   color: var(--text-dim);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  min-height: 20px;
+  min-height: 24px;
   font-family: var(--font);
+  gap: 8px;
+}
+#status-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+#status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 #status-tokens {
   font-variant-numeric: tabular-nums;
@@ -529,11 +537,11 @@ body {
 /* Mobile responsive */
 @media (max-width: 600px) {
   :root { --font-size: 13px; }
-  #banner { padding: 6px 8px 0; }
-  #banner pre { font-size: clamp(4px, 1vw, 7px); }
-  #banner-top { gap: 6px; }
-  #banner .subtitle { font-size: 10px; padding-bottom: 4px; }
-  #mode-badge, #persona-badge, #model-badge { font-size: 9px; padding: 2px 8px; margin-bottom: 6px; }
+  #banner { padding: 6px 10px; gap: 8px; }
+  #banner pre { font-size: clamp(5px, 1.2vw, 9px); }
+  #banner .subtitle { font-size: 10px; }
+  #mode-badge, #persona-badge, #model-badge { font-size: 8px; padding: 1px 6px; }
+  #status-bar { padding: 3px 10px; font-size: 10px; gap: 6px; }
   #chat { padding: 8px; gap: 8px; }
   #input-area { padding: 6px 8px; gap: 6px; }
   #input { font-size: 13px; padding: 8px 10px; }
@@ -545,8 +553,8 @@ body {
 }
 @media (max-width: 480px) {
   #banner pre { display: none; }
-  #banner { padding: 4px 8px 0; }
-  #banner .subtitle { font-size: 11px; padding-bottom: 2px; margin-top: 2px; }
+  #banner { padding: 4px 10px; gap: 6px; }
+  #banner .subtitle { font-size: 11px; }
   #chat { padding: 6px; gap: 6px; }
   #tips { font-size: 10px; padding: 8px 10px; }
   #tips code { font-size: 9px; }
@@ -592,17 +600,21 @@ body {
 
 <!-- Banner -->
 <div id="banner">
-  <div id="banner-top">
-    <pre id="banner-art"></pre>
-  </div>
+  <pre id="banner-art"></pre>
   <div class="subtitle">AI chat at your terminal</div>
-  <div id="mode-badge" class="general">general</div><span id="persona-badge" class="none"></span><span id="model-badge"></span>
 </div>
 
-<!-- Status bar: model + tokens -->
+<!-- Status bar: badges + model + tokens -->
 <div id="status-bar">
-  <span id="status-model"></span>
-  <span id="status-tokens"></span>
+  <span id="status-left">
+    <span id="mode-badge" class="general">general</span>
+    <span id="persona-badge" class="none"></span>
+    <span id="model-badge"></span>
+  </span>
+  <span id="status-right">
+    <span id="status-model"></span>
+    <span id="status-tokens"></span>
+  </span>
 </div>
 
 <!-- Chat messages -->
