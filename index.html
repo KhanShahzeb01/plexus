@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -348,6 +350,43 @@ body {
   align-items: center;
   gap: 8px;
 }
+#input-extras {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#file-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+#file-btn:hover { color: var(--accent); }
+#file-btn.has-file { color: var(--accent); }
+#file-info {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 2px 8px;
+  background: var(--surface2);
+  border-radius: 4px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#file-info .fname { color: var(--text-bright); font-weight: 500; }
+#file-info .fremove {
+  color: var(--red);
+  cursor: pointer;
+  font-weight: 700;
+  margin-left: auto;
+}
+#file-info .fremove:hover { opacity: 0.7; }
 #prompt {
   color: var(--accent);
   font-weight: 700;
@@ -867,8 +906,13 @@ body {
 
 <!-- Input area -->
 <div id="input-area">
+  <div id="input-extras">
+    <button id="file-btn" title="Attach file">📎</button>
+    <input type="file" id="file-input" accept=".pdf,.docx,.pptx,.md,.txt" hidden>
+  </div>
   <span id="prompt">›</span>
   <div id="input-wrapper">
+    <div id="file-info" style="display:none"></div>
     <div id="suggestions"></div>
     <textarea id="input" rows="1" placeholder="Type a message..." enterkeyhint="send"></textarea>
   </div>
@@ -1131,8 +1175,16 @@ const themeSelect = document.getElementById('theme-select');
 const statusModel = document.getElementById('status-model');
 const statusTokens = document.getElementById('status-tokens');
 const stopBtn = document.getElementById('stop-btn');
+const fileBtn = document.getElementById('file-btn');
+const fileInput = document.getElementById('file-input');
+const fileInfo = document.getElementById('file-info');
 const spTemp = document.getElementById('sp-temp');
 const spTempVal = document.getElementById('sp-temp-val');
+
+// Configure PDF.js worker
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
 
 // ─── Font settings ─────────────────────────────────────────────────────
 function applyFontSettings() {
@@ -1783,6 +1835,10 @@ async function sendMessage(userText) {
   if (state.webSearch) {
     apiMessages.push({ role: 'system', content: 'You have web search enabled and must use it for any query asking for current/present information. When asked for stock prices, weather, news, or any real-time data: use web search to find the actual current value and return it directly. Do NOT write code to fetch the data — just search the web and quote the result with the source and timestamp.' });
   }
+  if (uploadedText.trim()) {
+    const fname = uploadedFile ? uploadedFile.name : 'attached file';
+    apiMessages.push({ role: 'system', content: `The user attached a file (${fname}). Its content is:\n\n${uploadedText.trim().substring(0, 50000)}` });
+  }
   for (const msg of state.messages.slice(-20)) { // last 20 for context
     apiMessages.push({ role: msg.role, content: msg.content });
   }
@@ -2271,6 +2327,7 @@ function handleSubmit() {
   }
 
   sendMessage(text);
+  if (uploadedText.trim()) clearFile();
 }
 
 inputEl.addEventListener('input', () => {
@@ -2386,6 +2443,64 @@ stopBtn.addEventListener('click', () => {
 });
 
 // Side panel temperature slider
+let uploadedFile = null;
+let uploadedText = '';
+
+// File upload
+fileBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', async () => {
+  const f = fileInput.files[0];
+  if (!f) return;
+  if (f.size > 5 * 1024 * 1024) { alert('File must be under 5MB'); fileInput.value = ''; return; }
+  uploadedFile = f;
+  fileBtn.classList.add('has-file');
+  fileInfo.style.display = 'flex';
+  fileInfo.innerHTML = `<span class="fname">${f.name}</span> <span>(${(f.size / 1024).toFixed(0)}KB)</span> <span class="fremove">✕</span>`;
+  fileInfo.querySelector('.fremove').onclick = clearFile;
+  uploadedText = '';
+  try {
+    const ext = f.name.split('.').pop().toLowerCase();
+    if (ext === 'txt' || ext === 'md') {
+      uploadedText = await f.text();
+    } else if (ext === 'pdf') {
+      const buf = await f.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      const pages = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const txt = await page.getTextContent();
+        pages.push(txt.items.map(t => t.str).join(' '));
+      }
+      uploadedText = pages.join('\n\n');
+    } else if (ext === 'docx' || ext === 'pptx') {
+      const buf = await f.arrayBuffer();
+      const zip = await JSZip.loadAsync(buf);
+      const paths = ext === 'docx'
+        ? Object.keys(zip.files).filter(p => p.startsWith('word/document'))
+        : Object.keys(zip.files).filter(p => /^ppt\/slides\/slide\d/.test(p));
+      const texts = [];
+      for (const p of paths) {
+        const xml = await zip.file(p).async('text');
+        const m = xml.match(/<[^>]+>([^<]+)<\/[^>]+>/g);
+        if (m) texts.push(...m.map(t => t.replace(/<[^>]+>/g, '').trim()).filter(Boolean));
+      }
+      uploadedText = texts.join('\n');
+    }
+    if (!uploadedText.trim()) throw new Error('No text extracted');
+  } catch (e) {
+    uploadedText = '';
+    fileInfo.innerHTML = `<span style="color:var(--red)">Failed to extract: ${f.name}</span> <span class="fremove">✕</span>`;
+    fileInfo.querySelector('.fremove').onclick = clearFile;
+  }
+});
+
+function clearFile() {
+  uploadedFile = null;
+  uploadedText = '';
+  fileInput.value = '';
+  fileBtn.classList.remove('has-file');
+  fileInfo.style.display = 'none';
+}
 if (spTemp) {
   spTemp.addEventListener('input', () => {
     const v = parseFloat(spTemp.value);
