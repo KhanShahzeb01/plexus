@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -208,10 +210,10 @@ body {
   color: var(--cyan);
 }
 .panel-body pre {
-  background: rgba(0,0,0,0.4);
+  background: #1d1f21;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  padding: 14px 16px;
   margin: 8px 0;
   overflow-x: auto;
   font-size: 0.92em;
@@ -220,8 +222,10 @@ body {
 .panel-body pre code {
   background: none;
   padding: 0;
-  color: var(--text);
+  color: #e0e0e0;
+  font-family: 'JetBrains Mono','Fira Code','Consolas',monospace;
 }
+.panel-body pre code .hljs { background: none; padding: 0; }
 .panel-body strong { color: var(--text-bright); }
 .panel-body a { color: var(--cyan); text-decoration: underline; }
 .panel-body h1, .panel-body h2, .panel-body h3, .panel-body h4 {
@@ -1276,8 +1280,13 @@ function renderMarkdown(text) {
   const codeBlocks = [];
   html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
     const idx = codeBlocks.length;
-    const langAttr = lang ? ` class="lang-${escapeHtml(lang)}"` : '';
-    codeBlocks.push(`<pre><code${langAttr}>${escapeHtml(code.trim())}</code></pre>`);
+    const clean = code.trim();
+    let highlighted = clean;
+    if (lang && hljs && hljs.getLanguage(lang)) {
+      try { highlighted = hljs.highlight(clean, { language: lang }).value; } catch {}
+    }
+    const langAttr = lang ? ` class="language-${escapeHtml(lang)}"` : '';
+    codeBlocks.push(`<pre><code${langAttr}>${highlighted}</code></pre>`);
     return `\x00CODEBLOCK${idx}\x00`;
   });
 
