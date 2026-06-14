@@ -50,17 +50,6 @@ body {
   flex-direction: column;
   position: relative;
 }
-#app-row {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-}
-#app-column {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-}
 #input-area {
   position: sticky;
   bottom: 0;
@@ -88,6 +77,12 @@ body {
   white-space: pre;
   letter-spacing: 0;
   flex-shrink: 0;
+}
+#banner .subtitle {
+  font-size: clamp(12px, 2.5vw, 16px);
+  color: var(--accent);
+  font-weight: 500;
+  white-space: nowrap;
 }
 #mode-badge {
   display: inline-block;
@@ -138,80 +133,34 @@ body {
 }
 #status-bar {
   flex-shrink: 0;
-  padding: 0;
-  min-height: 0;
-  height: 0;
-  border: none;
-}
-/* Side panel */
-#side-panel {
-  flex-shrink: 0;
-  width: 0;
-  overflow: hidden;
-  background: var(--surface);
-  border-left: none;
-  transition: width 0.2s;
-}
-@media (min-width: 900px) {
-  #side-panel {
-    width: 180px;
-    border-left: 1px solid var(--border);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
-  }
-}
-#side-panel .sp-title {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-dim);
-}
-#side-panel .sp-desc {
-  font-size: 11px;
-  line-height: 1.5;
-  color: var(--text-dim);
-}
-#side-panel .sp-section {
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
-}
-#side-panel .sp-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 4px 14px;
   font-size: 11px;
-  padding: 2px 0;
-}
-#side-panel .sp-row .sp-label {
   color: var(--text-dim);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  min-height: 24px;
+  font-family: var(--font);
+  gap: 8px;
 }
-#side-panel .sp-row .sp-value {
-  color: var(--text-bright);
-  font-weight: 500;
-}
-#side-panel .sp-bar {
-  height: 3px;
-  border-radius: 2px;
-  background: var(--border);
-  margin: 4px 0;
+#status-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
 }
-#side-panel .sp-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: var(--accent);
-  transition: width 0.3s;
+#status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
-#side-panel .sp-footer {
-  margin-top: auto;
-  font-size: 10px;
-  color: var(--text-dim);
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
+#status-tokens {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Main chat area */
@@ -591,7 +540,9 @@ body {
   :root { --font-size: 13px; }
   #banner { padding: 6px 10px; gap: 8px; }
   #banner pre { font-size: clamp(5px, 1.2vw, 9px); }
-  #side-panel { display: none; }
+  #banner .subtitle { font-size: 10px; }
+  #mode-badge, #persona-badge, #model-badge { font-size: 8px; padding: 1px 6px; }
+  #status-bar { padding: 3px 10px; font-size: 10px; gap: 6px; }
   #chat { padding: 8px; gap: 8px; }
   #input-area { padding: 6px 8px; gap: 6px; }
   #input { font-size: 13px; padding: 8px 10px; }
@@ -604,6 +555,7 @@ body {
 @media (max-width: 480px) {
   #banner pre { display: none; }
   #banner { padding: 4px 10px; gap: 6px; }
+  #banner .subtitle { font-size: 11px; }
   #chat { padding: 6px; gap: 6px; }
   #tips { font-size: 10px; padding: 8px 10px; }
   #tips code { font-size: 9px; }
@@ -648,18 +600,25 @@ body {
 <body>
 
 
-<div id="app-row">
-<div id="app-column">
-
 <!-- Banner -->
 <div id="banner">
   <pre id="banner-art"></pre>
+  <div class="subtitle">AI chat at your terminal</div>
 </div>
 
-<!-- Status bar: minimal (blank) -->
+<!-- Status bar: badges + model + tokens -->
 <div id="status-bar">
-  <span id="status-left"></span>
-  <span id="status-right"></span>
+  <span id="status-left">
+    <span id="mode-badge" class="general">general</span>
+    <span id="persona-badge" class="none"></span>
+    <span id="model-badge"></span>
+    <span style="color:var(--border)">|</span>
+  </span>
+  <span id="status-right">
+    <span id="status-model"></span>
+    <span style="color:var(--border)">|</span>
+    <span id="status-tokens"></span>
+  </span>
 </div>
 
 <!-- Chat messages -->
@@ -798,59 +757,6 @@ body {
     <div id="settings-status"></div>
   </div>
 </div>
-
-</div><!-- /app-column -->
-
-<!-- Side panel -->
-<div id="side-panel">
-  <div class="sp-title">Plexus</div>
-  <div class="sp-desc">Terminal-styled AI chat powered by OpenRouter. Themes, personas, multi-step research.</div>
-
-  <div class="sp-section">
-    <div class="sp-title">Session</div>
-    <div class="sp-row">
-      <span class="sp-label">Mode</span>
-      <span class="sp-value" id="sp-mode">general</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Model</span>
-      <span class="sp-value" id="sp-model">—</span>
-    </div>
-  </div>
-
-  <div class="sp-section">
-    <div class="sp-title">Tokens</div>
-    <div class="sp-row">
-      <span class="sp-label">Input</span>
-      <span class="sp-value" id="sp-tokens-in">0</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Output</span>
-      <span class="sp-value" id="sp-tokens-out">0</span>
-    </div>
-    <div class="sp-row">
-      <span class="sp-label">Total</span>
-      <span class="sp-value" id="sp-tokens-total">0</span>
-    </div>
-  </div>
-
-  <div class="sp-section">
-    <div class="sp-title">Context</div>
-    <div class="sp-row">
-      <span class="sp-label">Messages</span>
-      <span class="sp-value" id="sp-msgs">0</span>
-    </div>
-    <div id="sp-context-bar" class="sp-bar">
-      <div class="sp-bar-fill" id="sp-context-fill" style="width:0%"></div>
-    </div>
-  </div>
-
-  <div class="sp-footer">
-    <span id="sp-cost">$0.00</span> estimated
-  </div>
-</div>
-
-</div><!-- /app-row -->
 
 <script>
 // ─── Banner ────────────────────────────────────────────────────────────
