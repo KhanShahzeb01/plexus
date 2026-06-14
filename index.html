@@ -1536,7 +1536,7 @@ async function doDeepResearch(query) {
   state.messages.push({ role: 'user', content: query.trim() });
   saveState();
 
-  const { body: progressBody } = addMessage('response', '', true);
+  const { div: progressDiv, body: progressBody } = addMessage('response', '', true);
   const progressEl = progressBody.querySelector('#loading');
   isStreaming = true;
   sendBtn.disabled = true;
@@ -1669,6 +1669,7 @@ async function doDeepResearch(query) {
     if (!fullResponse.trim()) throw new Error('Empty synthesis response');
     state.messages.push({ role: 'assistant', content: fullResponse.trim() });
     saveState();
+    addMessageButtons(progressDiv, 'response', fullResponse.trim());
 
   } catch (err) {
     if (progressEl) progressEl.classList.remove('active');
