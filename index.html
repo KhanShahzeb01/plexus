@@ -3204,6 +3204,296 @@ body {
 .theme-hacker #suggestions .suggestion { color: color-mix(in srgb, var(--accent) 75%, #5aff5a); }
 .theme-hacker #suggestions .suggestion.selected { background: var(--query-bg); }
 
+/* Minimal CLI theme — ultra-clean terminal, full viewport */
+.theme-minimal {
+  font-family: 'SF Mono', 'JetBrains Mono', 'Menlo', 'Courier New', monospace;
+}
+.theme-minimal::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes minimalFadeIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes minimalDotPulse {
+  0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+  30% { opacity: 1; transform: scale(1.2); }
+}
+.theme-minimal #app-row {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 15%, var(--border));
+}
+.theme-minimal #banner {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.theme-minimal #banner #banner-theme-icon {
+  display: inline-block;
+  font-size: 1.1rem;
+  opacity: 0.7;
+  color: var(--text-dim);
+  font-family: monospace;
+}
+.theme-minimal #banner pre {
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: clamp(10px, 2vw, 16px);
+  line-height: 1.3;
+  white-space: pre;
+  letter-spacing: 0;
+  flex-shrink: 0;
+  flex: 0 1 auto;
+  color: var(--accent);
+  opacity: 0.85;
+}
+.theme-minimal #banner::after {
+  content: 'openrouter · v1.0';
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--surface2);
+  padding: 0.2rem 0.8rem;
+  border-radius: 20px;
+  font-family: monospace;
+  white-space: nowrap;
+  margin-left: auto;
+}
+.theme-minimal #status-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 4px 16px;
+  font-size: 10px;
+  min-height: 22px;
+  gap: 8px;
+  color: var(--text-dim);
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  font-family: monospace;
+}
+.theme-minimal #status-bar #status-model,
+.theme-minimal #status-bar #status-tokens { color: color-mix(in srgb, var(--accent) 55%, var(--text-dim)); }
+.theme-minimal #mode-badge,
+.theme-minimal #persona-badge,
+.theme-minimal #model-badge {
+  border-color: var(--border);
+  color: var(--text-dim);
+}
+.theme-minimal #chat-row { min-height: 0; flex: 1; }
+.theme-minimal #chat {
+  font-family: 'SF Mono', 'JetBrains Mono', monospace;
+  letter-spacing: -0.2px;
+}
+.theme-minimal #chat::-webkit-scrollbar { width: 4px; }
+.theme-minimal #chat::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 35%, #3a3a45);
+  border-radius: 4px;
+}
+.theme-minimal #tips {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+}
+.theme-minimal #tips code {
+  color: var(--accent);
+  border-radius: 4px;
+}
+.theme-minimal .message {
+  animation: minimalFadeIn 0.15s ease;
+  border-left: 1px solid var(--border);
+  padding-left: 12px;
+  margin-bottom: 0;
+}
+.theme-minimal .message.query { border-left-color: var(--query-border); }
+.theme-minimal .message.response { border-left-color: var(--response-border); }
+.theme-minimal .message .panel {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding-left: 0;
+}
+.theme-minimal .panel-title {
+  font-size: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 0 0 4px;
+}
+.theme-minimal .message.query .panel-title::before {
+  content: '[you]';
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--query-border);
+  font-family: monospace;
+}
+.theme-minimal .message.response .panel-title::before {
+  content: '[ai]';
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--response-border);
+  font-family: monospace;
+}
+.theme-minimal .panel-body {
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+}
+.theme-minimal .panel-body code {
+  color: var(--accent);
+  border-radius: 4px;
+}
+.theme-minimal .panel-body a { color: var(--accent); }
+.theme-minimal .panel-body pre { border-color: var(--border); }
+.theme-minimal .code-wrap { border-color: var(--border); }
+.theme-minimal .code-hdr { border-color: var(--border); }
+.theme-minimal #loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  background: transparent;
+  border: none;
+  width: fit-content;
+}
+.theme-minimal #loading::before {
+  content: 'processing';
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: monospace;
+}
+.theme-minimal #loading .dot {
+  width: 5px;
+  height: 5px;
+  background: color-mix(in srgb, var(--accent) 45%, #6a6a7a);
+  animation: minimalDotPulse 1.2s infinite;
+}
+.theme-minimal #loading .dot:nth-child(2) { animation-delay: 0.2s; }
+.theme-minimal #loading .dot:nth-child(3) { animation-delay: 0.4s; }
+.theme-minimal #side-panel {
+  border-left: 1px solid var(--border);
+  font-family: 'SF Mono', monospace;
+}
+.theme-minimal #side-panel .sp-title {
+  color: var(--text);
+  opacity: 0.7;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+.theme-minimal #side-panel .sp-row .sp-value { color: color-mix(in srgb, var(--accent) 65%, var(--text)); }
+.theme-minimal #side-panel .sp-row .sp-label { color: var(--text-dim); }
+.theme-minimal #side-panel .sp-desc,
+.theme-minimal #side-panel .sp-footer { color: var(--text-dim); }
+.theme-minimal #side-panel .sp-footer { border-top-color: var(--border); }
+.theme-minimal #side-panel .sp-bar-fill { background: var(--accent); }
+.theme-minimal #side-panel input[type="range"]::-webkit-slider-thumb { background: var(--accent); }
+.theme-minimal #side-panel input[type="range"]::-moz-range-thumb { background: var(--accent); }
+.theme-minimal #side-panel .sp-new-btn {
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 20px;
+  background: transparent;
+}
+.theme-minimal #side-panel .sp-new-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.theme-minimal .sp-sess:hover { background: var(--query-bg); }
+.theme-minimal .sp-sess.active {
+  color: var(--accent);
+  background: var(--query-bg);
+}
+.theme-minimal #input-area {
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+  gap: 8px;
+}
+.theme-minimal #prompt {
+  font-size: 0;
+  line-height: 1;
+}
+.theme-minimal #prompt::before {
+  content: '$>';
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  opacity: 0.8;
+  font-family: monospace;
+  white-space: nowrap;
+}
+.theme-minimal #input {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 8px 0;
+  font-family: 'SF Mono', monospace;
+  caret-color: var(--accent);
+}
+.theme-minimal #input:focus {
+  background: transparent;
+  border-left: none;
+  box-shadow: none;
+}
+.theme-minimal #input::placeholder {
+  color: var(--text-dim);
+  opacity: 0.6;
+  font-size: 12px;
+}
+.theme-minimal #send-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  width: auto;
+  height: auto;
+  padding: 6px 16px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: monospace;
+}
+.theme-minimal #send-btn:not(:disabled):hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  opacity: 1;
+  box-shadow: none;
+}
+.theme-minimal #stop-btn {
+  border: 1px solid var(--border);
+  color: #ff9a8a;
+  border-radius: 20px;
+  width: auto;
+  height: auto;
+  padding: 6px 14px;
+  font-size: 11px;
+  background: transparent;
+}
+.theme-minimal #file-btn { color: var(--text-dim); }
+.theme-minimal #file-btn:hover,
+.theme-minimal #file-btn.has-file { color: var(--accent); }
+.theme-minimal #settings-toggle {
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  background: var(--surface2);
+}
+.theme-minimal #settings-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.theme-minimal #suggestions {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.theme-minimal #suggestions .suggestion { color: var(--accent); }
+.theme-minimal #suggestions .suggestion.selected { background: var(--query-bg); }
+
 /* All themes: keep default Plexus black/dark surfaces (borders/icons/accent only) */
 .theme-code-cli,
 .theme-cyber,
@@ -3211,6 +3501,7 @@ body {
 .theme-stellar,
 .theme-forest,
 .theme-hacker,
+.theme-minimal,
 .theme-crt {
   background: var(--bg) !important;
 }
@@ -3223,6 +3514,7 @@ body {
 .theme-stellar #app-row,
 .theme-forest #app-row,
 .theme-hacker #app-row,
+.theme-minimal #app-row,
 .theme-crt #app-row {
   background: transparent !important;
   backdrop-filter: none !important;
@@ -3234,6 +3526,7 @@ body {
 .theme-stellar #banner,
 .theme-forest #banner,
 .theme-hacker #banner,
+.theme-minimal #banner,
 .theme-crt #banner {
   background: var(--surface) !important;
 }
@@ -3243,6 +3536,7 @@ body {
 .theme-stellar #status-bar,
 .theme-forest #status-bar,
 .theme-hacker #status-bar,
+.theme-minimal #status-bar,
 .theme-crt #status-bar {
   background: var(--surface2) !important;
 }
@@ -3252,6 +3546,7 @@ body {
 .theme-stellar #chat,
 .theme-forest #chat,
 .theme-hacker #chat,
+.theme-minimal #chat,
 .theme-crt #chat {
   background: transparent !important;
 }
@@ -3261,6 +3556,7 @@ body {
 .theme-stellar #side-panel,
 .theme-forest #side-panel,
 .theme-hacker #side-panel,
+.theme-minimal #side-panel,
 .theme-crt #side-panel {
   background: var(--surface) !important;
   backdrop-filter: none !important;
@@ -3272,6 +3568,7 @@ body {
 .theme-stellar #input-area,
 .theme-forest #input-area,
 .theme-hacker #input-area,
+.theme-minimal #input-area,
 .theme-crt #input-area {
   background: var(--surface) !important;
   backdrop-filter: none !important;
@@ -3283,6 +3580,7 @@ body {
 .theme-stellar #input,
 .theme-forest #input,
 .theme-hacker #input,
+.theme-minimal #input,
 .theme-crt #input {
   background: var(--surface2) !important;
   color: var(--text) !important;
@@ -3293,6 +3591,7 @@ body {
 .theme-stellar #input:focus,
 .theme-forest #input:focus,
 .theme-hacker #input:focus,
+.theme-minimal #input:focus,
 .theme-crt #input:focus {
   background: var(--focus-bg) !important;
 }
@@ -3302,6 +3601,7 @@ body {
 .theme-stellar #tips,
 .theme-forest #tips,
 .theme-hacker #tips,
+.theme-minimal #tips,
 .theme-crt #tips {
   background: var(--surface2) !important;
   color: var(--text-dim) !important;
@@ -3314,6 +3614,7 @@ body {
 .theme-stellar #tips strong,
 .theme-forest #tips strong,
 .theme-hacker #tips strong,
+.theme-minimal #tips strong,
 .theme-crt #tips strong {
   color: var(--text) !important;
 }
@@ -3323,6 +3624,7 @@ body {
 .theme-stellar .message .panel,
 .theme-forest .message .panel,
 .theme-hacker .message .panel,
+.theme-minimal .message .panel,
 .theme-crt .message .panel {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -3333,6 +3635,7 @@ body {
 .theme-stellar .message.query .panel,
 .theme-forest .message.query .panel,
 .theme-hacker .message.query .panel,
+.theme-minimal .message.query .panel,
 .theme-crt .message.query .panel {
   background: var(--query-bg) !important;
 }
@@ -3342,6 +3645,7 @@ body {
 .theme-stellar .message.response .panel,
 .theme-forest .message.response .panel,
 .theme-hacker .message.response .panel,
+.theme-minimal .message.response .panel,
 .theme-crt .message.response .panel {
   background: var(--surface) !important;
 }
@@ -3351,6 +3655,7 @@ body {
 .theme-stellar .message.query .panel-body,
 .theme-forest .message.query .panel-body,
 .theme-hacker .message.query .panel-body,
+.theme-minimal .message.query .panel-body,
 .theme-crt .message.query .panel-body {
   color: var(--text-bright) !important;
 }
@@ -3360,6 +3665,7 @@ body {
 .theme-stellar .message.response .panel-body,
 .theme-forest .message.response .panel-body,
 .theme-hacker .message.response .panel-body,
+.theme-minimal .message.response .panel-body,
 .theme-crt .message.response .panel-body {
   color: var(--text) !important;
 }
@@ -3369,6 +3675,7 @@ body {
 .theme-stellar .panel-body pre,
 .theme-forest .panel-body pre,
 .theme-hacker .panel-body pre,
+.theme-minimal .panel-body pre,
 .theme-crt .panel-body pre {
   background: #1d1f21 !important;
 }
@@ -3378,6 +3685,7 @@ body {
 .theme-stellar .code-hdr,
 .theme-forest .code-hdr,
 .theme-hacker .code-hdr,
+.theme-minimal .code-hdr,
 .theme-crt .code-hdr {
   background: #252729 !important;
 }
@@ -3387,6 +3695,7 @@ body {
 .theme-stellar #loading,
 .theme-forest #loading,
 .theme-hacker #loading,
+.theme-minimal #loading,
 .theme-crt #loading {
   background: var(--surface2) !important;
   backdrop-filter: none !important;
@@ -3398,6 +3707,7 @@ body {
 .theme-stellar #side-panel .sp-bar,
 .theme-forest #side-panel .sp-bar,
 .theme-hacker #side-panel .sp-bar,
+.theme-minimal #side-panel .sp-bar,
 .theme-crt #side-panel .sp-bar {
   background: var(--border) !important;
 }
@@ -3407,6 +3717,7 @@ body {
 .theme-stellar #chat::-webkit-scrollbar-track,
 .theme-forest #chat::-webkit-scrollbar-track,
 .theme-hacker #chat::-webkit-scrollbar-track,
+.theme-minimal #chat::-webkit-scrollbar-track,
 .theme-crt #chat::-webkit-scrollbar-track {
   background: transparent !important;
 }
@@ -3416,6 +3727,7 @@ body {
 .theme-stellar #banner::after,
 .theme-forest #banner::after,
 .theme-hacker #banner::after,
+.theme-minimal #banner::after,
 .theme-crt #banner::after,
 .theme-code-cli #prompt::before,
 .theme-cyber #prompt::before,
@@ -3423,6 +3735,7 @@ body {
 .theme-stellar #prompt::before,
 .theme-forest #prompt::before,
 .theme-hacker #prompt::before,
+.theme-minimal #prompt::before,
 .theme-crt #prompt::before {
   background: var(--surface2) !important;
 }
@@ -3432,6 +3745,7 @@ body {
 .theme-stellar #mode-badge,
 .theme-forest #mode-badge,
 .theme-hacker #mode-badge,
+.theme-minimal #mode-badge,
 .theme-crt #mode-badge,
 .theme-code-cli #persona-badge,
 .theme-cyber #persona-badge,
@@ -3439,6 +3753,7 @@ body {
 .theme-stellar #persona-badge,
 .theme-forest #persona-badge,
 .theme-hacker #persona-badge,
+.theme-minimal #persona-badge,
 .theme-crt #persona-badge,
 .theme-code-cli #model-badge,
 .theme-cyber #model-badge,
@@ -3446,6 +3761,7 @@ body {
 .theme-stellar #model-badge,
 .theme-forest #model-badge,
 .theme-hacker #model-badge,
+.theme-minimal #model-badge,
 .theme-crt #model-badge {
   background: var(--surface2) !important;
 }
@@ -3455,6 +3771,7 @@ body {
 .theme-stellar #settings-toggle,
 .theme-forest #settings-toggle,
 .theme-hacker #settings-toggle,
+.theme-minimal #settings-toggle,
 .theme-crt #settings-toggle {
   background: var(--surface2) !important;
 }
@@ -3464,6 +3781,7 @@ body {
 .theme-stellar #suggestions,
 .theme-forest #suggestions,
 .theme-hacker #suggestions,
+.theme-minimal #suggestions,
 .theme-crt #suggestions {
   background: rgba(13, 13, 13, 0.95) !important;
   backdrop-filter: none !important;
@@ -3746,6 +4064,7 @@ body {
       <option value="stellar">Stellar Nebula</option>
       <option value="forest">Forest Canopy</option>
       <option value="hacker">Hacker Root</option>
+      <option value="minimal">Minimal CLI</option>
       <option value="crt">CRT Retro</option>
     </select>
 
@@ -3804,7 +4123,7 @@ function migrateColorScheme(name) {
 }
 
 function migrateTheme(data) {
-  const valid = new Set(['cli', 'codecli', 'cyber', 'fantasy', 'stellar', 'forest', 'hacker', 'crt']);
+  const valid = new Set(['cli', 'codecli', 'cyber', 'fantasy', 'stellar', 'forest', 'hacker', 'minimal', 'crt']);
   if (data.theme === 'crt' || data.layout === 'crt') return 'crt';
   if (data.theme && valid.has(data.theme)) return data.theme;
   if (data.theme === 'cli' || data.theme === 'default') return 'cli';
@@ -4089,6 +4408,7 @@ const THEMES = {
   stellar: { class: 'theme-stellar', label: 'Stellar Nebula', showStatusBar: true, sendLabel: '⏎ TRANSMIT' },
   forest: { class: 'theme-forest', label: 'Forest Canopy', showStatusBar: true, sendLabel: '🌱 SEND' },
   hacker: { class: 'theme-hacker', label: 'Hacker Root', showStatusBar: true, sendLabel: '[ EXEC ]' },
+  minimal: { class: 'theme-minimal', label: 'Minimal CLI', showStatusBar: true, sendLabel: '⏎' },
   crt: { class: 'theme-crt', label: 'CRT Retro', showStatusBar: true, sendLabel: '[ SEND ]' },
 };
 
@@ -4127,7 +4447,9 @@ function setMatrixRain(active) {
 function updateBannerThemeIcon(themeId) {
   const icon = document.getElementById('banner-theme-icon');
   if (!icon) return;
-  icon.textContent = themeId === 'hacker' ? '⧫' : '';
+  if (themeId === 'hacker') icon.textContent = '⧫';
+  else if (themeId === 'minimal') icon.textContent = '$';
+  else icon.textContent = '';
 }
 
 function applyColor() {
