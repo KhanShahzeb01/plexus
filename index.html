@@ -756,7 +756,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  overflow-y: auto;
+  overflow: hidden;
+  min-height: 0;
+  align-self: stretch;
   font-size: 12px;
 }
 @media (max-width: 800px) {
@@ -794,6 +796,14 @@ body {
 #side-panel .sp-section {
   padding-top: 8px;
   border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#side-panel .sp-section.sp-chats-section {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 #side-panel .sp-section:first-child { border-top: none; padding-top: 0; }
 #side-panel .sp-row {
@@ -862,8 +872,14 @@ body {
   margin-right: 4px;
 }
 #side-panel .sp-footer { margin-top: auto; font-size: 9px; color: var(--accent); padding-top: 8px; border-top: 1px solid var(--border); }
-/* Sessions list */
-#sp-sessions { margin-bottom: 4px; max-height: 120px; overflow-y: auto; }
+/* Sessions list — only this region scrolls */
+#sp-sessions {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-bottom: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 .sp-sess {
   display: flex;
   justify-content: space-between;
@@ -892,7 +908,9 @@ body {
   padding: 3px;
   cursor: pointer;
   margin-bottom: 6px;
+  flex-shrink: 0;
 }
+#side-panel .sp-chats-section .sp-title { flex-shrink: 0; }
 .sp-new-btn:hover { border-color: var(--accent); }
 /* Mobile responsive */
 @media (max-width: 600px) {
@@ -4737,7 +4755,7 @@ body #banner pre {
 
 <!-- Side panel -->
 <div id="side-panel">
-  <div class="sp-section">
+  <div class="sp-section sp-chats-section">
     <div class="sp-title">Chats</div>
     <button class="sp-new-btn" id="sp-new-sess">+ New</button>
     <div id="sp-sessions"></div>
@@ -5088,9 +5106,22 @@ function saveSessionStore() {
 }
 function getSessionName(msgs) {
   for (const m of msgs) {
-    if (m.role === 'user') return m.content.substring(0, 40);
+    if (m.role === 'user') {
+      const text = (m.content || '').trim().replace(/\s+/g, ' ');
+      if (!text) continue;
+      const words = text.split(' ').filter(Boolean);
+      if (!words.length) continue;
+      const preview = words.slice(0, 6).join(' ');
+      return preview.length > 42 ? preview.slice(0, 42).trim() + '…' : preview;
+    }
   }
   return 'New Chat';
+}
+
+function getSessionDisplayName(session) {
+  const fromMessages = getSessionName(session?.messages || []);
+  if (fromMessages !== 'New Chat') return fromMessages;
+  return session?.name || 'New Chat';
 }
 function loadSession(sessionId) {
   const store = loadSessionStore();
@@ -5142,7 +5173,7 @@ function renderSessionList() {
   const sorted = Object.entries(store.sessions).sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0));
   el.innerHTML = sorted.map(([id, s]) =>
     `<div class="sp-sess ${id === store.activeId ? 'active' : ''}" data-id="${id}">
-      <span class="sp-sess-name">${(s.name || 'Chat').substring(0, 30)}</span>
+      <span class="sp-sess-name">${escapeHtml(getSessionDisplayName(s))}</span>
       <span class="sp-sess-del" data-id="${id}">✕</span>
     </div>`
   ).join('');
