@@ -67,10 +67,148 @@ body {
   flex: 1;
   min-height: 0;
 }
-#input-area {
+#input-footer {
   position: sticky;
   bottom: 0;
   z-index: 10;
+  flex-shrink: 0;
+  border-top: 2px solid var(--text-dim);
+  background: var(--surface);
+}
+#input-area {
+  flex-shrink: 0;
+  background: var(--surface);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#kbd-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 12px 8px;
+  border-top: 1px solid var(--border);
+}
+.kbd-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface2);
+  color: var(--text-dim);
+  font-family: var(--font);
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.kbd-hint:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.kbd-hint kbd {
+  font-family: inherit;
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-bright);
+}
+.kbd-hint.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+#shortcuts-overlay,
+#cmd-palette-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 16px 16px;
+}
+#shortcuts-overlay.active,
+#cmd-palette-overlay.active { display: flex; }
+#shortcuts-panel,
+#cmd-palette {
+  width: min(520px, 100%);
+  max-height: min(70vh, 560px);
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+#shortcuts-panel h2,
+#cmd-palette h2 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--text-bright);
+}
+.shortcuts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.shortcuts-table td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.shortcuts-table td:last-child { text-align: right; white-space: nowrap; }
+.shortcuts-table kbd {
+  font-family: inherit;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-bright);
+}
+#cmd-palette-input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text-bright);
+  font-family: var(--font);
+  font-size: 13px;
+}
+#cmd-palette-input:focus { outline: none; border-color: var(--accent); }
+.cmd-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.cmd-item.selected,
+.cmd-item:hover {
+  background: var(--surface2);
+  color: var(--text-bright);
+}
+.cmd-item kbd {
+  font-family: inherit;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  white-space: nowrap;
 }
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
@@ -421,16 +559,7 @@ body {
 .plan-answer {
   margin-top: 4px;
 }
-/* Input area */
-#input-area {
-  flex-shrink: 0;
-  border-top: 2px solid var(--text-dim);
-  background: var(--surface);
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+/* Input area — see #input-footer for sticky wrapper */
 #input-extras {
   display: flex;
   align-items: center;
@@ -4797,6 +4926,7 @@ body #banner pre {
 </div><!-- /chat-row -->
 
 <!-- Input area -->
+<div id="input-footer">
 <div id="input-area">
   <div id="input-extras">
     <button id="file-btn" title="Attach file">📎</button>
@@ -4811,8 +4941,35 @@ body #banner pre {
   <button id="stop-btn" aria-label="Stop">⏹</button>
   <button id="send-btn" disabled aria-label="Send">→</button>
 </div>
+<div id="kbd-hints">
+  <button type="button" class="kbd-hint" data-action="new-chat"><kbd id="kbd-new"></kbd> New chat</button>
+  <button type="button" class="kbd-hint" data-action="export"><kbd id="kbd-export"></kbd> Export</button>
+  <button type="button" class="kbd-hint" data-action="plan" id="kbd-plan-btn"><kbd id="kbd-plan"></kbd> <span id="kbd-plan-label">Plan</span></button>
+  <button type="button" class="kbd-hint" data-action="shortcuts"><kbd id="kbd-help"></kbd> Shortcuts</button>
+</div>
+</div>
 
 </div><!-- /app-row -->
+
+<!-- Command palette -->
+<div id="cmd-palette-overlay">
+  <div id="cmd-palette">
+    <h2>Command palette</h2>
+    <input type="text" id="cmd-palette-input" placeholder="Search commands…" autocomplete="off">
+    <div id="cmd-palette-list"></div>
+  </div>
+</div>
+
+<!-- Keyboard shortcuts help -->
+<div id="shortcuts-overlay">
+  <div id="shortcuts-panel">
+    <h2>Keyboard shortcuts</h2>
+    <table class="shortcuts-table" id="shortcuts-table"></table>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn primary" id="shortcuts-close" type="button">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- Settings modal -->
 <div id="settings-overlay">
@@ -6093,13 +6250,15 @@ ${summary}` },
   },
 };
 
-async function runStructuredAnalysis(query, { parallel = false, qualityGate = false } = {}) {
+async function runStructuredAnalysis(query, { parallel = false, qualityGate = false, appendUser = true } = {}) {
   if (isStreaming || !state.apiKey) return;
 
   const userContent = query.trim();
-  addMessage('query', userContent);
-  state.messages.push({ role: 'user', content: userContent });
-  saveState();
+  if (appendUser) {
+    addMessage('query', userContent);
+    state.messages.push({ role: 'user', content: userContent });
+    saveState();
+  }
 
   const fileContext = uploadedText.trim()
     ? `\n\nAttached file context (${uploadedFile ? uploadedFile.name : 'file'}):\n${uploadedText.trim().substring(0, 50000)}`
@@ -6281,13 +6440,15 @@ async function doDeepResearch(query) {
 }
 
 // ─── OpenRouter API call ───────────────────────────────────────────────
-async function sendMessage(userText) {
+async function sendMessage(userText, { appendUser = true } = {}) {
   if (isStreaming || !userText.trim() || !state.apiKey) return;
 
   // Add user message
-  addMessage('query', userText.trim());
-  state.messages.push({ role: 'user', content: userText.trim() });
-  saveState();
+  if (appendUser) {
+    addMessage('query', userText.trim());
+    state.messages.push({ role: 'user', content: userText.trim() });
+    saveState();
+  }
 
   // Add placeholder response
   const { div: responseDiv, body: responseBody } = addMessage('response', '', true);
@@ -6518,6 +6679,7 @@ function setPersona(name) {
 function setPlanMode(enabled) {
   state.planMode = !!enabled;
   updatePlanBadge();
+  updateKbdHints();
   saveState();
   return true;
 }
@@ -6673,28 +6835,34 @@ function handleSlashCommand(cmd, args) {
         '',
         '---',
         '',
+        '## Keyboard shortcuts',
+        '',
+        '| Action | Shortcut |',
+        '|---|---|',
+        '| Focus input | `Ctrl/Cmd+J` |',
+        '| New chat | `Ctrl/Cmd+N` |',
+        '| Stop generation | `Esc` |',
+        '| Settings | `Ctrl/Cmd+,` |',
+        '| Export chat | `Ctrl/Cmd+E` |',
+        '| Toggle plan mode | `Ctrl/Cmd+P` |',
+        '| Command palette | `Ctrl/Cmd+K` |',
+        '| Shortcuts help | `Ctrl/Cmd+/` |',
+        '| Copy last response | `Ctrl/Cmd+Shift+C` |',
+        '| Regenerate last response | `Ctrl/Cmd+Shift+R` |',
+        '| Next / previous session | `Ctrl/Cmd+]` / `Ctrl/Cmd+[` |',
+        '| Clear chat | `Ctrl/Cmd+Shift+L` |',
+        '',
+        'Press **Ctrl/Cmd+/** anytime for the full shortcuts panel.',
+        '',
+        '---',
+        '',
         '**Tips:** Theme + Persona stack together. `Shift+Enter` for newline. Attach files via 📎. Type `/` for autocomplete.',
       ].join('\n');
       addMessage('response', helpText);
       return true;
 
     case '/export':
-      if (state.messages.length === 0) {
-        addMessage('response', 'Nothing to export yet.');
-        return true;
-      }
-      const exportText = state.messages.map(m => {
-        const role = m.role === 'user' ? '## Query' : '## Response';
-        return `${role}\n${m.content}\n`;
-      }).join('\n');
-      const blob = new Blob([exportText], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `plexus-${new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')}.md`;
-      a.click();
-      URL.revokeObjectURL(url);
-      addMessage('response', `Conversation exported as \`${a.download}\``);
+      exportConversation();
       return true;
 
     case '/mode':
@@ -6927,25 +7095,316 @@ inputEl.addEventListener('keydown', (e) => {
 });
 
 // Global keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey || e.metaKey) {
-    if (e.key === 'k' || e.key === 'K') {
-      e.preventDefault();
-      settingsOverlay.classList.contains('active') ? closeSettings() : openSettings();
-    }
-    if (e.key === 'l' || e.key === 'L') {
-      e.preventDefault();
-      state.messages = [];
-      state.totalTokensIn = 0;
-      state.totalTokensOut = 0;
-      saveState();
-      tipsEl.style.display = 'block';
-      chatEl.querySelectorAll('.message').forEach(el => el.remove());
-      chatEl.querySelectorAll('.error-msg').forEach(el => el.remove());
-      updateSidePanel();
-      addMessage('response', 'Chat cleared. Use /help for commands.');
+const cmdPaletteOverlay = document.getElementById('cmd-palette-overlay');
+const cmdPaletteInput = document.getElementById('cmd-palette-input');
+const cmdPaletteList = document.getElementById('cmd-palette-list');
+const shortcutsOverlay = document.getElementById('shortcuts-overlay');
+const shortcutsTable = document.getElementById('shortcuts-table');
+const shortcutsClose = document.getElementById('shortcuts-close');
+const IS_MAC = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
+
+function modKeyLabel() { return IS_MAC ? '⌘' : 'Ctrl'; }
+function fmtShortcut(key, { shift = false } = {}) {
+  const mod = modKeyLabel();
+  return shift ? `${mod}+Shift+${key}` : `${mod}+${key}`;
+}
+
+function exportConversation({ notify = true } = {}) {
+  if (state.messages.length === 0) {
+    if (notify) addMessage('response', 'Nothing to export yet.');
+    return false;
+  }
+  const exportText = state.messages.map(m => {
+    const role = m.role === 'user' ? '## Query' : '## Response';
+    return `${role}\n${m.content}\n`;
+  }).join('\n');
+  const blob = new Blob([exportText], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `plexus-${new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+  if (notify) addMessage('response', `Conversation exported as \`${a.download}\``);
+  return true;
+}
+
+function clearCurrentChat(notify = true) {
+  state.messages = [];
+  state.totalTokensIn = 0;
+  state.totalTokensOut = 0;
+  saveState();
+  tipsEl.style.display = 'block';
+  chatEl.querySelectorAll('.message').forEach(el => el.remove());
+  chatEl.querySelectorAll('.error-msg').forEach(el => el.remove());
+  updateSidePanel();
+  if (notify) addMessage('response', 'Chat cleared. Use /help for commands.');
+}
+
+function stopGeneration() {
+  if (abortController) {
+    abortController.abort();
+    abortController = null;
+  }
+  stopBtn.classList.remove('active');
+}
+
+function focusInput() {
+  inputEl.focus();
+  const len = inputEl.value.length;
+  inputEl.selectionStart = inputEl.selectionEnd = len;
+}
+
+function togglePlanModeQuiet() {
+  setPlanMode(!state.planMode);
+}
+
+function getSortedSessionIds() {
+  const store = loadSessionStore();
+  return Object.entries(store.sessions)
+    .sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0))
+    .map(([id]) => id);
+}
+
+function switchSessionByDelta(delta) {
+  if (isStreaming) return;
+  const store = loadSessionStore();
+  const ids = getSortedSessionIds();
+  const idx = ids.indexOf(store.activeId);
+  if (idx === -1) return;
+  const next = ids[(idx + delta + ids.length) % ids.length];
+  if (next !== store.activeId) loadSession(next);
+}
+
+function copyLastResponse() {
+  for (let i = state.messages.length - 1; i >= 0; i--) {
+    if (state.messages[i].role === 'assistant') {
+      copyText(state.messages[i].content);
+      return true;
     }
   }
+  return false;
+}
+
+function regenerateLastResponse() {
+  if (isStreaming || !state.apiKey) return;
+  let userText = '';
+  for (let i = state.messages.length - 1; i >= 0; i--) {
+    if (state.messages[i].role === 'user') {
+      userText = state.messages[i].content;
+      break;
+    }
+  }
+  if (!userText) return;
+
+  if (state.messages.length && state.messages[state.messages.length - 1].role === 'assistant') {
+    state.messages.pop();
+    saveState();
+  }
+  const responseMsgs = chatEl.querySelectorAll('.message.response');
+  if (responseMsgs.length) responseMsgs[responseMsgs.length - 1].remove();
+  chatEl.querySelectorAll('.error-msg').forEach(el => el.remove());
+
+  if (state.planMode) {
+    runStructuredAnalysis(userText, { parallel: true, qualityGate: true, appendUser: false });
+  } else {
+    sendMessage(userText, { appendUser: false });
+  }
+}
+
+const SHORTCUT_ROWS = [
+  ['Focus input', () => fmtShortcut('J')],
+  ['New chat', () => fmtShortcut('N')],
+  ['Stop generation', () => 'Esc'],
+  ['Settings', () => `${modKeyLabel()}+,`],
+  ['Export chat', () => fmtShortcut('E')],
+  ['Toggle plan mode', () => fmtShortcut('P')],
+  ['Command palette', () => fmtShortcut('K')],
+  ['Shortcuts help', () => fmtShortcut('/')],
+  ['Copy last response', () => fmtShortcut('C', { shift: true })],
+  ['Regenerate last response', () => fmtShortcut('R', { shift: true })],
+  ['Next session', () => fmtShortcut(']')],
+  ['Previous session', () => fmtShortcut('[')],
+  ['Clear chat', () => fmtShortcut('L', { shift: true })],
+];
+
+function renderShortcutsTable() {
+  if (!shortcutsTable) return;
+  shortcutsTable.innerHTML = SHORTCUT_ROWS.map(([label, keyFn]) =>
+    `<tr><td>${label}</td><td><kbd>${keyFn()}</kbd></td></tr>`
+  ).join('');
+}
+
+function openShortcutsHelp() {
+  renderShortcutsTable();
+  shortcutsOverlay?.classList.add('active');
+}
+
+function closeShortcutsHelp() {
+  shortcutsOverlay?.classList.remove('active');
+}
+
+const PALETTE_COMMANDS = [
+  { label: 'New chat', keys: () => fmtShortcut('N'), keywords: 'new session chat', run: () => newSession() },
+  { label: 'Export chat', keys: () => fmtShortcut('E'), keywords: 'export download markdown', run: () => exportConversation({ notify: false }) },
+  { label: 'Toggle plan mode', keys: () => fmtShortcut('P'), keywords: 'plan structured analysis', run: togglePlanModeQuiet },
+  { label: 'Open settings', keys: () => `${modKeyLabel()}+,`, keywords: 'settings api key model', run: openSettings },
+  { label: 'Clear chat', keys: () => fmtShortcut('L', { shift: true }), keywords: 'clear reset conversation', run: () => clearCurrentChat(false) },
+  { label: 'Copy last response', keys: () => fmtShortcut('C', { shift: true }), keywords: 'copy assistant', run: copyLastResponse },
+  { label: 'Regenerate last response', keys: () => fmtShortcut('R', { shift: true }), keywords: 'regenerate retry', run: regenerateLastResponse },
+  { label: 'Next session', keys: () => fmtShortcut(']'), keywords: 'session chat switch', run: () => switchSessionByDelta(1) },
+  { label: 'Previous session', keys: () => fmtShortcut('['), keywords: 'session chat switch', run: () => switchSessionByDelta(-1) },
+  { label: 'Keyboard shortcuts', keys: () => fmtShortcut('/'), keywords: 'help shortcuts keys', run: openShortcutsHelp },
+  { label: 'Show slash commands', keys: () => '/help', keywords: 'help commands slash', run: () => handleSlashCommand('/help', '') },
+];
+
+let paletteIndex = 0;
+let paletteFiltered = PALETTE_COMMANDS.slice();
+
+function renderCommandPalette() {
+  if (!cmdPaletteList) return;
+  cmdPaletteList.innerHTML = paletteFiltered.map((cmd, i) =>
+    `<div class="cmd-item${i === paletteIndex ? ' selected' : ''}" data-index="${i}">
+      <span>${cmd.label}</span>
+      <kbd>${cmd.keys()}</kbd>
+    </div>`
+  ).join('');
+}
+
+function openCommandPalette() {
+  paletteFiltered = PALETTE_COMMANDS.slice();
+  paletteIndex = 0;
+  renderCommandPalette();
+  cmdPaletteOverlay?.classList.add('active');
+  cmdPaletteInput.value = '';
+  setTimeout(() => cmdPaletteInput?.focus(), 0);
+}
+
+function closeCommandPalette() {
+  cmdPaletteOverlay?.classList.remove('active');
+}
+
+function runPaletteCommand(index) {
+  const cmd = paletteFiltered[index];
+  if (!cmd) return;
+  closeCommandPalette();
+  cmd.run();
+  updateKbdHints();
+}
+
+function filterCommandPalette(query) {
+  const q = query.trim().toLowerCase();
+  paletteFiltered = !q
+    ? PALETTE_COMMANDS.slice()
+    : PALETTE_COMMANDS.filter(cmd =>
+        cmd.label.toLowerCase().includes(q) || cmd.keywords.includes(q)
+      );
+  paletteIndex = 0;
+  renderCommandPalette();
+}
+
+function updateKbdHints() {
+  const mod = modKeyLabel();
+  const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  set('kbd-new', `${mod}+N`);
+  set('kbd-export', `${mod}+E`);
+  set('kbd-plan', `${mod}+P`);
+  set('kbd-help', `${mod}+/`);
+  const planBtn = document.getElementById('kbd-plan-btn');
+  const planLabel = document.getElementById('kbd-plan-label');
+  if (planLabel) planLabel.textContent = state.planMode ? 'Plan on' : 'Plan off';
+  if (planBtn) planBtn.classList.toggle('active', !!state.planMode);
+}
+
+document.getElementById('kbd-hints')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('.kbd-hint');
+  if (!btn) return;
+  switch (btn.dataset.action) {
+    case 'new-chat': newSession(); break;
+    case 'export': exportConversation({ notify: false }); break;
+    case 'plan': togglePlanModeQuiet(); break;
+    case 'shortcuts': openShortcutsHelp(); break;
+  }
+  updateKbdHints();
+  focusInput();
+});
+
+cmdPaletteInput?.addEventListener('input', () => filterCommandPalette(cmdPaletteInput.value));
+cmdPaletteInput?.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    paletteIndex = Math.min(paletteIndex + 1, paletteFiltered.length - 1);
+    renderCommandPalette();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    paletteIndex = Math.max(paletteIndex - 1, 0);
+    renderCommandPalette();
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    runPaletteCommand(paletteIndex);
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    closeCommandPalette();
+  }
+});
+cmdPaletteList?.addEventListener('mousedown', (e) => {
+  const item = e.target.closest('.cmd-item');
+  if (!item) return;
+  e.preventDefault();
+  runPaletteCommand(parseInt(item.dataset.index, 10));
+});
+cmdPaletteOverlay?.addEventListener('click', (e) => {
+  if (e.target === cmdPaletteOverlay) closeCommandPalette();
+});
+shortcutsClose?.addEventListener('click', closeShortcutsHelp);
+shortcutsOverlay?.addEventListener('click', (e) => {
+  if (e.target === shortcutsOverlay) closeShortcutsHelp();
+});
+
+function isEditableTarget(el) {
+  if (!el) return false;
+  const tag = el.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+}
+
+document.addEventListener('keydown', (e) => {
+  const mod = e.ctrlKey || e.metaKey;
+  const inPalette = cmdPaletteOverlay?.classList.contains('active');
+  const inShortcuts = shortcutsOverlay?.classList.contains('active');
+  const inSettings = settingsOverlay.classList.contains('active');
+
+  if (e.key === 'Escape') {
+    if (inPalette) { e.preventDefault(); closeCommandPalette(); return; }
+    if (inShortcuts) { e.preventDefault(); closeShortcutsHelp(); return; }
+    if (inSettings) { e.preventDefault(); closeSettings(); return; }
+    if (isStreaming) { e.preventDefault(); stopGeneration(); return; }
+    return;
+  }
+
+  if (!mod) return;
+
+  const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  const typing = isEditableTarget(e.target) && e.target !== cmdPaletteInput;
+
+  if (typing) {
+    const allowed = ['j', 'k', 'p', 'e', 'n', ',', '/', '[', ']'];
+    const shiftAllowed = ['c', 'r', 'l'];
+    if (!allowed.includes(key) && !(e.shiftKey && shiftAllowed.includes(key))) return;
+  }
+
+  if (key === 'j') { e.preventDefault(); focusInput(); return; }
+  if (key === 'n') { e.preventDefault(); newSession(); updateKbdHints(); return; }
+  if (key === 'e') { e.preventDefault(); exportConversation({ notify: false }); return; }
+  if (key === 'p') { e.preventDefault(); togglePlanModeQuiet(); return; }
+  if (key === 'k') { e.preventDefault(); openCommandPalette(); return; }
+  if (key === ',') { e.preventDefault(); inSettings ? closeSettings() : openSettings(); return; }
+  if (key === '/' || e.code === 'Slash') { e.preventDefault(); openShortcutsHelp(); return; }
+  if (key === ']') { e.preventDefault(); switchSessionByDelta(1); return; }
+  if (key === '[') { e.preventDefault(); switchSessionByDelta(-1); return; }
+
+  if (e.shiftKey && key === 'c') { e.preventDefault(); copyLastResponse(); return; }
+  if (e.shiftKey && key === 'r') { e.preventDefault(); regenerateLastResponse(); return; }
+  if (e.shiftKey && key === 'l') { e.preventDefault(); clearCurrentChat(); return; }
 });
 
 // Click on suggestion
@@ -6967,13 +7426,7 @@ document.addEventListener('mousedown', (e) => {
 sendBtn.addEventListener('click', handleSubmit);
 
 // Stop button
-stopBtn.addEventListener('click', () => {
-  if (abortController) {
-    abortController.abort();
-    abortController = null;
-  }
-  stopBtn.classList.remove('active');
-});
+stopBtn.addEventListener('click', stopGeneration);
 
 // Side panel temperature slider
 let uploadedFile = null;
@@ -7149,34 +7602,16 @@ function checkApiKey() {
 }
 
 clearChatBtn.addEventListener('click', () => {
-  state.messages = [];
-  state.totalTokensIn = 0;
-  state.totalTokensOut = 0;
-  saveState();
+  clearCurrentChat(false);
   restoreMessages();
-  updateSidePanel();
   showSettingsStatus('Chat cleared', 'info');
 });
 
 exportChatBtn.addEventListener('click', () => {
-  const text = state.messages.map(m => {
-    const role = m.role === 'user' ? '## Query' : '## Response';
-    return `${role}\n${m.content}\n`;
-  }).join('\n');
-  const blob = new Blob([text], { type: 'text/markdown' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `plexus-${new Date().toISOString().slice(0, 19).replace(/[:-]/g, '')}.md`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showSettingsStatus('Chat exported as markdown', 'ok');
-});
-
-// ─── Keyboard shortcut for settings ────────────────────────────────────
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && settingsOverlay.classList.contains('active')) {
-    closeSettings();
+  if (exportConversation({ notify: false })) {
+    showSettingsStatus('Chat exported as markdown', 'ok');
+  } else {
+    showSettingsStatus('Nothing to export yet', 'info');
   }
 });
 
@@ -7209,6 +7644,8 @@ if (personaName === 'none') {
 }
 
 updatePlanBadge();
+updateKbdHints();
+renderShortcutsTable();
 document.getElementById('plan-badge')?.addEventListener('click', () => {
   setPlanMode(!state.planMode);
   addMessage('response', state.planMode
