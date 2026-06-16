@@ -37,105 +37,117 @@ function migrateTheme(data) {
   return 'cli';
 }
 
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STATE_KEY);
-    const data = raw ? JSON.parse(raw) : {};
-    return {
-      apiKey: data.apiKey || '',
-      model: data.model || 'openai/gpt-oss-120b:free',
-      systemPrompt: data.systemPrompt || '',
-      messages: Array.isArray(data.messages) ? data.messages : [],
-      mode: data.mode || 'general',
-      persona: data.persona || 'none',
-      planMode: !!data.planMode,
-      fontSize: data.fontSize || '14px',
-      fontFamily: data.fontFamily || '',
-      colorScheme: migrateColorScheme(data.colorScheme || data.theme),
-      theme: migrateTheme(data),
-      temperature: data.temperature ?? 0.7,
-      topP: data.topP ?? 1.0,
-      totalTokensIn: data.totalTokensIn || 0,
-      totalTokensOut: data.totalTokensOut || 0,
-      lifetimeTokensIn: data.lifetimeTokensIn || 0,
-      lifetimeTokensOut: data.lifetimeTokensOut || 0,
-      researchWebSearch: data.researchWebSearch !== false,
-      webSearchModel: data.webSearchModel || 'google/gemini-2.5-flash',
-      codeTheme: data.codeTheme || 'atom-one-dark',
-      planMinQuestions: data.planMinQuestions ?? 3,
-      planMaxQuestions: data.planMaxQuestions ?? 14,
-      planParallel: data.planParallel !== false,
-      planQualityGate: data.planQualityGate !== false,
-      researchParallel: !!data.researchParallel,
-      researchQualityGate: !!data.researchQualityGate,
-    };
-  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '', colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0, researchWebSearch: true, webSearchModel: 'google/gemini-2.5-flash', codeTheme: 'atom-one-dark', planMinQuestions: 3, planMaxQuestions: 14, planParallel: true, planQualityGate: true, researchParallel: false, researchQualityGate: false }; }
+function defaultStateData() {
+  return {
+    apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [],
+    mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '',
+    colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0,
+    totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0,
+    researchWebSearch: true, webSearchModel: 'google/gemini-2.5-flash', codeTheme: 'atom-one-dark',
+    planMinQuestions: 3, planMaxQuestions: 14, planParallel: true, planQualityGate: true,
+    researchParallel: false, researchQualityGate: false,
+  };
 }
+
+function parseStateFromData(data) {
+  return {
+    apiKey: data.apiKey || '',
+    model: data.model || 'openai/gpt-oss-120b:free',
+    systemPrompt: data.systemPrompt || '',
+    messages: Array.isArray(data.messages) ? data.messages : [],
+    mode: data.mode || 'general',
+    persona: data.persona || 'none',
+    planMode: !!data.planMode,
+    fontSize: data.fontSize || '14px',
+    fontFamily: data.fontFamily || '',
+    colorScheme: migrateColorScheme(data.colorScheme || data.theme),
+    theme: migrateTheme(data),
+    temperature: data.temperature ?? 0.7,
+    topP: data.topP ?? 1.0,
+    totalTokensIn: data.totalTokensIn || 0,
+    totalTokensOut: data.totalTokensOut || 0,
+    lifetimeTokensIn: data.lifetimeTokensIn || 0,
+    lifetimeTokensOut: data.lifetimeTokensOut || 0,
+    researchWebSearch: data.researchWebSearch !== false,
+    webSearchModel: data.webSearchModel || 'google/gemini-2.5-flash',
+    codeTheme: data.codeTheme || 'atom-one-dark',
+    planMinQuestions: data.planMinQuestions ?? 3,
+    planMaxQuestions: data.planMaxQuestions ?? 14,
+    planParallel: data.planParallel !== false,
+    planQualityGate: data.planQualityGate !== false,
+    researchParallel: !!data.researchParallel,
+    researchQualityGate: !!data.researchQualityGate,
+  };
+}
+
+function buildStatePayload() {
+  return {
+    apiKey: state.apiKey,
+    model: state.model,
+    systemPrompt: state.systemPrompt,
+    messages: state.messages,
+    mode: state.mode || 'general',
+    persona: state.persona || 'none',
+    planMode: !!state.planMode,
+    fontSize: state.fontSize,
+    fontFamily: state.fontFamily,
+    colorScheme: state.colorScheme || 'sage',
+    theme: state.theme || 'cli',
+    temperature: state.temperature ?? 0.7,
+    topP: state.topP ?? 1.0,
+    totalTokensIn: state.totalTokensIn || 0,
+    totalTokensOut: state.totalTokensOut || 0,
+    lifetimeTokensIn: state.lifetimeTokensIn || 0,
+    lifetimeTokensOut: state.lifetimeTokensOut || 0,
+    researchWebSearch: state.researchWebSearch !== false,
+    webSearchModel: state.webSearchModel || 'google/gemini-2.5-flash',
+    codeTheme: state.codeTheme || 'atom-one-dark',
+    planMinQuestions: state.planMinQuestions ?? 3,
+    planMaxQuestions: state.planMaxQuestions ?? 14,
+    planParallel: state.planParallel !== false,
+    planQualityGate: state.planQualityGate !== false,
+    researchParallel: !!state.researchParallel,
+    researchQualityGate: !!state.researchQualityGate,
+  };
+}
+
+let saveChain = Promise.resolve();
+async function persistAllAsync() {
+  if (StorageCrypto.isEnabled() && !StorageCrypto.isUnlocked()) return;
+  await StorageCrypto.writeJson(STATE_KEY, buildStatePayload());
+  const store = loadSessionStore();
+  store.sessions[store.activeId] = {
+    name: store.sessions[store.activeId]?.name || getSessionName(state.messages),
+    messages: state.messages,
+    mode: state.mode,
+    persona: state.persona,
+    planMode: !!state.planMode,
+    model: state.model,
+    temperature: state.temperature,
+    topP: state.topP,
+    totalTokensIn: state.totalTokensIn,
+    totalTokensOut: state.totalTokensOut,
+    systemPrompt: state.systemPrompt,
+    updatedAt: Date.now(),
+  };
+  sessionStoreCache = store;
+  await StorageCrypto.writeJson(SESSION_KEY, store);
+}
+
 function saveState() {
-  try {
-    const data = {
-      apiKey: state.apiKey,
-      model: state.model,
-      systemPrompt: state.systemPrompt,
-      messages: state.messages,
-      mode: state.mode || 'general',
-      persona: state.persona || 'none',
-      planMode: !!state.planMode,
-      fontSize: state.fontSize,
-      fontFamily: state.fontFamily,
-      colorScheme: state.colorScheme || 'sage',
-      theme: state.theme || 'cli',
-      temperature: state.temperature ?? 0.7,
-      topP: state.topP ?? 1.0,
-      totalTokensIn: state.totalTokensIn || 0,
-      totalTokensOut: state.totalTokensOut || 0,
-      lifetimeTokensIn: state.lifetimeTokensIn || 0,
-      lifetimeTokensOut: state.lifetimeTokensOut || 0,
-      researchWebSearch: state.researchWebSearch !== false,
-      webSearchModel: state.webSearchModel || 'google/gemini-2.5-flash',
-      codeTheme: state.codeTheme || 'atom-one-dark',
-      planMinQuestions: state.planMinQuestions ?? 3,
-      planMaxQuestions: state.planMaxQuestions ?? 14,
-      planParallel: state.planParallel !== false,
-      planQualityGate: state.planQualityGate !== false,
-      researchParallel: !!state.researchParallel,
-      researchQualityGate: !!state.researchQualityGate,
-    };
-    localStorage.setItem(STATE_KEY, JSON.stringify(data));
-    // Update session store
-    saveSessionStore();
-  } catch {}
+  saveChain = saveChain.then(() => persistAllAsync()).catch(() => {});
 }
 
 // ─── Sessions ──────────────────────────────────────────────────────────
 const SESSION_KEY = 'plexus_sessions';
+let sessionStoreCache = { sessions: {}, activeId: 'default' };
+
 function loadSessionStore() {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    const data = raw ? JSON.parse(raw) : {};
-    return { sessions: data.sessions || {}, activeId: data.activeId || 'default' };
-  } catch { return { sessions: {}, activeId: 'default' }; }
+  return sessionStoreCache;
 }
+
 function saveSessionStore() {
-  try {
-    const store = loadSessionStore();
-    // Update current session's data
-    store.sessions[store.activeId] = {
-      name: store.sessions[store.activeId]?.name || getSessionName(state.messages),
-      messages: state.messages,
-      mode: state.mode,
-      persona: state.persona,
-      planMode: !!state.planMode,
-      model: state.model,
-      temperature: state.temperature,
-      topP: state.topP,
-      totalTokensIn: state.totalTokensIn,
-      totalTokensOut: state.totalTokensOut,
-      systemPrompt: state.systemPrompt,
-      updatedAt: Date.now(),
-    };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(store));
-  } catch {}
+  saveState();
 }
 function getSessionName(msgs) {
   for (const m of msgs) {
@@ -174,7 +186,7 @@ function loadSession(sessionId) {
   state.totalTokensOut = s.totalTokensOut || 0;
   state.systemPrompt = s.systemPrompt || '';
   store.activeId = sessionId;
-  localStorage.setItem(SESSION_KEY, JSON.stringify(store));
+  sessionStoreCache = store;
   saveState();
   restoreMessages();
   renderSessionList();
@@ -189,7 +201,7 @@ function newSession() {
   const id = 'sess_' + Date.now();
   store.sessions[id] = { name: 'New Chat', messages: [], mode: 'general', persona: 'none', planMode: false, model: state.model, temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, systemPrompt: '', updatedAt: Date.now() };
   store.activeId = id;
-  localStorage.setItem(SESSION_KEY, JSON.stringify(store));
+  sessionStoreCache = store;
   state.messages = [];
   state.planMode = false;
   state.totalTokensIn = 0;
@@ -232,29 +244,21 @@ function renderSessionList() {
         const remaining = Object.keys(store2.sessions);
         store2.activeId = remaining[0];
       }
-      localStorage.setItem(SESSION_KEY, JSON.stringify(store2));
+      sessionStoreCache = store2;
       if (store2.activeId === id) { /* already changed */ }
       // Reload if active was deleted
       if (state.sessionId === id) {
         const newStore = loadSessionStore();
         loadSession(newStore.activeId);
       } else {
+        saveState();
         renderSessionList();
       }
     });
   });
 }
-let state = loadState();
-// Initialize session store with default if needed
-(function initSessions() {
-  const store = loadSessionStore();
-  if (!store.sessions[store.activeId]) {
-    store.sessions[store.activeId] = { name: getSessionName(state.messages), messages: state.messages, mode: state.mode, persona: state.persona, planMode: !!state.planMode, model: state.model, temperature: state.temperature, topP: state.topP, totalTokensIn: state.totalTokensIn, totalTokensOut: state.totalTokensOut, systemPrompt: state.systemPrompt, updatedAt: Date.now() };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(store));
-  }
-  state.sessionId = store.activeId;
-  renderSessionList();
-})();
+let state = parseStateFromData(defaultStateData());
+let appBootstrapped = false;
 let isStreaming = false;
 let abortController = null;
 let autoScroll = true;
@@ -290,6 +294,23 @@ const planParallelInput = document.getElementById('plan-parallel');
 const planQualityGateInput = document.getElementById('plan-quality-gate');
 const researchParallelInput = document.getElementById('research-parallel');
 const researchQualityGateInput = document.getElementById('research-quality-gate');
+const lockOverlay = document.getElementById('lock-overlay');
+const lockPassphraseInput = document.getElementById('lock-passphrase');
+const lockUnlockBtn = document.getElementById('lock-unlock-btn');
+const lockStatus = document.getElementById('lock-status');
+const encryptionStatusEl = document.getElementById('encryption-status');
+const encryptionEnableFields = document.getElementById('encryption-enable-fields');
+const encryptionManageFields = document.getElementById('encryption-manage-fields');
+const encryptPassphraseInput = document.getElementById('encrypt-passphrase');
+const encryptPassphraseConfirmInput = document.getElementById('encrypt-passphrase-confirm');
+const enableEncryptionBtn = document.getElementById('enable-encryption-btn');
+const changePassphraseOldInput = document.getElementById('change-passphrase-old');
+const changePassphraseNewInput = document.getElementById('change-passphrase-new');
+const changePassphraseConfirmInput = document.getElementById('change-passphrase-confirm');
+const changePassphraseBtn = document.getElementById('change-passphrase-btn');
+const lockNowBtn = document.getElementById('lock-now-btn');
+const disableEncryptionBtn = document.getElementById('disable-encryption-btn');
+const disablePassphraseInput = document.getElementById('disable-passphrase');
 const statusModel = document.getElementById('status-model');
 const statusTokens = document.getElementById('status-tokens');
 const stopBtn = document.getElementById('stop-btn');
@@ -1950,6 +1971,211 @@ if (spTemp) {
   });
 }
 
+// ─── Encrypted storage ─────────────────────────────────────────────────
+async function initSessionsFromStorage() {
+  if (!sessionStoreCache.sessions[sessionStoreCache.activeId]) {
+    sessionStoreCache.sessions[sessionStoreCache.activeId] = {
+      name: getSessionName(state.messages),
+      messages: state.messages,
+      mode: state.mode,
+      persona: state.persona,
+      planMode: !!state.planMode,
+      model: state.model,
+      temperature: state.temperature,
+      topP: state.topP,
+      totalTokensIn: state.totalTokensIn,
+      totalTokensOut: state.totalTokensOut,
+      systemPrompt: state.systemPrompt,
+      updatedAt: Date.now(),
+    };
+    await StorageCrypto.writeJson(SESSION_KEY, sessionStoreCache);
+  }
+  state.sessionId = sessionStoreCache.activeId;
+  renderSessionList();
+}
+
+async function loadStorageIntoMemory() {
+  state = parseStateFromData(await StorageCrypto.readJson(STATE_KEY, defaultStateData()));
+  sessionStoreCache = await StorageCrypto.readJson(SESSION_KEY, { sessions: {}, activeId: 'default' });
+  await initSessionsFromStorage();
+}
+
+function showLockOverlay() {
+  lockOverlay?.classList.add('active');
+  setTimeout(() => lockPassphraseInput?.focus(), 50);
+}
+
+function hideLockOverlay() {
+  lockOverlay?.classList.remove('active');
+  if (lockPassphraseInput) lockPassphraseInput.value = '';
+  if (lockStatus) {
+    lockStatus.textContent = '';
+    lockStatus.className = '';
+  }
+}
+
+function showLockStatus(text, type) {
+  if (!lockStatus) return;
+  lockStatus.textContent = text;
+  lockStatus.className = 'show ' + type;
+}
+
+function updateEncryptionSettingsUI() {
+  const enabled = StorageCrypto.isEnabled();
+  const unlocked = StorageCrypto.isUnlocked();
+  if (!encryptionStatusEl) return;
+  if (!enabled) {
+    encryptionStatusEl.textContent = 'Off — chats stored as plain JSON in this browser.';
+    encryptionStatusEl.className = '';
+  } else if (unlocked) {
+    encryptionStatusEl.textContent = 'On — unlocked for this session.';
+    encryptionStatusEl.className = 'on';
+  } else {
+    encryptionStatusEl.textContent = 'On — locked. Enter your passphrase on the lock screen.';
+    encryptionStatusEl.className = 'on';
+  }
+  if (encryptionEnableFields) encryptionEnableFields.style.display = enabled ? 'none' : 'block';
+  if (encryptionManageFields) encryptionManageFields.style.display = enabled && unlocked ? 'block' : 'none';
+}
+
+function clearSensitiveMemory() {
+  state = parseStateFromData(defaultStateData());
+  sessionStoreCache = { sessions: {}, activeId: 'default' };
+  restoreMessages();
+  renderSessionList();
+  updateSidePanel();
+  checkApiKey();
+}
+
+function lockStorageNow() {
+  StorageCrypto.lock();
+  clearSensitiveMemory();
+  showLockOverlay();
+  updateEncryptionSettingsUI();
+}
+
+async function unlockFromOverlay() {
+  const pass = lockPassphraseInput?.value || '';
+  if (!pass) {
+    showLockStatus('Enter your passphrase.', 'err');
+    return;
+  }
+  try {
+    if (lockUnlockBtn) lockUnlockBtn.disabled = true;
+    await StorageCrypto.unlock(pass);
+    hideLockOverlay();
+    if (!appBootstrapped) {
+      await bootstrapApp();
+    } else {
+      await loadStorageIntoMemory();
+      restoreMessages();
+      setMode(state.mode || 'general');
+      setPersona(state.persona || 'none');
+      updatePlanBadge();
+      updateSidePanel();
+      updateStatusBar();
+      rebuildSystemPrompt();
+      checkApiKey();
+    }
+    updateEncryptionSettingsUI();
+  } catch {
+    showLockStatus('Wrong passphrase. Try again.', 'err');
+  } finally {
+    if (lockUnlockBtn) lockUnlockBtn.disabled = false;
+  }
+}
+
+function validatePassphrasePair(pass, confirm, minLen = 8) {
+  if ((pass || '').length < minLen) return `Passphrase must be at least ${minLen} characters.`;
+  if (pass !== confirm) return 'Passphrases do not match.';
+  return null;
+}
+
+lockUnlockBtn?.addEventListener('click', unlockFromOverlay);
+lockPassphraseInput?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    unlockFromOverlay();
+  }
+});
+
+enableEncryptionBtn?.addEventListener('click', async () => {
+  const pass = encryptPassphraseInput?.value || '';
+  const confirm = encryptPassphraseConfirmInput?.value || '';
+  const err = validatePassphrasePair(pass, confirm);
+  if (err) {
+    showSettingsStatus(err, 'err');
+    return;
+  }
+  try {
+    await saveChain;
+    await persistAllAsync();
+    await StorageCrypto.enableEncryption(pass);
+    await loadStorageIntoMemory();
+    if (encryptPassphraseInput) encryptPassphraseInput.value = '';
+    if (encryptPassphraseConfirmInput) encryptPassphraseConfirmInput.value = '';
+    showSettingsStatus('Encryption enabled for local chats and API key.', 'ok');
+    updateEncryptionSettingsUI();
+    checkApiKey();
+  } catch {
+    showSettingsStatus('Could not enable encryption.', 'err');
+  }
+});
+
+changePassphraseBtn?.addEventListener('click', async () => {
+  const oldPass = changePassphraseOldInput?.value || '';
+  const newPass = changePassphraseNewInput?.value || '';
+  const confirm = changePassphraseConfirmInput?.value || '';
+  if (!oldPass) {
+    showSettingsStatus('Enter your current passphrase.', 'err');
+    return;
+  }
+  const err = validatePassphrasePair(newPass, confirm);
+  if (err) {
+    showSettingsStatus(err, 'err');
+    return;
+  }
+  try {
+    await saveChain;
+    await StorageCrypto.changePassphrase(oldPass, newPass);
+    if (changePassphraseOldInput) changePassphraseOldInput.value = '';
+    if (changePassphraseNewInput) changePassphraseNewInput.value = '';
+    if (changePassphraseConfirmInput) changePassphraseConfirmInput.value = '';
+    showSettingsStatus('Passphrase updated.', 'ok');
+  } catch (e) {
+    showSettingsStatus(e.message === 'WRONG_PASSPHRASE' ? 'Current passphrase is incorrect.' : 'Could not change passphrase.', 'err');
+  }
+});
+
+lockNowBtn?.addEventListener('click', () => {
+  lockStorageNow();
+  showSettingsStatus('Locked. Enter passphrase to unlock.', 'info');
+});
+
+disableEncryptionBtn?.addEventListener('click', async () => {
+  const pass = disablePassphraseInput?.value || '';
+  if (!pass) {
+    showSettingsStatus('Enter your passphrase to disable encryption.', 'err');
+    return;
+  }
+  try {
+    await saveChain;
+    const { stateData, sessionData } = await StorageCrypto.disableEncryption(pass);
+    state = parseStateFromData(stateData);
+    sessionStoreCache = sessionData;
+    await initSessionsFromStorage();
+    if (disablePassphraseInput) disablePassphraseInput.value = '';
+    restoreMessages();
+    updateSidePanel();
+    updateStatusBar();
+    checkApiKey();
+    showSettingsStatus('Encryption disabled. Data stored as plain JSON again.', 'ok');
+    updateEncryptionSettingsUI();
+  } catch (e) {
+    showSettingsStatus(e.message === 'WRONG_PASSPHRASE' ? 'Wrong passphrase.' : 'Could not disable encryption.', 'err');
+  }
+});
+
 // ─── Settings ──────────────────────────────────────────────────────────
 function openSettings() {
   apiKeyInput.value = state.apiKey;
@@ -1963,6 +2189,7 @@ function openSettings() {
   if (researchWebSearchInput) researchWebSearchInput.checked = state.researchWebSearch !== false;
   if (webSearchModelSelect) webSearchModelSelect.value = state.webSearchModel || 'google/gemini-2.5-flash';
   syncPlanPipelineInputs();
+  updateEncryptionSettingsUI();
   settingsStatus.classList.remove('show');
   settingsOverlay.classList.add('active');
 }
@@ -2106,49 +2333,68 @@ if (window.visualViewport) {
 }
 
 // ─── Init ──────────────────────────────────────────────────────────────
-checkApiKey();
-Vision.refreshModelCache();
-restoreMessages();
+async function bootstrapApp() {
+  if (StorageCrypto.isEnabled() && !StorageCrypto.isUnlocked()) {
+    showLockOverlay();
+    updateEncryptionSettingsUI();
+    return;
+  }
+  await loadStorageIntoMemory();
+  if (appBootstrapped) return;
+  appBootstrapped = true;
 
-// Restore mode badge
-const modeName = state.mode && MODES[state.mode] ? state.mode : 'general';
-const modeBadge = document.getElementById('mode-badge');
-modeBadge.textContent = modeName;
-modeBadge.className = modeName;
+  checkApiKey();
+  Vision.refreshModelCache();
+  restoreMessages();
 
-// Restore persona badge
-const personaName = state.persona && PERSONAS[state.persona] ? state.persona : 'none';
-const personaBadge = document.getElementById('persona-badge');
-if (personaName === 'none') {
-  personaBadge.className = 'none';
-  personaBadge.textContent = '';
-} else {
-  personaBadge.textContent = personaName;
-  personaBadge.className = personaName;
+  const modeName = state.mode && MODES[state.mode] ? state.mode : 'general';
+  const modeBadge = document.getElementById('mode-badge');
+  modeBadge.textContent = modeName;
+  modeBadge.className = modeName;
+
+  const personaName = state.persona && PERSONAS[state.persona] ? state.persona : 'none';
+  const personaBadge = document.getElementById('persona-badge');
+  if (personaName === 'none') {
+    personaBadge.className = 'none';
+    personaBadge.textContent = '';
+  } else {
+    personaBadge.textContent = personaName;
+    personaBadge.className = personaName;
+  }
+
+  updatePlanBadge();
+  updateKbdHints();
+  renderShortcutsTable();
+  document.getElementById('plan-badge')?.addEventListener('click', () => {
+    setPlanMode(!state.planMode);
+    const modeDesc = describePlanPipelineMode();
+    addMessage('response', state.planMode
+      ? `**Plan mode ON.** ${modeDesc.charAt(0).toUpperCase()}${modeDesc.slice(1)}, then synthesis.`
+      : '**Plan mode OFF.**');
+  });
+
+  applyFontSettings();
+  applyCodeTheme(state.codeTheme || 'atom-one-dark');
+  applyColor();
+  applyTheme();
+  updateStatusBar();
+  rebuildSystemPrompt();
+  updateEncryptionSettingsUI();
+
+  if (!state.apiKey && state.messages.length === 0) {
+    setTimeout(openSettings, 300);
+  }
+
+  inputEl.focus();
 }
 
-updatePlanBadge();
-updateKbdHints();
-renderShortcutsTable();
-document.getElementById('plan-badge')?.addEventListener('click', () => {
-  setPlanMode(!state.planMode);
-  const modeDesc = describePlanPipelineMode();
-  addMessage('response', state.planMode
-    ? `**Plan mode ON.** ${modeDesc.charAt(0).toUpperCase()}${modeDesc.slice(1)}, then synthesis.`
-    : '**Plan mode OFF.**');
-});
-
-// Apply font, accent color, theme, and rebuild system prompt
-applyFontSettings();
-applyCodeTheme(state.codeTheme || 'atom-one-dark');
-applyColor();
-applyTheme();
-updateStatusBar();
-rebuildSystemPrompt();
-
-// Auto-open settings on first visit if no API key
-if (!state.apiKey && state.messages.length === 0) {
-  setTimeout(openSettings, 300);
+async function startApp() {
+  if (StorageCrypto.isEnabled() && !StorageCrypto.isUnlocked()) {
+    showLockOverlay();
+    updateEncryptionSettingsUI();
+    return;
+  }
+  await bootstrapApp();
 }
 
-inputEl.focus();
+startApp();

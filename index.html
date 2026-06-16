@@ -144,12 +144,54 @@
   </div>
 </div>
 
+<!-- Lock screen (encrypted local storage) -->
+<div id="lock-overlay">
+  <div id="lock-panel">
+    <h2>Unlock Plexus</h2>
+    <p>Your chats and API key are encrypted in this browser. Enter your passphrase to continue.</p>
+    <label for="lock-passphrase">Passphrase</label>
+    <input type="password" id="lock-passphrase" placeholder="Passphrase" autocomplete="current-password">
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn primary" id="lock-unlock-btn" type="button">Unlock</button>
+    </div>
+    <div id="lock-status"></div>
+  </div>
+</div>
+
 <!-- Settings modal -->
 <div id="settings-overlay">
   <div id="settings-panel">
     <h2>Settings</h2>
 
-    <label for="api-key">OpenRouter API Key</label>
+    <label>Local storage encryption</label>
+    <div id="encryption-status">Off — chats stored as plain JSON in this browser.</div>
+    <p class="hint">Encrypts your API key and chat history with a passphrase (AES-GCM + PBKDF2). If you forget the passphrase, encrypted data cannot be recovered.</p>
+    <div id="encryption-enable-fields">
+      <label for="encrypt-passphrase">New passphrase</label>
+      <input type="password" id="encrypt-passphrase" placeholder="At least 8 characters" autocomplete="new-password">
+      <label for="encrypt-passphrase-confirm">Confirm passphrase</label>
+      <input type="password" id="encrypt-passphrase-confirm" placeholder="Repeat passphrase" autocomplete="new-password">
+      <div class="encryption-actions">
+        <button class="btn primary" id="enable-encryption-btn" type="button">Enable encryption</button>
+      </div>
+    </div>
+    <div id="encryption-manage-fields" style="display:none">
+      <label for="change-passphrase-old">Current passphrase</label>
+      <input type="password" id="change-passphrase-old" autocomplete="current-password">
+      <label for="change-passphrase-new">New passphrase</label>
+      <input type="password" id="change-passphrase-new" autocomplete="new-password">
+      <label for="change-passphrase-confirm">Confirm new passphrase</label>
+      <input type="password" id="change-passphrase-confirm" autocomplete="new-password">
+      <div class="encryption-actions">
+        <button class="btn" id="change-passphrase-btn" type="button">Change passphrase</button>
+        <button class="btn" id="lock-now-btn" type="button">Lock now</button>
+        <button class="btn" id="disable-encryption-btn" type="button">Disable encryption</button>
+      </div>
+      <label for="disable-passphrase" style="margin-top:10px">Passphrase to disable encryption</label>
+      <input type="password" id="disable-passphrase" placeholder="Required to decrypt and store plain JSON" autocomplete="current-password">
+    </div>
+
+    <label for="api-key" style="margin-top:16px">OpenRouter API Key</label>
     <input type="password" id="api-key" placeholder="sk-or-v1-..." autocomplete="off">
     <div class="btn-row">
       <button class="btn primary" id="save-key-btn">Save</button>
@@ -371,6 +413,7 @@
   </div>
 </div>
 
+<script src="js/storage-crypto.js"></script>
 <script src="js/app.js"></script>
 <script src="js/plan-pipeline.js"></script>
 </body>

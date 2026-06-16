@@ -709,6 +709,65 @@ body {
   transition: border-color 0.15s, color 0.15s;
 }
 #settings-toggle:hover { border-color: var(--cyan); color: var(--cyan); }
+#lock-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#lock-overlay.active { display: flex; }
+#lock-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+}
+#lock-panel h2 {
+  color: var(--text-bright);
+  font-size: 16px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+#lock-panel p {
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+#lock-status {
+  margin-top: 10px;
+  font-size: 12px;
+  display: none;
+}
+#lock-status.show { display: block; }
+#lock-status.err { color: #f87171; }
+#lock-status.ok { color: var(--green); }
+#settings-panel .hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.45;
+  margin: 6px 0 10px;
+}
+#settings-panel .encryption-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+#encryption-status {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+#encryption-status.on { color: var(--green); }
+
 #settings-overlay {
   display: none;
   position: fixed;

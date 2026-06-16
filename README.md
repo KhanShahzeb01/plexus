@@ -8,6 +8,7 @@ css/base.css        # Core layout and components
 css/themes.css      # Theme variants
 js/app.js           # UI, chat, settings, vision
 js/plan-pipeline.js # Plan mode and /research pipeline
+js/storage-crypto.js # Optional passphrase encryption for localStorage
 ```
 
 Looks and feels like the rallies CLI terminal, works on your phone.
