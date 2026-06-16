@@ -66,12 +66,18 @@ body {
   display: flex;
   flex: 1;
   min-height: 0;
+  align-items: stretch;
+}
+#main-col {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 #input-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
   flex-shrink: 0;
+  z-index: 10;
   border-top: 2px solid var(--text-dim);
   background: var(--surface);
 }
@@ -85,16 +91,22 @@ body {
 }
 #kbd-hints {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
   padding: 0 12px 8px;
   border-top: 1px solid var(--border);
 }
 .kbd-hint {
+  flex: 1 1 0;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 3px 8px;
+  padding: 4px 6px;
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--surface2);
@@ -103,6 +115,7 @@ body {
   font-size: 11px;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
 }
 .kbd-hint:hover {
   border-color: var(--accent);
@@ -309,6 +322,7 @@ body {
 /* Main chat area */
 #chat {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 16px;
   display: flex;
@@ -894,6 +908,7 @@ body {
   font-size: var(--sp-font-base);
 }
 @media (max-width: 800px) {
+  #main-col { min-width: 0; }
   #side-panel {
     position: fixed;
     bottom: 72px;
@@ -4875,6 +4890,7 @@ body #banner pre {
 
 <!-- Chat area + side panel -->
 <div id="chat-row">
+<div id="main-col">
 <div id="chat" role="log" aria-live="polite">
   <div id="tips">
     <strong>Plexus</strong> — AI chat powered by OpenRouter.<br>
@@ -4884,6 +4900,32 @@ body #banner pre {
     Click <strong>settings</strong> to set your API key. Type <code>/help</code> for all commands.
   </div>
 </div>
+
+<!-- Input area -->
+<div id="input-footer">
+<div id="input-area">
+  <div id="input-extras">
+    <button id="file-btn" title="Attach file">📎</button>
+    <input type="file" id="file-input" accept=".pdf,.docx,.pptx,.md,.txt" hidden>
+  </div>
+  <span id="prompt">›</span>
+  <div id="input-wrapper">
+    <div id="file-info" style="display:none"></div>
+    <div id="suggestions"></div>
+    <textarea id="input" rows="1" placeholder="Type a message..." enterkeyhint="send"></textarea>
+  </div>
+  <button id="stop-btn" aria-label="Stop">⏹</button>
+  <button id="send-btn" disabled aria-label="Send">→</button>
+</div>
+<div id="kbd-hints">
+  <button type="button" class="kbd-hint" data-action="new-chat"><kbd id="kbd-new"></kbd> New</button>
+  <button type="button" class="kbd-hint" data-action="export"><kbd id="kbd-export"></kbd> Export</button>
+  <button type="button" class="kbd-hint" data-action="plan" id="kbd-plan-btn"><kbd id="kbd-plan"></kbd> <span id="kbd-plan-label">Plan</span></button>
+  <button type="button" class="kbd-hint" data-action="palette"><kbd id="kbd-palette"></kbd> Commands</button>
+  <button type="button" class="kbd-hint" data-action="shortcuts"><kbd id="kbd-help"></kbd> Keys</button>
+</div>
+</div>
+</div><!-- /main-col -->
 
 <!-- Side panel -->
 <div id="side-panel">
@@ -4924,30 +4966,6 @@ body #banner pre {
   <button id="settings-toggle" type="button" aria-label="Settings">settings</button>
 </div>
 </div><!-- /chat-row -->
-
-<!-- Input area -->
-<div id="input-footer">
-<div id="input-area">
-  <div id="input-extras">
-    <button id="file-btn" title="Attach file">📎</button>
-    <input type="file" id="file-input" accept=".pdf,.docx,.pptx,.md,.txt" hidden>
-  </div>
-  <span id="prompt">›</span>
-  <div id="input-wrapper">
-    <div id="file-info" style="display:none"></div>
-    <div id="suggestions"></div>
-    <textarea id="input" rows="1" placeholder="Type a message..." enterkeyhint="send"></textarea>
-  </div>
-  <button id="stop-btn" aria-label="Stop">⏹</button>
-  <button id="send-btn" disabled aria-label="Send">→</button>
-</div>
-<div id="kbd-hints">
-  <button type="button" class="kbd-hint" data-action="new-chat"><kbd id="kbd-new"></kbd> New chat</button>
-  <button type="button" class="kbd-hint" data-action="export"><kbd id="kbd-export"></kbd> Export</button>
-  <button type="button" class="kbd-hint" data-action="plan" id="kbd-plan-btn"><kbd id="kbd-plan"></kbd> <span id="kbd-plan-label">Plan</span></button>
-  <button type="button" class="kbd-hint" data-action="shortcuts"><kbd id="kbd-help"></kbd> Shortcuts</button>
-</div>
-</div>
 
 </div><!-- /app-row -->
 
@@ -7309,6 +7327,7 @@ function updateKbdHints() {
   set('kbd-new', `${mod}+N`);
   set('kbd-export', `${mod}+E`);
   set('kbd-plan', `${mod}+P`);
+  set('kbd-palette', `${mod}+K`);
   set('kbd-help', `${mod}+/`);
   const planBtn = document.getElementById('kbd-plan-btn');
   const planLabel = document.getElementById('kbd-plan-label');
@@ -7323,6 +7342,7 @@ document.getElementById('kbd-hints')?.addEventListener('click', (e) => {
     case 'new-chat': newSession(); break;
     case 'export': exportConversation({ notify: false }); break;
     case 'plan': togglePlanModeQuiet(); break;
+    case 'palette': openCommandPalette(); break;
     case 'shortcuts': openShortcutsHelp(); break;
   }
   updateKbdHints();
