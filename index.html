@@ -37,6 +37,7 @@
   --focus-border: #6b8f71;
   --focus-bg: rgba(107,143,113,0.08);
   --font: 'Courier New','Consolas',monospace;
+  --chat-font: 'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;
   --font-size: 14px;
   --panel-font-size: 13px;
 }
@@ -46,7 +47,7 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: var(--font-size);
+  font-size: 14px;
   line-height: 1.6;
   overflow: hidden;
 }
@@ -197,6 +198,7 @@ body {
 .message.response .panel-title { color: var(--text-dim); }
 .panel-body {
   padding: 8px 12px 12px;
+  font-family: var(--chat-font);
   font-size: var(--panel-font-size);
   line-height: 1.7;
   word-wrap: break-word;
@@ -470,23 +472,23 @@ body {
 #stop-btn:hover { background: rgba(239,68,68,0.1); }
 /* Settings panel */
 #settings-toggle {
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  width: 44px;
-  height: 44px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 12px;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 6px;
   color: var(--text-dim);
-  font-size: 22px;
+  font-size: 11px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font);
-  z-index: 100;
-  transition: border-color 0.15s;
+  text-transform: lowercase;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
 }
 #settings-toggle:hover { border-color: var(--cyan); color: var(--cyan); }
 #settings-overlay {
@@ -687,7 +689,24 @@ body {
   font-size: 12px;
 }
 @media (max-width: 800px) {
-  #side-panel { display: none; }
+  #side-panel {
+    position: fixed;
+    bottom: 72px;
+    right: 10px;
+    width: auto;
+    padding: 0;
+    border: none;
+    background: transparent;
+    z-index: 100;
+    overflow: visible;
+  }
+  #side-panel .sp-section,
+  #side-panel .sp-footer { display: none; }
+  #settings-toggle {
+    width: auto;
+    min-width: 88px;
+    margin-top: 0;
+  }
 }
 #side-panel .sp-title {
   font-size: 10px;
@@ -809,14 +828,14 @@ body {
   :root { --font-size: 13px; }
   #banner { padding: 6px 10px; gap: 8px; }
   #banner pre { font-size: clamp(8px, 1.5vw, 13px); }
-  #side-panel { display: none; }
   #chat { padding: 8px; gap: 8px; }
+  #side-panel { bottom: 64px; right: 8px; }
   #input-area { padding: 6px 8px; gap: 6px; }
   #input { font-size: 13px; padding: 8px 10px; }
   #send-btn { width: 36px; height: 36px; font-size: 16px; }
   .panel-body { font-size: 12px; padding: 6px 10px 10px; }
   #settings-panel { padding: 16px; }
-  #settings-toggle { top: 6px; right: 6px; width: 30px; height: 30px; font-size: 13px; }
+  #settings-toggle { min-width: 80px; font-size: 10px; padding: 7px 12px; }
   #prompt { font-size: 14px; }
 }
 @media (max-width: 480px) {
@@ -4527,6 +4546,21 @@ body {
   background: transparent !important;
 }
 
+/* User font settings — AI/user message bodies only (not banner, side panel, or chrome) */
+#chat .message .panel-body {
+  font-family: var(--chat-font) !important;
+  font-size: var(--panel-font-size) !important;
+}
+#chat .message .panel-body pre,
+#chat .message .panel-body pre code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+  font-size: calc(var(--panel-font-size) * 0.92) !important;
+}
+body #banner pre {
+  font-family: 'Courier New', 'Consolas', monospace !important;
+  font-size: clamp(10px, 2vw, 16px) !important;
+}
+
 /* Slash command autocomplete */
 #suggestions {
   position: absolute;
@@ -4598,7 +4632,7 @@ body {
     <strong>Plexus</strong> — AI chat powered by OpenRouter.<br>
     Themes: <code>/finance</code> <code>/aidev</code> <code>/github</code> <code>/datascience</code> <code>/blog</code><br>
     Quick: <code>/summarize</code> <code>/explain</code> <code>/translate</code> <code>/rephrase</code> <code>/bulletise</code><br>
-    Click <strong>⚙</strong> to set your API key. Type <code>/help</code> for all commands.
+    Click <strong>settings</strong> to set your API key. Type <code>/help</code> for all commands.
   </div>
 </div>
 
@@ -4642,6 +4676,7 @@ body {
     <div class="sp-row"><span class="sp-label">Lifetime out</span><span class="sp-value" id="sp-lt-out">0</span></div>
   </div>
   <div class="sp-footer"><span id="sp-cost">$0.00</span> est.</div>
+  <button id="settings-toggle" type="button" aria-label="Settings">settings</button>
 </div>
 </div><!-- /chat-row -->
 
@@ -4662,9 +4697,6 @@ body {
 </div>
 
 </div><!-- /app-row -->
-
-<!-- Settings gear -->
-<button id="settings-toggle" aria-label="Settings">⚙</button>
 
 <!-- Settings modal -->
 <div id="settings-overlay">
@@ -5093,11 +5125,10 @@ if (typeof pdfjsLib !== 'undefined') {
 function applyFontSettings() {
   const root = document.documentElement;
   const px = parseInt(state.fontSize) || 14;
+  const defaultChat = "'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace";
   root.style.setProperty('--font-size', state.fontSize);
   root.style.setProperty('--panel-font-size', Math.max(10, px - 1) + 'px');
-  if (state.fontFamily) {
-    root.style.setProperty('--font', state.fontFamily);
-  }
+  root.style.setProperty('--chat-font', state.fontFamily || defaultChat);
 }
 
 // ─── Accent colors (apply on top of any theme) ─────────────────────────
@@ -5732,7 +5763,7 @@ async function doDeepResearch(query) {
   } catch (err) {
     if (progressEl) progressEl.classList.remove('active');
     let msg = err.message || 'Research failed';
-    if (msg.includes('401')) msg = 'Invalid API key. Set it in ⚙ settings.';
+    if (msg.includes('401')) msg = 'Invalid API key. Set it in settings.';
     else if (msg.includes('402')) msg = 'Model out of credits. Try a free model.';
     else if (msg.includes('Failed to fetch')) msg = 'Network error. Check your connection.';
     progressBody.innerHTML = `<div style="color:var(--red);font-size:12px">⚠ ${msg}</div>`;
@@ -5866,8 +5897,8 @@ async function sendMessage(userText) {
     // Remove loading state
     if (loadingEl) loadingEl.classList.remove('active');
     let msg = err.message || 'Unknown error';
-    if (msg.includes('401')) msg = 'Invalid API key. Open ⚙ settings to set a valid OpenRouter key.';
-    else if (msg.includes('402')) msg = 'Model out of credits. Try a free model in ⚙ settings.';
+    if (msg.includes('401')) msg = 'Invalid API key. Open settings to set a valid OpenRouter key.';
+    else if (msg.includes('402')) msg = 'Model out of credits. Try a free model in settings.';
     else if (msg.includes('429')) msg = 'Rate limited. Please wait a moment.';
     else if (msg.includes('403')) msg = 'Access denied by OpenRouter. Check your API key.';
     else if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) msg = 'Network error. Check your connection.';
@@ -6276,7 +6307,7 @@ function handleSubmit() {
   }
 
   if (!state.apiKey) {
-    addMessage('response', 'Set your OpenRouter API key first. Click ⚙ or use \`/key <key>\`.');
+    addMessage('response', 'Set your OpenRouter API key first. Click settings or use \`/key <key>\`.');
     return;
   }
 
@@ -6561,7 +6592,7 @@ function showSettingsStatus(text, type) {
 function checkApiKey() {
   sendBtn.disabled = !state.apiKey;
   if (!state.apiKey) {
-    inputEl.placeholder = 'Open ⚙ to set your OpenRouter API key...';
+    inputEl.placeholder = 'Open settings to set your OpenRouter API key...';
   } else {
     inputEl.placeholder = 'Type a message...';
   }
