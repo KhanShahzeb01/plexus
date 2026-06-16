@@ -43,7 +43,7 @@ function defaultStateData() {
     mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '',
     colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0,
     totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0,
-    researchWebSearch: true, webSearchModel: 'google/gemini-2.5-flash', codeTheme: 'atom-one-dark',
+    codeTheme: 'atom-one-dark',
     planMinQuestions: 3, planMaxQuestions: 14, planParallel: true, planQualityGate: true,
     researchParallel: false, researchQualityGate: false,
   };
@@ -68,8 +68,6 @@ function parseStateFromData(data) {
     totalTokensOut: data.totalTokensOut || 0,
     lifetimeTokensIn: data.lifetimeTokensIn || 0,
     lifetimeTokensOut: data.lifetimeTokensOut || 0,
-    researchWebSearch: data.researchWebSearch !== false,
-    webSearchModel: data.webSearchModel || 'google/gemini-2.5-flash',
     codeTheme: data.codeTheme || 'atom-one-dark',
     planMinQuestions: data.planMinQuestions ?? 3,
     planMaxQuestions: data.planMaxQuestions ?? 14,
@@ -99,8 +97,6 @@ function buildStatePayload() {
     totalTokensOut: state.totalTokensOut || 0,
     lifetimeTokensIn: state.lifetimeTokensIn || 0,
     lifetimeTokensOut: state.lifetimeTokensOut || 0,
-    researchWebSearch: state.researchWebSearch !== false,
-    webSearchModel: state.webSearchModel || 'google/gemini-2.5-flash',
     codeTheme: state.codeTheme || 'atom-one-dark',
     planMinQuestions: state.planMinQuestions ?? 3,
     planMaxQuestions: state.planMaxQuestions ?? 14,
@@ -286,8 +282,6 @@ const codeThemeSelect = document.getElementById('code-theme-select');
 const hljsThemeLink = document.getElementById('hljs-theme');
 const themeSelect = document.getElementById('theme-select');
 const colorSelect = document.getElementById('color-select');
-const researchWebSearchInput = document.getElementById('research-web-search');
-const webSearchModelSelect = document.getElementById('web-search-model');
 const planMinQuestionsInput = document.getElementById('plan-min-questions');
 const planMaxQuestionsInput = document.getElementById('plan-max-questions');
 const planParallelInput = document.getElementById('plan-parallel');
@@ -1247,7 +1241,7 @@ function handleSlashCommand(cmd, args) {
         '| **Persona** | `/nopersona` | `/nopersona` | Clear active persona |',
         '| **Plan** | `/plan` | `/plan` | Toggle plan mode — every message is split into sub-questions, answered one-by-one, then synthesized |',
         '| **Plan** | `/plan on` / `/plan off` | `/plan on` | Enable or disable plan mode |',
-        '| **Research** | `/research <q>` | `/research analyze AAPL stock` | Web search → sub-questions → answers → final answer |',
+        '| **Research** | `/research <q>` | `/research analyze AAPL stock` | Sub-questions → answers → final answer |',
         '| **Research** | `/deep <q>` | `/deep NVDA vs AMD` | Shorthand for /research |',
         '| **Quick** | `/summarize <text>` | `/summarize ...` | Condense text preserving key info |',
         '| **Quick** | `/explain <text>` | `/explain ...` | Break down concepts with examples |',
@@ -1349,7 +1343,7 @@ function handleSlashCommand(cmd, args) {
     case '/research':
     case '/deep':
       if (!args) {
-        addMessage('response', 'Usage: `/research <query>` — e.g. `/research analyze AAPL stock`\n\nOptionally searches the web for live data (settings), breaks the query into sub-questions (min/max in settings), answers each, and synthesizes a final answer. Parallel answers and quality gate are configurable under **Plan pipeline** in settings.');
+        addMessage('response', 'Usage: `/research <query>` — e.g. `/research analyze AAPL stock`\n\nBreaks the query into sub-questions (min/max in settings), answers each, and synthesizes a final answer. Parallel answers and quality gate are configurable under **Plan pipeline** in settings.');
         return true;
       }
       doDeepResearch(args);
@@ -2186,8 +2180,6 @@ function openSettings() {
   if (codeThemeSelect) codeThemeSelect.value = state.codeTheme || 'atom-one-dark';
   themeSelect.value = state.theme || 'cli';
   colorSelect.value = state.colorScheme || 'sage';
-  if (researchWebSearchInput) researchWebSearchInput.checked = state.researchWebSearch !== false;
-  if (webSearchModelSelect) webSearchModelSelect.value = state.webSearchModel || 'google/gemini-2.5-flash';
   syncPlanPipelineInputs();
   updateEncryptionSettingsUI();
   settingsStatus.classList.remove('show');
@@ -2213,8 +2205,6 @@ saveKeyBtn.addEventListener('click', () => {
   state.apiKey = key;
   state.model = modelSelect.value;
   state.systemPrompt = systemPromptInput.value.trim();
-  if (researchWebSearchInput) state.researchWebSearch = researchWebSearchInput.checked;
-  if (webSearchModelSelect) state.webSearchModel = webSearchModelSelect.value;
   readPlanPipelineInputs();
   saveState();
   showSettingsStatus('API key saved', 'ok');
@@ -2263,16 +2253,6 @@ themeSelect.addEventListener('change', () => {
 colorSelect.addEventListener('change', () => {
   state.colorScheme = colorSelect.value;
   applyColor();
-  saveState();
-});
-
-researchWebSearchInput?.addEventListener('change', () => {
-  state.researchWebSearch = researchWebSearchInput.checked;
-  saveState();
-});
-
-webSearchModelSelect?.addEventListener('change', () => {
-  state.webSearchModel = webSearchModelSelect.value;
   saveState();
 });
 

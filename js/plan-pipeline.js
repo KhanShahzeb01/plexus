@@ -47,7 +47,7 @@ const Vision = {
   FALLBACK_HEURISTIC: /gpt-4o|gpt-4\.1|gemini|claude-3|claude-sonnet|claude-haiku|claude-opus|llama-3\.2.*vision|pixtral|qwen.*vl|llava|gemma.*vision|gpt-oss.*vision/i,
 
   fallbackModel() {
-    return state.webSearchModel || 'google/gemini-2.5-flash';
+    return 'google/gemini-2.5-flash';
   },
 
   supports(modelId = state.model) {
@@ -163,60 +163,6 @@ const Vision = {
         apiMessages.push({ role: msg.role, content: msg.content });
       }
     }
-  },
-};
-
-const WEB_SEARCH_CTX_MAX = 12000;
-
-const WebSearch = {
-  async gather(query, signal) {
-    const model = state.webSearchModel || 'google/gemini-2.5-flash';
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.apiKey}`,
-        'HTTP-Referer': window.location.origin,
-        'X-Title': 'Plexus',
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          {
-            role: 'system',
-            content: 'You gather live web information for research. Search the web, then return a factual brief in markdown: grouped bullet points with dates/numbers where available, and a ## Sources section listing URLs. Prefer recent, authoritative sources. Do not speculate beyond search results.',
-          },
-          {
-            role: 'user',
-            content: `Search the web for current information relevant to this research query:\n\n${query}`,
-          },
-        ],
-        tools: [{ type: 'openrouter:web_search', max_results: 8 }],
-        stream: false,
-        max_tokens: 4000,
-        temperature: 0.2,
-      }),
-      signal: signal || undefined,
-    });
-    if (!response.ok) {
-      let detail = '';
-      try { const err = await response.json(); detail = err.error?.message || ''; } catch {}
-      throw new Error(detail || `Web search HTTP ${response.status}`);
-    }
-    const data = await response.json();
-    if (data.usage) {
-      const pi = data.usage.prompt_tokens || 0;
-      const co = data.usage.completion_tokens || 0;
-      state.totalTokensIn = (state.totalTokensIn || 0) + pi;
-      state.totalTokensOut = (state.totalTokensOut || 0) + co;
-      state.lifetimeTokensIn = (state.lifetimeTokensIn || 0) + pi;
-      state.lifetimeTokensOut = (state.lifetimeTokensOut || 0) + co;
-      saveState();
-      updateStatusBar();
-    }
-    const text = (data.choices?.[0]?.message?.content || '').trim();
-    if (!text) throw new Error('Web search returned no content');
-    return truncatePlanText(text, WEB_SEARCH_CTX_MAX);
   },
 };
 
@@ -573,7 +519,7 @@ ${summary}` },
   },
 };
 
-async function runStructuredAnalysis(query, { parallel = false, qualityGate = false, appendUser = true, webSearch = false } = {}) {
+async function runStructuredAnalysis(query, { parallel = false, qualityGate = false, appendUser = true } = {}) {
   if (isStreaming || !state.apiKey) return;
 
   const userContent = query.trim();
@@ -609,12 +555,12 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
     : [];
 
   const questionList = [];
-  let webSearchNote = '';
+  let contextNote = '';
   let finalAnswer = '';
 
   function renderThinkingUI({ activeIndex = -1, completedCount = 0, phase = 'planning', parallel = false } = {}) {
     if (progressEl) progressEl.classList.remove('active');
-    const showDots = ['searching', 'vision', 'planning', 'answering', 'quality', 'synthesizing'].includes(phase);
+    const showDots = ['vision', 'planning', 'answering', 'quality', 'synthesizing'].includes(phase);
     const isDone = phase === 'done';
     const dots = showDots ? '<span class="plan-thinking-dots"><span>.</span><span>.</span><span>.</span></span>' : '';
     const headerLabel = isDone ? 'Thought' : 'Thinking';
@@ -646,16 +592,14 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
       if (phase === 'synthesizing') {
         questionsHtml += '<div class="plan-thinking-q active">Synthesizing final answer…</div>';
       }
-    } else if (phase === 'searching') {
-      questionsHtml = '<div class="plan-thinking-q active">Searching the web for live data…</div>';
     } else if (phase === 'vision') {
       questionsHtml = '<div class="plan-thinking-q active">Analyzing attached image…</div>';
     } else {
       questionsHtml = '<div class="plan-thinking-q active">Planning…</div>';
     }
 
-    if (webSearchNote && phase !== 'searching') {
-      questionsHtml = `<div class="plan-thinking-q done">${escapeHtml(webSearchNote)}</div>` + questionsHtml;
+    if (contextNote) {
+      questionsHtml = `<div class="plan-thinking-q done">${escapeHtml(contextNote)}</div>` + questionsHtml;
     }
 
     const questionsCollapsed = isDone && progressBody.dataset.thinkingOpen !== '1';
@@ -701,27 +645,15 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
   }
 
   try {
-    if (webSearch) {
-      renderThinkingUI({ phase: 'searching' });
-      try {
-        const webBrief = await WebSearch.gather(userContent, signal);
-        fileContext += `\n\n## Live web research (auto-gathered before analysis)\n${webBrief}`;
-        webSearchNote = '✓ Live web data gathered';
-      } catch (err) {
-        if (err.name === 'AbortError') throw err;
-        webSearchNote = `⚠ Web search skipped: ${(err.message || 'unavailable').slice(0, 80)}`;
-      }
-    }
-
     if (uploadedImage) {
       renderThinkingUI({ phase: 'vision' });
       try {
         const imageDesc = await Vision.describeForContext(uploadedImage, signal);
         fileContext += `\n\n## Attached image (${uploadedImage.name})\n${imageDesc}`;
-        webSearchNote = (webSearchNote ? webSearchNote + ' · ' : '') + '✓ Image analyzed';
+        contextNote = '✓ Image analyzed';
       } catch (err) {
         if (err.name === 'AbortError') throw err;
-        webSearchNote = (webSearchNote ? webSearchNote + ' · ' : '') + `⚠ Image analysis skipped: ${(err.message || 'unavailable').slice(0, 60)}`;
+        contextNote = `⚠ Image analysis skipped: ${(err.message || 'unavailable').slice(0, 60)}`;
       }
     }
 
@@ -805,6 +737,5 @@ async function doDeepResearch(query) {
   return runStructuredAnalysis(query, {
     parallel: !!state.researchParallel,
     qualityGate: !!state.researchQualityGate,
-    webSearch: state.researchWebSearch !== false,
   });
 }
