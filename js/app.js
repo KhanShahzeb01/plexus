@@ -62,8 +62,14 @@ function loadState() {
       researchWebSearch: data.researchWebSearch !== false,
       webSearchModel: data.webSearchModel || 'google/gemini-2.5-flash',
       codeTheme: data.codeTheme || 'atom-one-dark',
+      planMinQuestions: data.planMinQuestions ?? 3,
+      planMaxQuestions: data.planMaxQuestions ?? 14,
+      planParallel: data.planParallel !== false,
+      planQualityGate: data.planQualityGate !== false,
+      researchParallel: !!data.researchParallel,
+      researchQualityGate: !!data.researchQualityGate,
     };
-  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '', colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0, researchWebSearch: true, webSearchModel: 'google/gemini-2.5-flash', codeTheme: 'atom-one-dark' }; }
+  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '', colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0, researchWebSearch: true, webSearchModel: 'google/gemini-2.5-flash', codeTheme: 'atom-one-dark', planMinQuestions: 3, planMaxQuestions: 14, planParallel: true, planQualityGate: true, researchParallel: false, researchQualityGate: false }; }
 }
 function saveState() {
   try {
@@ -88,6 +94,12 @@ function saveState() {
       researchWebSearch: state.researchWebSearch !== false,
       webSearchModel: state.webSearchModel || 'google/gemini-2.5-flash',
       codeTheme: state.codeTheme || 'atom-one-dark',
+      planMinQuestions: state.planMinQuestions ?? 3,
+      planMaxQuestions: state.planMaxQuestions ?? 14,
+      planParallel: state.planParallel !== false,
+      planQualityGate: state.planQualityGate !== false,
+      researchParallel: !!state.researchParallel,
+      researchQualityGate: !!state.researchQualityGate,
     };
     localStorage.setItem(STATE_KEY, JSON.stringify(data));
     // Update session store
@@ -272,6 +284,12 @@ const themeSelect = document.getElementById('theme-select');
 const colorSelect = document.getElementById('color-select');
 const researchWebSearchInput = document.getElementById('research-web-search');
 const webSearchModelSelect = document.getElementById('web-search-model');
+const planMinQuestionsInput = document.getElementById('plan-min-questions');
+const planMaxQuestionsInput = document.getElementById('plan-max-questions');
+const planParallelInput = document.getElementById('plan-parallel');
+const planQualityGateInput = document.getElementById('plan-quality-gate');
+const researchParallelInput = document.getElementById('research-parallel');
+const researchQualityGateInput = document.getElementById('research-quality-gate');
 const statusModel = document.getElementById('status-model');
 const statusTokens = document.getElementById('status-tokens');
 const stopBtn = document.getElementById('stop-btn');
@@ -282,7 +300,63 @@ const newSessBtn = document.getElementById('sp-new-sess');
 const spTemp = document.getElementById('sp-temp');
 const spTempVal = document.getElementById('sp-temp-val');
 
-// Configure PDF.js worker
+function normalizePlanPipelineState() {
+  let min = parseInt(state.planMinQuestions, 10);
+  let max = parseInt(state.planMaxQuestions, 10);
+  if (!Number.isFinite(min)) min = 3;
+  if (!Number.isFinite(max)) max = 14;
+  min = Math.max(1, Math.min(30, min));
+  max = Math.max(3, Math.min(50, max));
+  if (min > max) min = max;
+  state.planMinQuestions = min;
+  state.planMaxQuestions = max;
+  state.planParallel = state.planParallel !== false;
+  state.planQualityGate = state.planQualityGate !== false;
+  state.researchParallel = !!state.researchParallel;
+  state.researchQualityGate = !!state.researchQualityGate;
+}
+
+function getPlanModePipelineOptions(extra = {}) {
+  normalizePlanPipelineState();
+  return {
+    parallel: state.planParallel !== false,
+    qualityGate: state.planQualityGate !== false,
+    ...extra,
+  };
+}
+
+function describePlanPipelineMode() {
+  normalizePlanPipelineState();
+  const { min, max } = typeof getPlanQuestionBounds === 'function'
+    ? getPlanQuestionBounds()
+    : { min: state.planMinQuestions, max: state.planMaxQuestions };
+  const parallel = state.planParallel !== false ? 'parallel' : 'sequential';
+  const gate = state.planQualityGate !== false ? ' with a quality gate' : '';
+  return `${min}–${max} sub-questions, ${parallel} answers${gate}`;
+}
+
+function syncPlanPipelineInputs() {
+  normalizePlanPipelineState();
+  if (planMinQuestionsInput) planMinQuestionsInput.value = state.planMinQuestions;
+  if (planMaxQuestionsInput) planMaxQuestionsInput.value = state.planMaxQuestions;
+  if (planParallelInput) planParallelInput.checked = state.planParallel !== false;
+  if (planQualityGateInput) planQualityGateInput.checked = state.planQualityGate !== false;
+  if (researchParallelInput) researchParallelInput.checked = !!state.researchParallel;
+  if (researchQualityGateInput) researchQualityGateInput.checked = !!state.researchQualityGate;
+}
+
+function readPlanPipelineInputs() {
+  if (planMinQuestionsInput) state.planMinQuestions = planMinQuestionsInput.value;
+  if (planMaxQuestionsInput) state.planMaxQuestions = planMaxQuestionsInput.value;
+  if (planParallelInput) state.planParallel = planParallelInput.checked;
+  if (planQualityGateInput) state.planQualityGate = planQualityGateInput.checked;
+  if (researchParallelInput) state.researchParallel = researchParallelInput.checked;
+  if (researchQualityGateInput) state.researchQualityGate = researchQualityGateInput.checked;
+  normalizePlanPipelineState();
+  syncPlanPipelineInputs();
+}
+
+normalizePlanPipelineState();
 if (typeof pdfjsLib !== 'undefined') {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
@@ -1246,7 +1320,7 @@ function handleSlashCommand(cmd, args) {
       else if (args === 'off') setPlanMode(false);
       else setPlanMode(!state.planMode);
       addMessage('response', state.planMode
-        ? '**Plan mode ON.** The AI picks 3–14 sub-questions based on your query, answers them in parallel, runs a quality review, then delivers a **Final Answer**.\n\nUse `/plan off` or click the **plan** badge for direct answers. Use `/research <query>` for sequential analysis without the quality gate.'
+        ? `**Plan mode ON.** The AI picks **${describePlanPipelineMode()}**, then delivers a **Final Answer**.\n\nUse \`/plan off\` or click the **plan** badge for direct answers. Tune min/max, parallel, and quality gate in **settings**. Use \`/research <query>\` for the research pipeline.`
         : '**Plan mode OFF.** Messages go to the model for direct answers again.');
       return true;
     }
@@ -1359,7 +1433,7 @@ function handleSubmit() {
   }
 
   if (state.planMode) {
-    runStructuredAnalysis(text, { parallel: true, qualityGate: true });
+    runStructuredAnalysis(text, getPlanModePipelineOptions());
     return;
   }
 
@@ -1541,7 +1615,7 @@ function regenerateLastResponse() {
   chatEl.querySelectorAll('.error-msg').forEach(el => el.remove());
 
   if (state.planMode) {
-    runStructuredAnalysis(userText, { parallel: true, qualityGate: true, appendUser: false });
+    runStructuredAnalysis(userText, getPlanModePipelineOptions({ appendUser: false }));
   } else {
     sendMessage(userText, { appendUser: false });
   }
@@ -1888,6 +1962,7 @@ function openSettings() {
   colorSelect.value = state.colorScheme || 'sage';
   if (researchWebSearchInput) researchWebSearchInput.checked = state.researchWebSearch !== false;
   if (webSearchModelSelect) webSearchModelSelect.value = state.webSearchModel || 'google/gemini-2.5-flash';
+  syncPlanPipelineInputs();
   settingsStatus.classList.remove('show');
   settingsOverlay.classList.add('active');
 }
@@ -1913,6 +1988,7 @@ saveKeyBtn.addEventListener('click', () => {
   state.systemPrompt = systemPromptInput.value.trim();
   if (researchWebSearchInput) state.researchWebSearch = researchWebSearchInput.checked;
   if (webSearchModelSelect) state.webSearchModel = webSearchModelSelect.value;
+  readPlanPipelineInputs();
   saveState();
   showSettingsStatus('API key saved', 'ok');
   checkApiKey();
@@ -1972,6 +2048,20 @@ webSearchModelSelect?.addEventListener('change', () => {
   state.webSearchModel = webSearchModelSelect.value;
   saveState();
 });
+
+function bindPlanPipelineInput(el, handler) {
+  el?.addEventListener('change', () => {
+    handler();
+    saveState();
+  });
+}
+
+bindPlanPipelineInput(planMinQuestionsInput, readPlanPipelineInputs);
+bindPlanPipelineInput(planMaxQuestionsInput, readPlanPipelineInputs);
+bindPlanPipelineInput(planParallelInput, readPlanPipelineInputs);
+bindPlanPipelineInput(planQualityGateInput, readPlanPipelineInputs);
+bindPlanPipelineInput(researchParallelInput, readPlanPipelineInputs);
+bindPlanPipelineInput(researchQualityGateInput, readPlanPipelineInputs);
 
 systemPromptInput.addEventListener('change', () => {
   state.systemPrompt = systemPromptInput.value.trim();
@@ -2042,8 +2132,9 @@ updateKbdHints();
 renderShortcutsTable();
 document.getElementById('plan-badge')?.addEventListener('click', () => {
   setPlanMode(!state.planMode);
+  const modeDesc = describePlanPipelineMode();
   addMessage('response', state.planMode
-    ? '**Plan mode ON.** Parallel sub-answers, quality review, then synthesis.'
+    ? `**Plan mode ON.** ${modeDesc.charAt(0).toUpperCase()}${modeDesc.slice(1)}, then synthesis.`
     : '**Plan mode OFF.**');
 });
 

@@ -352,8 +352,16 @@ async function streamChatCompletion(messages, { signal, maxTokens = 8000, onDelt
 }
 
 // ─── Plan pipeline modules (planner → answerer → quality gate → synthesizer) ─
-const PLAN_MIN_QUESTIONS = 3;
-const PLAN_MAX_QUESTIONS = 14;
+function getPlanQuestionBounds() {
+  let min = parseInt(state.planMinQuestions, 10);
+  let max = parseInt(state.planMaxQuestions, 10);
+  if (!Number.isFinite(min)) min = 3;
+  if (!Number.isFinite(max)) max = 14;
+  min = Math.max(1, Math.min(30, min));
+  max = Math.max(3, Math.min(50, max));
+  if (min > max) min = max;
+  return { min, max };
+}
 
 const PlanPipeline = {
   FALLBACK_QUESTIONS: [
@@ -388,6 +396,7 @@ const PlanPipeline = {
   },
 
   applyQuestionGuardrails(subQuestions) {
+    const { min: PLAN_MIN_QUESTIONS, max: PLAN_MAX_QUESTIONS } = getPlanQuestionBounds();
     let list = subQuestions.slice(0, PLAN_MAX_QUESTIONS);
     if (list.length < PLAN_MIN_QUESTIONS) {
       const fallback = this.FALLBACK_QUESTIONS.map(q => ({
@@ -410,6 +419,7 @@ const PlanPipeline = {
   },
 
   async planner({ userContent, fileContext, sys, signal }) {
+    const { min: PLAN_MIN_QUESTIONS, max: PLAN_MAX_QUESTIONS } = getPlanQuestionBounds();
     const planRaw = await callLLM([
       ...(sys || []),
       { role: 'system', content: 'You decompose user queries into the optimal analytical checklist. Judge complexity yourself and return only valid JSON.' },
@@ -793,8 +803,8 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
 
 async function doDeepResearch(query) {
   return runStructuredAnalysis(query, {
-    parallel: false,
-    qualityGate: false,
+    parallel: !!state.researchParallel,
+    qualityGate: !!state.researchQualityGate,
     webSearch: state.researchWebSearch !== false,
   });
 }

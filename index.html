@@ -51,7 +51,7 @@
     <strong>Plexus</strong> — AI chat powered by OpenRouter.<br>
     Themes: <code>/finance</code> <code>/aidev</code> <code>/github</code> <code>/datascience</code> <code>/blog</code><br>
     Quick: <code>/summarize</code> <code>/explain</code> <code>/translate</code> <code>/rephrase</code> <code>/bulletise</code><br>
-    Plan mode: <code>/plan</code> — AI picks 3–14 sub-questions by complexity, parallel answers, quality gate, then final answer. <code>/research</code> uses the same pipeline sequentially without the gate.<br>
+    Plan mode: <code>/plan</code> — structured sub-questions, synthesis, and optional quality gate (configure in settings). <code>/research</code> runs the same pipeline with its own options.<br>
     Click <strong>settings</strong> to set your API key. Attach files or images via 📎. Type <code>/help</code> for all commands.
   </div>
 </div>
@@ -313,6 +313,36 @@
       <option value="mist">Mist</option>
       <option value="heather">Heather</option>
     </select>
+
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+      <label style="margin-bottom:8px">Plan pipeline</label>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div style="flex:1">
+          <label for="plan-min-questions" style="font-size:11px;color:var(--text-dim)">Min sub-questions</label>
+          <input type="number" id="plan-min-questions" min="1" max="30" value="3">
+        </div>
+        <div style="flex:1">
+          <label for="plan-max-questions" style="font-size:11px;color:var(--text-dim)">Max sub-questions</label>
+          <input type="number" id="plan-max-questions" min="3" max="50" value="14">
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px">
+        <input type="checkbox" id="plan-parallel" style="width:auto;margin:0">
+        Parallel sub-answers (<code>/plan</code> mode)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px">
+        <input type="checkbox" id="plan-quality-gate" style="width:auto;margin:0">
+        Quality gate before synthesis (<code>/plan</code> mode)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px">
+        <input type="checkbox" id="research-parallel" style="width:auto;margin:0">
+        Parallel sub-answers (<code>/research</code>)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="research-quality-gate" style="width:auto;margin:0">
+        Quality gate (<code>/research</code>)
+      </label>
+    </div>
 
     <label style="margin-top:16px;display:flex;align-items:center;gap:8px;cursor:pointer">
       <input type="checkbox" id="research-web-search" style="width:auto;margin:0">
