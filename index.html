@@ -421,79 +421,6 @@ body {
 .plan-answer {
   margin-top: 4px;
 }
-/* Theme mascot motion */
-#input-wrapper { position: relative; overflow: visible; }
-#theme-mascot {
-  position: absolute;
-  bottom: 8px;
-  left: 10px;
-  z-index: 4;
-  pointer-events: none;
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  font-size: 16px;
-  line-height: 1;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-#theme-mascot.visible { opacity: 1; }
-#theme-mascot .mascot-body {
-  display: inline-block;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));
-}
-#theme-mascot .mascot-thought {
-  font-size: 10px;
-  color: var(--text-dim);
-  letter-spacing: 1px;
-  padding: 2px 6px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface2) 90%, transparent);
-  border: 1px solid var(--border);
-  opacity: 0;
-  transform: translateY(4px);
-}
-#theme-mascot.idle {
-  animation: mascot-idle 2.2s ease-in-out infinite;
-}
-#theme-mascot.idle .mascot-thought {
-  opacity: 1;
-  animation: mascot-thought 1.4s ease-in-out infinite;
-}
-#theme-mascot.busy {
-  animation: mascot-run 2.8s linear infinite;
-}
-#theme-mascot.busy .mascot-thought { display: none; }
-#theme-mascot.visible ~ #input {
-  padding-bottom: 28px;
-}
-@keyframes mascot-idle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-@keyframes mascot-thought {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 1; }
-}
-@keyframes mascot-run {
-  0% { left: 8px; transform: scaleX(1); }
-  48% { left: calc(100% - 36px); transform: scaleX(1); }
-  52% { left: calc(100% - 36px); transform: scaleX(-1); }
-  100% { left: 8px; transform: scaleX(-1); }
-}
-.theme-cyber #theme-mascot .mascot-body { color: var(--accent); text-shadow: 0 0 6px var(--accent); }
-.theme-fantasy #theme-mascot .mascot-body { filter: drop-shadow(0 0 4px rgba(226,184,122,0.5)); }
-.theme-stellar #theme-mascot .mascot-body { color: var(--accent); }
-.theme-hacker #theme-mascot .mascot-body { color: #5aff5a; font-family: monospace; }
-.theme-forest #theme-mascot .mascot-body { filter: drop-shadow(0 0 3px rgba(120,200,80,0.4)); }
-.theme-nova #theme-mascot .mascot-body { color: var(--accent); text-shadow: 0 0 8px color-mix(in srgb, var(--accent) 50%, transparent); }
-.theme-crt #theme-mascot .mascot-body { color: var(--accent); font-family: monospace; }
-.theme-codex #theme-mascot .mascot-body { font-family: monospace; color: var(--accent); }
-@media (prefers-reduced-motion: reduce) {
-  #theme-mascot.idle,
-  #theme-mascot.busy { animation: none !important; }
-  #theme-mascot.idle .mascot-thought { animation: none !important; opacity: 0.7; }
-}
 /* Input area */
 #input-area {
   flex-shrink: 0;
@@ -4863,10 +4790,6 @@ body #banner pre {
   <div id="input-wrapper">
     <div id="file-info" style="display:none"></div>
     <div id="suggestions"></div>
-    <div id="theme-mascot" class="visible idle" data-theme="cli" aria-hidden="true">
-      <span class="mascot-body">🤖</span>
-      <span class="mascot-thought">…</span>
-    </div>
     <textarea id="input" rows="1" placeholder="Type a message..." enterkeyhint="send"></textarea>
   </div>
   <button id="stop-btn" aria-label="Stop">⏹</button>
@@ -5273,55 +5196,6 @@ let abortController = null;
 let autoScroll = true;
 let lastQuery = '';
 
-function setStreaming(active) {
-  isStreaming = !!active;
-  ThemeMascot.sync();
-  if (!active) checkApiKey();
-}
-
-const ThemeMascot = {
-  el: null,
-  body: null,
-  thought: null,
-  SPRITES: {
-    cli: { body: '🤖', thought: '…' },
-    codecli: { body: '>_', thought: '// …' },
-    cyber: { body: '◈◡◈', thought: '▌▌▌' },
-    fantasy: { body: '🧙', thought: '✧ ✧' },
-    stellar: { body: '✦', thought: '~ ~ ~' },
-    forest: { body: '🦊', thought: '…' },
-    hacker: { body: '▮_▮', thought: '101' },
-    minimal: { body: '●', thought: '·' },
-    nova: { body: '✦', thought: '…' },
-    codex: { body: '$>', thought: '...' },
-    crt: { body: '▌▐', thought: '...' },
-  },
-
-  init() {
-    this.el = document.getElementById('theme-mascot');
-    this.body = this.el?.querySelector('.mascot-body');
-    this.thought = this.el?.querySelector('.mascot-thought');
-    this.applyTheme(state.theme || 'cli');
-    this.sync();
-  },
-
-  applyTheme(themeId) {
-    if (!this.el) return;
-    const id = themeId || 'cli';
-    const sprite = this.SPRITES[id] || this.SPRITES.cli;
-    this.el.dataset.theme = id;
-    if (this.body) this.body.textContent = sprite.body;
-    if (this.thought) this.thought.textContent = sprite.thought;
-    this.el.classList.add('visible');
-  },
-
-  sync() {
-    if (!this.el) return;
-    this.el.classList.remove('idle', 'busy');
-    this.el.classList.add(isStreaming ? 'busy' : 'idle');
-  },
-};
-
 // ─── DOM refs ──────────────────────────────────────────────────────────
 const chatEl = document.getElementById('chat');
 const inputEl = document.getElementById('input');
@@ -5494,7 +5368,6 @@ function applyTheme() {
   sendBtn.textContent = t.sendLabel || '→';
   setMatrixRain(state.theme === 'hacker');
   updateBannerThemeIcon(state.theme);
-  ThemeMascot.applyTheme(state.theme || 'cli');
 }
 
 // ─── Status bar (model + tokens) ──────────────────────────────────────
@@ -6213,7 +6086,7 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
 
   const { div: progressDiv, body: progressBody } = addMessage('response', '', true);
   const progressEl = progressBody.querySelector('#loading');
-  setStreaming(true);
+  isStreaming = true;
   sendBtn.disabled = true;
   stopBtn.classList.add('active');
   abortController = new AbortController();
@@ -6374,7 +6247,7 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
     else if (msg.includes('Failed to fetch')) msg = 'Network error. Check your connection.';
     progressBody.innerHTML = `<div style="color:var(--red);font-size:12px">⚠ ${msg}</div>`;
   } finally {
-    setStreaming(false);
+    isStreaming = false;
     stopBtn.classList.remove('active');
     sendBtn.disabled = false;
     abortController = null;
@@ -6399,7 +6272,7 @@ async function sendMessage(userText) {
   const { div: responseDiv, body: responseBody } = addMessage('response', '', true);
   const loadingEl = responseBody.querySelector('#loading');
 
-  setStreaming(true);
+  isStreaming = true;
   sendBtn.disabled = true;
   stopBtn.classList.add('active');
   abortController = new AbortController();
@@ -6519,7 +6392,7 @@ async function sendMessage(userText) {
     }
     addErrorMessage(msg);
   } finally {
-    setStreaming(false);
+    isStreaming = false;
     stopBtn.classList.remove('active');
     sendBtn.disabled = false;
     updateStatusBar();
@@ -7294,7 +7167,6 @@ if (window.visualViewport) {
 }
 
 // ─── Init ──────────────────────────────────────────────────────────────
-ThemeMascot.init();
 checkApiKey();
 restoreMessages();
 
