@@ -5680,6 +5680,8 @@ async function callLLM(messages, maxTokens = 2000, signal = null) {
 }
 
 // ─── Structured multi-step analysis (plan mode + /research) ───────────
+const PLAN_BALANCE_GUIDE = `Tone: stay balanced and evidence-based. Do not be unnecessarily positive or overly critical — weigh strengths and weaknesses fairly. Use Neutral or Mixed when evidence is mixed. Acknowledge uncertainty instead of forced optimism or doom.`;
+
 async function runStructuredAnalysis(query) {
   if (isStreaming || !state.apiKey) return;
 
@@ -5728,6 +5730,7 @@ Rules:
 - Adapt automatically to the domain (e.g. stock/company analysis, product comparison, technical architecture, scientific topic, policy debate, career decision — whatever fits the query).
 - Each sub-question is a short phrase ending with "?" (e.g. "Business model?", "Growth drivers?", "Key risks?").
 - Order logically: context → core dimensions → metrics/evidence → risks/catalysts → outlook.
+- Include both upside and downside angles where relevant — avoid a one-sided checklist.
 - Do not answer yet — only list questions.
 
 Return ONLY a JSON array:
@@ -5771,13 +5774,14 @@ Query: ${userContent}${fileContext}` },
       renderProgress(`Answering ${i + 1}/${maxSteps}: ${qText}`);
 
       const line = await callLLM([
-        { role: 'system', content: 'You answer analytical checklist items in exactly one line. Be specific, quantitative, and concise.' },
+        { role: 'system', content: `You answer analytical checklist items in exactly one line. Be specific, quantitative, and concise. ${PLAN_BALANCE_GUIDE}` },
         { role: 'user', content: `Original query: ${userContent}${fileContext}
 
 Answer sub-question ${i + 1} of ${maxSteps} in exactly ONE line using this format:
 ${i + 1}. ${qText}  [Verdict] – [key insight in a few words].  [1–3 specific data points, metrics, dates, or facts].
 
-Verdict examples: Yes / No / Neutral / Strong / Weak / Mixed / High / Low / Slightly rich / Very strong — pick what fits.
+Verdict examples: Yes / No / Neutral / Strong / Weak / Mixed / High / Low / Slightly rich / Very strong — pick what fits the evidence, not hype or fear.
+- ${PLAN_BALANCE_GUIDE}
 - Start with the number and question text exactly as shown.
 - Use an en-dash (–) after the verdict.
 - Include real numbers when you know them; if uncertain, say "approx." or "estimate".
@@ -5793,13 +5797,13 @@ Verdict examples: Yes / No / Neutral / Strong / Weak / Mixed / High / Low / Slig
 
     const subAnalysisBlock = `## Sub-analysis\n\n${completedLines.join('\n')}`;
     const synthesisMessages = [
-      { role: 'system', content: (state.systemPrompt ? state.systemPrompt + '\n\n' : '') + 'You synthesize multi-part analyses into one clear, comprehensive final answer. Use markdown with headings and organized sections. Lead with an executive summary, then detail. Reference insights from the sub-analysis without repeating every line verbatim.' },
+      { role: 'system', content: (state.systemPrompt ? state.systemPrompt + '\n\n' : '') + `You synthesize multi-part analyses into one clear, comprehensive final answer. Use markdown with headings and organized sections. Lead with an executive summary, then detail. Reference insights from the sub-analysis without repeating every line verbatim. ${PLAN_BALANCE_GUIDE} Present a fair view: note both positives and risks, and avoid cheerleading or undue pessimism.` },
       { role: 'user', content: `Original question: ${userContent}${fileContext}
 
 Sub-analysis (each line is one answered dimension):
 ${completedLines.join('\n')}
 
-Write a comprehensive **Final Answer** that integrates all sub-analysis points into a cohesive response. Structure with clear sections. Highlight the most important conclusions, trade-offs, and actionable takeaways.` },
+Write a comprehensive **Final Answer** that integrates all sub-analysis points into a cohesive, balanced response. Structure with clear sections. Highlight the most important conclusions, trade-offs, and actionable takeaways without leaning too positive or too negative.` },
     ];
 
     let fullResponse = subAnalysisBlock + '\n\n## Final Answer\n\n';
