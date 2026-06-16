@@ -1328,7 +1328,7 @@ function handleSlashCommand(cmd, args) {
     case '/research':
     case '/deep':
       if (!args) {
-        addMessage('response', 'Usage: `/research <query>` — e.g. `/research analyze AAPL stock`\n\nOptionally searches the web for live data (settings), then breaks the query into sub-questions, answers each in paragraphs, and synthesizes a polished final answer.');
+        addMessage('response', 'Usage: `/research <query>` — e.g. `/research analyze AAPL stock`\n\nOptionally searches the web for live data (settings), breaks the query into sub-questions (min/max in settings), answers each, and synthesizes a final answer. Parallel answers and quality gate are configurable under **Plan pipeline** in settings.');
         return true;
       }
       doDeepResearch(args);
