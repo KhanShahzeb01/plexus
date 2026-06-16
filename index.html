@@ -5142,6 +5142,20 @@ body #banner pre {
       <option value="heather">Heather</option>
     </select>
 
+    <label style="margin-top:16px;display:flex;align-items:center;gap:8px;cursor:pointer">
+      <input type="checkbox" id="research-web-search" style="width:auto;margin:0">
+      Web search before <code>/research</code> (live data via OpenRouter)
+    </label>
+    <label for="web-search-model">Web search model</label>
+    <select id="web-search-model">
+      <option value="google/gemini-2.5-flash">Gemini 2.5 Flash</option>
+      <option value="google/gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+      <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+      <option value="openai/gpt-4o">GPT-4o</option>
+      <option value="anthropic/claude-haiku-4.5">Claude Haiku 4.5</option>
+      <option value="anthropic/claude-sonnet-4">Claude Sonnet 4</option>
+    </select>
+
     <label for="system-prompt">System Prompt</label>
     <textarea id="system-prompt" rows="3" placeholder="Optional: set a custom system prompt..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;resize:vertical;margin-bottom:14px;transition:border-color 0.15s"></textarea>
 
@@ -5217,8 +5231,10 @@ function loadState() {
       totalTokensOut: data.totalTokensOut || 0,
       lifetimeTokensIn: data.lifetimeTokensIn || 0,
       lifetimeTokensOut: data.lifetimeTokensOut || 0,
+      researchWebSearch: data.researchWebSearch !== false,
+      webSearchModel: data.webSearchModel || 'google/gemini-2.5-flash',
     };
-  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '', colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0 }; }
+  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '', colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0, researchWebSearch: true, webSearchModel: 'google/gemini-2.5-flash' }; }
 }
 function saveState() {
   try {
@@ -5240,6 +5256,8 @@ function saveState() {
       totalTokensOut: state.totalTokensOut || 0,
       lifetimeTokensIn: state.lifetimeTokensIn || 0,
       lifetimeTokensOut: state.lifetimeTokensOut || 0,
+      researchWebSearch: state.researchWebSearch !== false,
+      webSearchModel: state.webSearchModel || 'google/gemini-2.5-flash',
     };
     localStorage.setItem(STATE_KEY, JSON.stringify(data));
     // Update session store
@@ -5420,6 +5438,8 @@ const fontSizeSelect = document.getElementById('font-size-select');
 const fontFamilySelect = document.getElementById('font-family-select');
 const themeSelect = document.getElementById('theme-select');
 const colorSelect = document.getElementById('color-select');
+const researchWebSearchInput = document.getElementById('research-web-search');
+const webSearchModelSelect = document.getElementById('web-search-model');
 const statusModel = document.getElementById('status-model');
 const statusTokens = document.getElementById('status-tokens');
 const stopBtn = document.getElementById('stop-btn');
@@ -5925,6 +5945,60 @@ async function callLLM(messages, maxTokens = 2000, signal = null) {
   return data.choices?.[0]?.message?.content || '';
 }
 
+const WEB_SEARCH_CTX_MAX = 12000;
+
+const WebSearch = {
+  async gather(query, signal) {
+    const model = state.webSearchModel || 'google/gemini-2.5-flash';
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.apiKey}`,
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Plexus',
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You gather live web information for research. Search the web, then return a factual brief in markdown: grouped bullet points with dates/numbers where available, and a ## Sources section listing URLs. Prefer recent, authoritative sources. Do not speculate beyond search results.',
+          },
+          {
+            role: 'user',
+            content: `Search the web for current information relevant to this research query:\n\n${query}`,
+          },
+        ],
+        tools: [{ type: 'openrouter:web_search', max_results: 8 }],
+        stream: false,
+        max_tokens: 4000,
+        temperature: 0.2,
+      }),
+      signal: signal || undefined,
+    });
+    if (!response.ok) {
+      let detail = '';
+      try { const err = await response.json(); detail = err.error?.message || ''; } catch {}
+      throw new Error(detail || `Web search HTTP ${response.status}`);
+    }
+    const data = await response.json();
+    if (data.usage) {
+      const pi = data.usage.prompt_tokens || 0;
+      const co = data.usage.completion_tokens || 0;
+      state.totalTokensIn = (state.totalTokensIn || 0) + pi;
+      state.totalTokensOut = (state.totalTokensOut || 0) + co;
+      state.lifetimeTokensIn = (state.lifetimeTokensIn || 0) + pi;
+      state.lifetimeTokensOut = (state.lifetimeTokensOut || 0) + co;
+      saveState();
+      updateStatusBar();
+    }
+    const text = (data.choices?.[0]?.message?.content || '').trim();
+    if (!text) throw new Error('Web search returned no content');
+    return truncatePlanText(text, WEB_SEARCH_CTX_MAX);
+  },
+};
+
 // ─── Structured multi-step analysis (plan mode + /research) ───────────
 const PLAN_BALANCE_GUIDE = `Tone: stay balanced and evidence-based. Do not be unnecessarily positive or overly critical — weigh strengths and weaknesses fairly. Use Neutral or Mixed when evidence is mixed. Acknowledge uncertainty instead of forced optimism or doom.`;
 
@@ -6268,7 +6342,7 @@ ${summary}` },
   },
 };
 
-async function runStructuredAnalysis(query, { parallel = false, qualityGate = false, appendUser = true } = {}) {
+async function runStructuredAnalysis(query, { parallel = false, qualityGate = false, appendUser = true, webSearch = false } = {}) {
   if (isStreaming || !state.apiKey) return;
 
   const userContent = query.trim();
@@ -6278,7 +6352,7 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
     saveState();
   }
 
-  const fileContext = uploadedText.trim()
+  let fileContext = uploadedText.trim()
     ? `\n\nAttached file context (${uploadedFile ? uploadedFile.name : 'file'}):\n${uploadedText.trim().substring(0, 50000)}`
     : '';
 
@@ -6295,11 +6369,12 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
     : [];
 
   const questionList = [];
+  let webSearchNote = '';
   let finalAnswer = '';
 
   function renderThinkingUI({ activeIndex = -1, completedCount = 0, phase = 'planning', parallel = false } = {}) {
     if (progressEl) progressEl.classList.remove('active');
-    const showDots = ['planning', 'answering', 'quality', 'synthesizing'].includes(phase);
+    const showDots = ['searching', 'planning', 'answering', 'quality', 'synthesizing'].includes(phase);
     const isDone = phase === 'done';
     const dots = showDots ? '<span class="plan-thinking-dots"><span>.</span><span>.</span><span>.</span></span>' : '';
     const headerLabel = isDone ? 'Thought' : 'Thinking';
@@ -6331,8 +6406,14 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
       if (phase === 'synthesizing') {
         questionsHtml += '<div class="plan-thinking-q active">Synthesizing final answer…</div>';
       }
+    } else if (phase === 'searching') {
+      questionsHtml = '<div class="plan-thinking-q active">Searching the web for live data…</div>';
     } else {
       questionsHtml = '<div class="plan-thinking-q active">Planning…</div>';
+    }
+
+    if (webSearchNote && phase !== 'searching') {
+      questionsHtml = `<div class="plan-thinking-q done">${escapeHtml(webSearchNote)}</div>` + questionsHtml;
     }
 
     const questionsCollapsed = isDone && progressBody.dataset.thinkingOpen !== '1';
@@ -6378,6 +6459,18 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
   }
 
   try {
+    if (webSearch) {
+      renderThinkingUI({ phase: 'searching' });
+      try {
+        const webBrief = await WebSearch.gather(userContent, signal);
+        fileContext += `\n\n## Live web research (auto-gathered before analysis)\n${webBrief}`;
+        webSearchNote = '✓ Live web data gathered';
+      } catch (err) {
+        if (err.name === 'AbortError') throw err;
+        webSearchNote = `⚠ Web search skipped: ${(err.message || 'unavailable').slice(0, 80)}`;
+      }
+    }
+
     renderThinkingUI({ phase: 'planning' });
 
     const subQuestions = await PlanPipeline.planner({ userContent, fileContext, sys, signal });
@@ -6454,7 +6547,11 @@ async function runStructuredAnalysis(query, { parallel = false, qualityGate = fa
 }
 
 async function doDeepResearch(query) {
-  return runStructuredAnalysis(query, { parallel: false, qualityGate: false });
+  return runStructuredAnalysis(query, {
+    parallel: false,
+    qualityGate: false,
+    webSearch: state.researchWebSearch !== false,
+  });
 }
 
 // ─── OpenRouter API call ───────────────────────────────────────────────
@@ -6838,7 +6935,7 @@ function handleSlashCommand(cmd, args) {
         '| **Persona** | `/nopersona` | `/nopersona` | Clear active persona |',
         '| **Plan** | `/plan` | `/plan` | Toggle plan mode — every message is split into sub-questions, answered one-by-one, then synthesized |',
         '| **Plan** | `/plan on` / `/plan off` | `/plan on` | Enable or disable plan mode |',
-        '| **Research** | `/research <q>` | `/research analyze AAPL stock` | One-shot structured analysis (sub-questions → answers → final answer) |',
+        '| **Research** | `/research <q>` | `/research analyze AAPL stock` | Web search → sub-questions → answers → final answer |',
         '| **Research** | `/deep <q>` | `/deep NVDA vs AMD` | Shorthand for /research |',
         '| **Quick** | `/summarize <text>` | `/summarize ...` | Condense text preserving key info |',
         '| **Quick** | `/explain <text>` | `/explain ...` | Break down concepts with examples |',
@@ -6940,7 +7037,7 @@ function handleSlashCommand(cmd, args) {
     case '/research':
     case '/deep':
       if (!args) {
-        addMessage('response', 'Usage: `/research <query>` — e.g. `/research analyze AAPL stock`\n\nBreaks the query into sub-questions, answers each in paragraphs, then synthesizes a polished final answer. Retries with a shorter context if the model hits input limits.');
+        addMessage('response', 'Usage: `/research <query>` — e.g. `/research analyze AAPL stock`\n\nOptionally searches the web for live data (settings), then breaks the query into sub-questions, answers each in paragraphs, and synthesizes a polished final answer.');
         return true;
       }
       doDeepResearch(args);
@@ -7533,6 +7630,8 @@ function openSettings() {
   fontFamilySelect.value = state.fontFamily || '';
   themeSelect.value = state.theme || 'cli';
   colorSelect.value = state.colorScheme || 'sage';
+  if (researchWebSearchInput) researchWebSearchInput.checked = state.researchWebSearch !== false;
+  if (webSearchModelSelect) webSearchModelSelect.value = state.webSearchModel || 'google/gemini-2.5-flash';
   settingsStatus.classList.remove('show');
   settingsOverlay.classList.add('active');
 }
@@ -7556,6 +7655,8 @@ saveKeyBtn.addEventListener('click', () => {
   state.apiKey = key;
   state.model = modelSelect.value;
   state.systemPrompt = systemPromptInput.value.trim();
+  if (researchWebSearchInput) state.researchWebSearch = researchWebSearchInput.checked;
+  if (webSearchModelSelect) state.webSearchModel = webSearchModelSelect.value;
   saveState();
   showSettingsStatus('API key saved', 'ok');
   checkApiKey();
@@ -7597,6 +7698,16 @@ themeSelect.addEventListener('change', () => {
 colorSelect.addEventListener('change', () => {
   state.colorScheme = colorSelect.value;
   applyColor();
+  saveState();
+});
+
+researchWebSearchInput?.addEventListener('change', () => {
+  state.researchWebSearch = researchWebSearchInput.checked;
+  saveState();
+});
+
+webSearchModelSelect?.addEventListener('change', () => {
+  state.webSearchModel = webSearchModelSelect.value;
   saveState();
 });
 
