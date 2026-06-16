@@ -4788,11 +4788,6 @@ body #banner pre {
     <div class="sp-row"><span class="sp-label">Total</span><span class="sp-value" id="sp-tokens-total">0</span></div>
   </div>
   <div class="sp-section">
-    <div class="sp-row"><span class="sp-label">Msgs</span><span class="sp-value" id="sp-msgs">0</span></div>
-    <div id="sp-context-bar" class="sp-bar"><div class="sp-bar-fill" id="sp-context-fill" style="width:0%"></div></div>
-    <div class="sp-row"><span class="sp-label">Context</span><span class="sp-value" id="sp-usage">0%</span></div>
-  </div>
-  <div class="sp-section">
     <div class="sp-row"><span class="sp-label">Lifetime in</span><span class="sp-value" id="sp-lt-in">0</span></div>
     <div class="sp-row"><span class="sp-label">Lifetime out</span><span class="sp-value" id="sp-lt-out">0</span></div>
   </div>
@@ -5423,7 +5418,6 @@ function updateSidePanel() {
   const tin = state.totalTokensIn || 0;
   const tout = state.totalTokensOut || 0;
   const total = tin + tout;
-  const msgs = state.messages.length;
 
   const el = id => document.getElementById(id);
   if (!el('sp-tokens-in')) return;
@@ -5431,18 +5425,11 @@ function updateSidePanel() {
   el('sp-tokens-in').textContent = tin.toLocaleString();
   el('sp-tokens-out').textContent = tout.toLocaleString();
   el('sp-tokens-total').textContent = total.toLocaleString();
-  el('sp-msgs').textContent = msgs;
 
   const short = state.model.split('/').pop()?.replace(/:free$/, '') || state.model;
   el('sp-model').textContent = short || '—';
   el('sp-mode').textContent = state.mode || 'general';
   if (el('sp-plan')) el('sp-plan').textContent = state.planMode ? 'on' : 'off';
-
-  const maxCtx = 8000;
-  const used = Math.min(total, maxCtx);
-  const pct = Math.round((used / maxCtx) * 100);
-  if (el('sp-context-fill')) el('sp-context-fill').style.width = pct + '%';
-  if (el('sp-usage')) el('sp-usage').textContent = pct + '%';
 
   // Ring chart: output / total ratio
   const ring = el('sp-ring');
