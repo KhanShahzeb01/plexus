@@ -371,6 +371,56 @@ body {
   padding: 0 12px 8px;
   font-style: italic;
 }
+/* Plan mode thinking block */
+.plan-thinking {
+  margin: 4px 0 8px;
+  padding: 10px 12px;
+  border-left: 2px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: color-mix(in srgb, var(--surface2) 80%, transparent);
+  border-radius: 0 4px 4px 0;
+}
+.plan-thinking-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  user-select: none;
+}
+.plan-thinking-header.done { cursor: pointer; }
+.plan-thinking-header.done:hover { color: var(--text-bright); }
+.plan-thinking-chevron {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-right: 2px;
+}
+.plan-thinking-dots span {
+  animation: thinkBlink 1.2s infinite;
+  opacity: 0.35;
+}
+.plan-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.plan-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes thinkBlink {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+.plan-thinking-questions {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+.plan-thinking-questions.collapsed { display: none; }
+.plan-thinking-q {
+  padding: 2px 0;
+}
+.plan-thinking-q.active { color: var(--accent); }
+.plan-thinking-q.done { opacity: 0.72; }
+.plan-answer {
+  margin-top: 4px;
+}
 /* Input area */
 #input-area {
   flex-shrink: 0;
@@ -5707,19 +5757,77 @@ async function runStructuredAnalysis(query) {
     : [];
 
   const completedLines = [];
+  const questionList = [];
+  let finalAnswer = '';
 
-  function renderProgress(statusText) {
+  function renderThinkingUI(activeIndex = -1, phase = 'planning') {
     if (progressEl) progressEl.classList.remove('active');
-    let md = `*${statusText}*`;
-    if (completedLines.length) {
-      md += `\n\n## Sub-analysis\n\n${completedLines.join('\n')}`;
+    const showDots = phase === 'planning' || phase === 'answering' || phase === 'synthesizing';
+    const isDone = phase === 'done';
+    const dots = showDots ? '<span class="plan-thinking-dots"><span>.</span><span>.</span><span>.</span></span>' : '';
+    const headerLabel = isDone ? 'Thought' : 'Thinking';
+    const chevron = isDone ? `<span class="plan-thinking-chevron">${progressBody.dataset.thinkingOpen === '1' ? '▼' : '▶'}</span>` : '';
+
+    let questionsHtml = '';
+    if (questionList.length) {
+      questionsHtml = questionList.map((q, i) => {
+        let cls = 'plan-thinking-q';
+        if (phase === 'answering' && i === activeIndex) cls += ' active';
+        else if (phase === 'answering' && i < activeIndex) cls += ' done';
+        else if (phase === 'synthesizing' || isDone) cls += ' done';
+        return `<div class="${cls}">${i + 1}. ${escapeHtml(q)}</div>`;
+      }).join('');
+      if (phase === 'synthesizing') {
+        questionsHtml += '<div class="plan-thinking-q active">Synthesizing final answer…</div>';
+      }
+    } else {
+      questionsHtml = '<div class="plan-thinking-q active">Planning…</div>';
     }
-    updateResponseBody(progressBody, md);
+
+    const questionsCollapsed = isDone && progressBody.dataset.thinkingOpen !== '1';
+    const existingAnswer = progressBody.querySelector('#plan-answer');
+    const answerHtml = existingAnswer ? existingAnswer.outerHTML : (phase === 'synthesizing' || isDone ? '<div class="plan-answer" id="plan-answer"></div>' : '');
+
+    progressBody.innerHTML = `
+      <div class="plan-thinking">
+        <div class="plan-thinking-header${isDone ? ' done' : ''}" id="plan-thinking-toggle">
+          ${chevron}${headerLabel}${dots}
+        </div>
+        <div class="plan-thinking-questions${questionsCollapsed ? ' collapsed' : ''}" id="plan-thinking-questions">${questionsHtml}</div>
+      </div>
+      ${answerHtml}
+    `;
+
+    if (isDone) {
+      const toggle = progressBody.querySelector('#plan-thinking-toggle');
+      toggle?.addEventListener('click', () => {
+        progressBody.dataset.thinkingOpen = progressBody.dataset.thinkingOpen === '1' ? '0' : '1';
+        renderThinkingUI(-1, 'done');
+        const ans = progressBody.querySelector('#plan-answer');
+        if (ans && progressBody.dataset.finalAnswer) {
+          ans.innerHTML = renderMarkdown(progressBody.dataset.finalAnswer);
+        }
+      });
+    }
+
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  function updatePlanAnswer(text) {
+    let el = progressBody.querySelector('#plan-answer');
+    if (!el) {
+      renderThinkingUI(-1, 'synthesizing');
+      el = progressBody.querySelector('#plan-answer');
+    }
+    if (el) {
+      el.innerHTML = renderMarkdown(text);
+      progressBody.dataset.finalAnswer = text;
+    }
     chatEl.scrollTop = chatEl.scrollHeight;
   }
 
   try {
-    renderProgress('Breaking query into sub-questions...');
+    renderThinkingUI(-1, 'planning');
 
     const planRaw = await callLLM([
       ...sys,
@@ -5766,12 +5874,17 @@ Query: ${userContent}${fileContext}` },
     }
 
     const maxSteps = Math.min(subQuestions.length, 14);
+    questionList.push(...subQuestions.map(sq => {
+      const q = sq.question.endsWith('?') ? sq.question : sq.question + '?';
+      return q;
+    }));
+    renderThinkingUI(-1, 'answering');
 
     for (let i = 0; i < maxSteps; i++) {
       if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
       const sq = subQuestions[i];
       const qText = sq.question.endsWith('?') ? sq.question : sq.question + '?';
-      renderProgress(`Answering ${i + 1}/${maxSteps}: ${qText}`);
+      renderThinkingUI(i, 'answering');
 
       const line = await callLLM([
         { role: 'system', content: `You answer analytical checklist items in exactly one line. Be specific, quantitative, and concise. ${PLAN_BALANCE_GUIDE}` },
@@ -5790,12 +5903,10 @@ Verdict examples: Yes / No / Neutral / Strong / Weak / Mixed / High / Low / Slig
 
       const cleaned = line.trim().replace(/^#+\s*/, '');
       completedLines.push(cleaned || `${i + 1}. ${qText}  Neutral – Unable to retrieve data for this angle.`);
-      renderProgress(`Completed ${i + 1}/${maxSteps}`);
     }
 
-    renderProgress('Building final answer from sub-analysis...');
+    renderThinkingUI(-1, 'synthesizing');
 
-    const subAnalysisBlock = `## Sub-analysis\n\n${completedLines.join('\n')}`;
     const synthesisMessages = [
       { role: 'system', content: (state.systemPrompt ? state.systemPrompt + '\n\n' : '') + `You synthesize multi-part analyses into one clear, comprehensive final answer. Use markdown with headings and organized sections. Lead with an executive summary, then detail. Reference insights from the sub-analysis without repeating every line verbatim. ${PLAN_BALANCE_GUIDE} Present a fair view: note both positives and risks, and avoid cheerleading or undue pessimism.` },
       { role: 'user', content: `Original question: ${userContent}${fileContext}
@@ -5805,8 +5916,6 @@ ${completedLines.join('\n')}
 
 Write a comprehensive **Final Answer** that integrates all sub-analysis points into a cohesive, balanced response. Structure with clear sections. Highlight the most important conclusions, trade-offs, and actionable takeaways without leaning too positive or too negative.` },
     ];
-
-    let fullResponse = subAnalysisBlock + '\n\n## Final Answer\n\n';
 
     const streamResp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -5861,26 +5970,33 @@ Write a comprehensive **Final Answer** that integrates all sub-analysis points i
           }
           const delta = chunk.choices?.[0]?.delta?.content;
           if (delta) {
-            fullResponse += delta;
-            updateResponseBody(progressBody, fullResponse);
+            finalAnswer += delta;
+            updatePlanAnswer(finalAnswer);
           }
         } catch {}
       }
     }
 
-    if (!fullResponse.trim()) throw new Error('Empty synthesis response');
-    state.messages.push({ role: 'assistant', content: fullResponse.trim() });
+    if (!finalAnswer.trim()) throw new Error('Empty synthesis response');
+    progressBody.dataset.thinkingOpen = '0';
+    renderThinkingUI(-1, 'done');
+    updatePlanAnswer(finalAnswer.trim());
+    state.messages.push({ role: 'assistant', content: finalAnswer.trim() });
     saveState();
-    addMessageButtons(progressDiv, 'response', fullResponse.trim());
+    addMessageButtons(progressDiv, 'response', finalAnswer.trim());
 
   } catch (err) {
     if (err.name === 'AbortError') {
-      if (completedLines.length) {
-        const partial = `## Sub-analysis\n\n${completedLines.join('\n')}\n\n*(Stopped before final synthesis)*`;
-        state.messages.push({ role: 'assistant', content: partial });
+      if (finalAnswer?.trim()) {
+        progressBody.dataset.thinkingOpen = '0';
+        renderThinkingUI(-1, 'done');
+        updatePlanAnswer(finalAnswer.trim());
+        state.messages.push({ role: 'assistant', content: finalAnswer.trim() });
         saveState();
-        updateResponseBody(progressBody, partial);
-        addMessageButtons(progressDiv, 'response', partial);
+        addMessageButtons(progressDiv, 'response', finalAnswer.trim());
+      } else if (questionList.length) {
+        renderThinkingUI(-1, 'done');
+        progressBody.querySelector('#plan-answer')?.remove();
       }
       return;
     }
