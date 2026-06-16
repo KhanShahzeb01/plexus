@@ -4730,7 +4730,7 @@ body #banner pre {
     <strong>Plexus</strong> — AI chat powered by OpenRouter.<br>
     Themes: <code>/finance</code> <code>/aidev</code> <code>/github</code> <code>/datascience</code> <code>/blog</code><br>
     Quick: <code>/summarize</code> <code>/explain</code> <code>/translate</code> <code>/rephrase</code> <code>/bulletise</code><br>
-    Plan mode: <code>/plan</code> breaks your query into numbered sub-questions, answers each one, then builds a final answer. <code>/research</code> runs the same pipeline once.<br>
+    Plan mode: <code>/plan</code> runs parallel sub-answers with a quality gate, then builds a final answer. <code>/research</code> uses the same pipeline sequentially without the gate.<br>
     Click <strong>settings</strong> to set your API key. Type <code>/help</code> for all commands.
   </div>
 </div>
@@ -5860,7 +5860,186 @@ async function streamChatCompletion(messages, { signal, maxTokens = 8000, onDelt
   return full;
 }
 
-async function runStructuredAnalysis(query) {
+// ─── Plan pipeline modules (planner → answerer → quality gate → synthesizer) ─
+const PlanPipeline = {
+  FALLBACK_QUESTIONS: [
+    { id: 1, question: 'Core subject and scope?' },
+    { id: 2, question: 'Key facts and context?' },
+    { id: 3, question: 'Quantitative metrics or data?' },
+    { id: 4, question: 'Strengths and advantages?' },
+    { id: 5, question: 'Weaknesses and risks?' },
+    { id: 6, question: 'Growth drivers or opportunities?' },
+    { id: 7, question: 'Competitive or comparative position?' },
+    { id: 8, question: 'Outlook and catalysts?' },
+  ],
+
+  normalizeQuestion(text) {
+    const q = String(text || '').replace(/^\d+[\.\)]\s*/, '').trim();
+    return q.endsWith('?') ? q : q + '?';
+  },
+
+  parseSubQuestions(planRaw) {
+    try {
+      const extracted = planRaw.match(/\[[\s\S]*\]/);
+      const parsed = JSON.parse(extracted ? extracted[0] : planRaw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map((item, i) => {
+        if (typeof item === 'string') return { id: i + 1, question: this.normalizeQuestion(item) };
+        const q = item.question || item.q || item.text || '';
+        return { id: item.id || i + 1, question: this.normalizeQuestion(q) };
+      }).filter(x => x.question && x.question.length > 1);
+    } catch {
+      return [];
+    }
+  },
+
+  async planner({ userContent, fileContext, sys, signal }) {
+    const planRaw = await callLLM([
+      ...(sys || []),
+      { role: 'system', content: 'You decompose complex questions into thorough analytical checklists. Return only valid JSON.' },
+      { role: 'user', content: `Break this query into 8–14 specific sub-questions that together would fully answer it.
+
+Rules:
+- Adapt automatically to the domain (e.g. stock/company analysis, product comparison, technical architecture, scientific topic, policy debate, career decision — whatever fits the query).
+- Each sub-question is a short phrase ending with "?" (e.g. "Business model?", "Growth drivers?", "Key risks?").
+- Order logically: context → core dimensions → metrics/evidence → risks/catalysts → outlook.
+- Include both upside and downside angles where relevant — avoid a one-sided checklist.
+- Do not answer yet — only list questions.
+
+Return ONLY a JSON array:
+[{"id": 1, "question": "..."}, {"id": 2, "question": "..."}, ...]
+
+Query: ${userContent}${fileContext}` },
+    ], 3000, signal);
+
+    let subQuestions = this.parseSubQuestions(planRaw);
+    if (subQuestions.length < 2) subQuestions = this.FALLBACK_QUESTIONS.map(q => ({ ...q, question: this.normalizeQuestion(q.question) }));
+    return subQuestions.slice(0, 14);
+  },
+
+  async answerOne({ userContent, fileContext, question, index, total, signal }) {
+    const qText = this.normalizeQuestion(question);
+    const answer = await callLLM([
+      { role: 'system', content: `You answer analytical sub-questions in clear prose. ${PLAN_BALANCE_GUIDE}` },
+      { role: 'user', content: `Original query: ${userContent}${fileContext}
+
+Answer sub-question ${index + 1} of ${total}: "${qText}"
+
+Write 1–3 detailed paragraphs in plain prose.
+- No tables, code blocks, or bullet lists.
+- Be specific with data, metrics, dates, and examples where relevant.
+- ${PLAN_BALANCE_GUIDE}
+- If data is uncertain, say so clearly.` },
+    ], 1800, signal);
+
+    const cleaned = answer.trim().replace(/^#+\s*/, '');
+    return {
+      question: qText,
+      answer: cleaned || 'Unable to retrieve sufficient data for this angle.',
+    };
+  },
+
+  async answerAll({ userContent, fileContext, subQuestions, signal, parallel = false, onProgress }) {
+    const total = subQuestions.length;
+    if (parallel) {
+      let completed = 0;
+      const results = await Promise.all(subQuestions.map(async (sq, i) => {
+        if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+        const pair = await this.answerOne({ userContent, fileContext, question: sq.question, index: i, total, signal });
+        completed++;
+        onProgress?.({ index: i, completed, total, parallel: true });
+        return pair;
+      }));
+      return results;
+    }
+
+    const results = [];
+    for (let i = 0; i < total; i++) {
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+      const pair = await this.answerOne({ userContent, fileContext, question: subQuestions[i].question, index: i, total, signal });
+      results.push(pair);
+      onProgress?.({ index: i, completed: i + 1, total, parallel: false });
+    }
+    return results;
+  },
+
+  async qualityGate({ userContent, fileContext, qaPairs, signal }) {
+    if (qaPairs.length <= 3) return qaPairs;
+
+    const summary = qaPairs.map((p, i) => (
+      `[${i + 1}] Q: ${p.question}\nA: ${truncatePlanText(p.answer, 600)}`
+    )).join('\n\n');
+
+    const raw = await callLLM([
+      { role: 'system', content: 'You review research sub-answers and filter weak or contradictory ones. Return only valid JSON.' },
+      { role: 'user', content: `Original query: ${userContent}${fileContext}
+
+Review these sub-question answers. Drop answers that are:
+- Empty, vague, or placeholder ("unable to retrieve", no real substance)
+- Clearly factually contradictory to stronger answers elsewhere
+- Heavily redundant (same point already covered better by another answer)
+
+Do NOT drop answers merely for being cautious, mixed, or balanced.
+
+Return ONLY JSON:
+{"drop": [1-based indices to exclude], "notes": "brief optional summary"}
+
+Rules:
+- Use 1-based indices matching [1], [2], etc.
+- Keep at least ${Math.max(3, Math.ceil(qaPairs.length * 0.5))} answers.
+- When uncertain, keep the answer.
+
+Sub-answers:
+${summary}` },
+    ], 1500, signal);
+
+    let dropIndices = new Set();
+    try {
+      const extracted = raw.match(/\{[\s\S]*\}/);
+      const parsed = JSON.parse(extracted ? extracted[0] : raw);
+      const drops = parsed.drop || parsed.remove || parsed.exclude || [];
+      if (Array.isArray(drops)) {
+        drops.forEach(n => {
+          const idx = parseInt(n, 10);
+          if (idx >= 1 && idx <= qaPairs.length) dropIndices.add(idx);
+        });
+      }
+    } catch {}
+
+    const minKeep = Math.max(3, Math.ceil(qaPairs.length * 0.5));
+    let filtered = qaPairs.filter((_, i) => !dropIndices.has(i + 1));
+    if (filtered.length < minKeep) return qaPairs;
+    return filtered.length ? filtered : qaPairs;
+  },
+
+  async synthesizer({ userContent, fileContext, qaPairs, signal, onDelta }) {
+    let finalAnswer = '';
+    let lastError = null;
+    for (let level = 0; level < SYNTHESIS_REDUCTIONS.length; level++) {
+      try {
+        const { messages } = buildSynthesisMessages(userContent, fileContext, qaPairs, level);
+        finalAnswer = '';
+        const streamed = await streamChatCompletion(messages, {
+          signal,
+          maxTokens: 8000,
+          onDelta: (_delta, full) => {
+            finalAnswer = full;
+            if (onDelta) onDelta(full);
+          },
+        });
+        return streamed || finalAnswer;
+      } catch (err) {
+        if (err.name === 'AbortError') throw err;
+        lastError = err;
+        if (isContextLengthError(err.message) && level < SYNTHESIS_REDUCTIONS.length - 1) continue;
+        throw err;
+      }
+    }
+    throw lastError || new Error('Synthesis failed after context reduction');
+  },
+};
+
+async function runStructuredAnalysis(query, { parallel = false, qualityGate = false } = {}) {
   if (isStreaming || !state.apiKey) return;
 
   const userContent = query.trim();
@@ -5884,13 +6063,12 @@ async function runStructuredAnalysis(query) {
     ? [{ role: 'system', content: state.systemPrompt }]
     : [];
 
-  const qaPairs = [];
   const questionList = [];
   let finalAnswer = '';
 
-  function renderThinkingUI(activeIndex = -1, phase = 'planning') {
+  function renderThinkingUI({ activeIndex = -1, completedCount = 0, phase = 'planning', parallel = false } = {}) {
     if (progressEl) progressEl.classList.remove('active');
-    const showDots = phase === 'planning' || phase === 'answering' || phase === 'synthesizing';
+    const showDots = ['planning', 'answering', 'quality', 'synthesizing'].includes(phase);
     const isDone = phase === 'done';
     const dots = showDots ? '<span class="plan-thinking-dots"><span>.</span><span>.</span><span>.</span></span>' : '';
     const headerLabel = isDone ? 'Thought' : 'Thinking';
@@ -5900,11 +6078,25 @@ async function runStructuredAnalysis(query) {
     if (questionList.length) {
       questionsHtml = questionList.map((q, i) => {
         let cls = 'plan-thinking-q';
-        if (phase === 'answering' && i === activeIndex) cls += ' active';
-        else if (phase === 'answering' && i < activeIndex) cls += ' done';
-        else if (phase === 'synthesizing' || isDone) cls += ' done';
+        if (phase === 'answering') {
+          if (parallel) {
+            if (i < completedCount) cls += ' done';
+          } else if (i === activeIndex) {
+            cls += ' active';
+          } else if (i < activeIndex) {
+            cls += ' done';
+          }
+        } else if (phase === 'quality' || phase === 'synthesizing' || isDone) {
+          cls += ' done';
+        }
         return `<div class="${cls}">${i + 1}. ${escapeHtml(q)}</div>`;
       }).join('');
+      if (phase === 'answering' && parallel && completedCount < questionList.length) {
+        questionsHtml += `<div class="plan-thinking-q active">Answering in parallel… ${completedCount}/${questionList.length}</div>`;
+      }
+      if (phase === 'quality') {
+        questionsHtml += '<div class="plan-thinking-q active">Reviewing answer quality…</div>';
+      }
       if (phase === 'synthesizing') {
         questionsHtml += '<div class="plan-thinking-q active">Synthesizing final answer…</div>';
       }
@@ -5930,7 +6122,7 @@ async function runStructuredAnalysis(query) {
       const toggle = progressBody.querySelector('#plan-thinking-toggle');
       toggle?.addEventListener('click', () => {
         progressBody.dataset.thinkingOpen = progressBody.dataset.thinkingOpen === '1' ? '0' : '1';
-        renderThinkingUI(-1, 'done');
+        renderThinkingUI({ phase: 'done' });
         const ans = progressBody.querySelector('#plan-answer');
         if (ans && progressBody.dataset.finalAnswer) {
           ans.innerHTML = renderMarkdown(progressBody.dataset.finalAnswer);
@@ -5944,7 +6136,7 @@ async function runStructuredAnalysis(query) {
   function updatePlanAnswer(text) {
     let el = progressBody.querySelector('#plan-answer');
     if (!el) {
-      renderThinkingUI(-1, 'synthesizing');
+      renderThinkingUI({ phase: 'synthesizing' });
       el = progressBody.querySelector('#plan-answer');
     }
     if (el) {
@@ -5955,117 +6147,46 @@ async function runStructuredAnalysis(query) {
   }
 
   try {
-    renderThinkingUI(-1, 'planning');
+    renderThinkingUI({ phase: 'planning' });
 
-    const planRaw = await callLLM([
-      ...sys,
-      { role: 'system', content: 'You decompose complex questions into thorough analytical checklists. Return only valid JSON.' },
-      { role: 'user', content: `Break this query into 8–14 specific sub-questions that together would fully answer it.
+    const subQuestions = await PlanPipeline.planner({ userContent, fileContext, sys, signal });
+    questionList.push(...subQuestions.map(sq => PlanPipeline.normalizeQuestion(sq.question)));
+    renderThinkingUI({ phase: 'answering', parallel, completedCount: 0 });
 
-Rules:
-- Adapt automatically to the domain (e.g. stock/company analysis, product comparison, technical architecture, scientific topic, policy debate, career decision — whatever fits the query).
-- Each sub-question is a short phrase ending with "?" (e.g. "Business model?", "Growth drivers?", "Key risks?").
-- Order logically: context → core dimensions → metrics/evidence → risks/catalysts → outlook.
-- Include both upside and downside angles where relevant — avoid a one-sided checklist.
-- Do not answer yet — only list questions.
-
-Return ONLY a JSON array:
-[{"id": 1, "question": "..."}, {"id": 2, "question": "..."}, ...]
-
-Query: ${userContent}${fileContext}` },
-    ], 3000, signal);
-
-    let subQuestions = [];
-    try {
-      const extracted = planRaw.match(/\[[\s\S]*\]/);
-      const parsed = JSON.parse(extracted ? extracted[0] : planRaw);
-      if (Array.isArray(parsed)) {
-        subQuestions = parsed.map((item, i) => {
-          if (typeof item === 'string') return { id: i + 1, question: item.replace(/^\d+[\.\)]\s*/, '') };
-          const q = item.question || item.q || item.text || '';
-          return { id: item.id || i + 1, question: String(q).replace(/^\d+[\.\)]\s*/, '') };
-        }).filter(x => x.question && x.question.trim());
-      }
-    } catch {}
-
-    if (subQuestions.length < 2) {
-      subQuestions = [
-        { id: 1, question: 'Core subject and scope?' },
-        { id: 2, question: 'Key facts and context?' },
-        { id: 3, question: 'Quantitative metrics or data?' },
-        { id: 4, question: 'Strengths and advantages?' },
-        { id: 5, question: 'Weaknesses and risks?' },
-        { id: 6, question: 'Growth drivers or opportunities?' },
-        { id: 7, question: 'Competitive or comparative position?' },
-        { id: 8, question: 'Outlook and catalysts?' },
-      ];
-    }
-
-    const maxSteps = Math.min(subQuestions.length, 14);
-    questionList.push(...subQuestions.map(sq => {
-      const q = sq.question.endsWith('?') ? sq.question : sq.question + '?';
-      return q;
-    }));
-    renderThinkingUI(-1, 'answering');
-
-    for (let i = 0; i < maxSteps; i++) {
-      if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
-      const sq = subQuestions[i];
-      const qText = sq.question.endsWith('?') ? sq.question : sq.question + '?';
-      renderThinkingUI(i, 'answering');
-
-      const answer = await callLLM([
-        { role: 'system', content: `You answer analytical sub-questions in clear prose. ${PLAN_BALANCE_GUIDE}` },
-        { role: 'user', content: `Original query: ${userContent}${fileContext}
-
-Answer sub-question ${i + 1} of ${maxSteps}: "${qText}"
-
-Write 1–3 detailed paragraphs in plain prose.
-- No tables, code blocks, or bullet lists.
-- Be specific with data, metrics, dates, and examples where relevant.
-- ${PLAN_BALANCE_GUIDE}
-- If data is uncertain, say so clearly.` },
-      ], 1800, signal);
-
-      const cleaned = answer.trim().replace(/^#+\s*/, '');
-      qaPairs.push({
-        question: qText,
-        answer: cleaned || 'Unable to retrieve sufficient data for this angle.',
-      });
-    }
-
-    renderThinkingUI(-1, 'synthesizing');
-
-    let synthesisDone = false;
-    let lastSynthesisError = null;
-    for (let level = 0; level < SYNTHESIS_REDUCTIONS.length && !synthesisDone; level++) {
-      try {
-        const { messages: synthesisMessages } = buildSynthesisMessages(userContent, fileContext, qaPairs, level);
-        finalAnswer = '';
-        const streamed = await streamChatCompletion(synthesisMessages, {
-          signal,
-          maxTokens: 8000,
-          onDelta: (_delta, full) => {
-            finalAnswer = full;
-            updatePlanAnswer(finalAnswer);
-          },
+    let qaResults = await PlanPipeline.answerAll({
+      userContent,
+      fileContext,
+      subQuestions,
+      signal,
+      parallel,
+      onProgress: ({ index, completed, parallel: isParallel }) => {
+        renderThinkingUI({
+          phase: 'answering',
+          parallel: isParallel,
+          activeIndex: isParallel ? -1 : index,
+          completedCount: completed,
         });
-        finalAnswer = streamed;
-        synthesisDone = true;
-      } catch (err) {
-        if (err.name === 'AbortError') throw err;
-        lastSynthesisError = err;
-        if (isContextLengthError(err.message) && level < SYNTHESIS_REDUCTIONS.length - 1) {
-          continue;
-        }
-        throw err;
-      }
+      },
+    });
+
+    if (qualityGate) {
+      renderThinkingUI({ phase: 'quality', parallel, completedCount: questionList.length });
+      qaResults = await PlanPipeline.qualityGate({ userContent, fileContext, qaPairs: qaResults, signal });
     }
-    if (!synthesisDone) throw lastSynthesisError || new Error('Synthesis failed after context reduction');
+
+    renderThinkingUI({ phase: 'synthesizing', parallel, completedCount: questionList.length });
+
+    finalAnswer = await PlanPipeline.synthesizer({
+      userContent,
+      fileContext,
+      qaPairs: qaResults,
+      signal,
+      onDelta: (full) => updatePlanAnswer(full),
+    });
 
     if (!finalAnswer.trim()) throw new Error('Empty synthesis response');
     progressBody.dataset.thinkingOpen = '0';
-    renderThinkingUI(-1, 'done');
+    renderThinkingUI({ phase: 'done' });
     updatePlanAnswer(finalAnswer.trim());
     state.messages.push({ role: 'assistant', content: finalAnswer.trim() });
     saveState();
@@ -6075,13 +6196,13 @@ Write 1–3 detailed paragraphs in plain prose.
     if (err.name === 'AbortError') {
       if (finalAnswer?.trim()) {
         progressBody.dataset.thinkingOpen = '0';
-        renderThinkingUI(-1, 'done');
+        renderThinkingUI({ phase: 'done' });
         updatePlanAnswer(finalAnswer.trim());
         state.messages.push({ role: 'assistant', content: finalAnswer.trim() });
         saveState();
         addMessageButtons(progressDiv, 'response', finalAnswer.trim());
       } else if (questionList.length) {
-        renderThinkingUI(-1, 'done');
+        renderThinkingUI({ phase: 'done' });
         progressBody.querySelector('#plan-answer')?.remove();
       }
       return;
@@ -6102,7 +6223,7 @@ Write 1–3 detailed paragraphs in plain prose.
 }
 
 async function doDeepResearch(query) {
-  return runStructuredAnalysis(query);
+  return runStructuredAnalysis(query, { parallel: false, qualityGate: false });
 }
 
 // ─── OpenRouter API call ───────────────────────────────────────────────
@@ -6571,7 +6692,7 @@ function handleSlashCommand(cmd, args) {
       else if (args === 'off') setPlanMode(false);
       else setPlanMode(!state.planMode);
       addMessage('response', state.planMode
-        ? '**Plan mode ON.** Each message will be broken into 8–14 sub-questions, each answered in detailed paragraphs (hidden while thinking), then combined into a polished **Final Answer**.\n\nUse `/plan off` or click the **plan** badge for direct answers. Use `/research <query>` for a one-shot run without keeping plan mode on.'
+        ? '**Plan mode ON.** Each message uses the plan pipeline: parallel sub-answers, quality review, then a polished **Final Answer**.\n\nUse `/plan off` or click the **plan** badge for direct answers. Use `/research <query>` for sequential analysis without the quality gate.'
         : '**Plan mode OFF.** Messages go to the model for direct answers again.');
       return true;
     }
@@ -6679,7 +6800,7 @@ function handleSubmit() {
   }
 
   if (state.planMode) {
-    runStructuredAnalysis(text);
+    runStructuredAnalysis(text, { parallel: true, qualityGate: true });
     if (uploadedText.trim()) clearFile();
     return;
   }
@@ -7037,7 +7158,7 @@ updatePlanBadge();
 document.getElementById('plan-badge')?.addEventListener('click', () => {
   setPlanMode(!state.planMode);
   addMessage('response', state.planMode
-    ? '**Plan mode ON.** Queries are split into sub-questions, answered one-by-one, then synthesized.'
+    ? '**Plan mode ON.** Parallel sub-answers, quality review, then synthesis.'
     : '**Plan mode OFF.**');
 });
 
