@@ -134,6 +134,27 @@ body {
 #persona-badge.deviladvocate { color: #ff8c42; border-color: rgba(255,140,66,0.4); background: rgba(255,140,66,0.06); }
 #persona-badge.simplify { color: #4d96ff; border-color: rgba(77,150,255,0.4); background: rgba(77,150,255,0.06); }
 #persona-badge.none { display: none; }
+#plan-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 10px;
+  border-radius: 3px;
+  margin-right: 4px;
+  border: 1px dashed var(--border);
+  color: var(--text-dim);
+  background: transparent;
+  cursor: pointer;
+}
+#plan-badge.off { display: none; }
+#plan-badge.plan {
+  color: #fbbf24;
+  border-color: rgba(251,191,36,0.45);
+  border-style: solid;
+  background: rgba(251,191,36,0.08);
+}
 #model-badge {
   display: inline-block;
   font-size: 10px;
@@ -960,6 +981,7 @@ body {
 .theme-crt #status-bar #status-tokens { color: color-mix(in srgb, var(--accent) 75%, #5eff9e); }
 .theme-crt #mode-badge,
 .theme-crt #persona-badge,
+.theme-crt #plan-badge,
 .theme-crt #model-badge {
   background: #0a0a0a;
   border-color: var(--accent);
@@ -1573,6 +1595,7 @@ body {
 .theme-cyber #status-bar #status-tokens { color: var(--accent); text-shadow: 0 0 4px var(--accent-dim); }
 .theme-cyber #mode-badge,
 .theme-cyber #persona-badge,
+.theme-cyber #plan-badge,
 .theme-cyber #model-badge {
   background: var(--query-bg);
   border-color: var(--accent);
@@ -1942,6 +1965,7 @@ body {
 .theme-fantasy #status-bar #status-tokens { color: #e2b87a; }
 .theme-fantasy #mode-badge,
 .theme-fantasy #persona-badge,
+.theme-fantasy #plan-badge,
 .theme-fantasy #model-badge {
   background: #2a1a0c;
   border-color: #9a6a2e;
@@ -2311,6 +2335,7 @@ body {
 .theme-stellar #status-bar #status-tokens { color: color-mix(in srgb, var(--accent) 70%, #9bc9ff); }
 .theme-stellar #mode-badge,
 .theme-stellar #persona-badge,
+.theme-stellar #plan-badge,
 .theme-stellar #model-badge {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
@@ -2647,6 +2672,7 @@ body {
 .theme-forest #status-bar #status-tokens { color: color-mix(in srgb, var(--accent) 75%, #bde88a); }
 .theme-forest #mode-badge,
 .theme-forest #persona-badge,
+.theme-forest #plan-badge,
 .theme-forest #model-badge {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
@@ -3020,6 +3046,7 @@ body {
 .theme-hacker #status-bar #status-tokens { color: color-mix(in srgb, var(--accent) 75%, #5aff5a); }
 .theme-hacker #mode-badge,
 .theme-hacker #persona-badge,
+.theme-hacker #plan-badge,
 .theme-hacker #model-badge {
   border-color: var(--accent);
   color: var(--accent);
@@ -3312,6 +3339,7 @@ body {
 .theme-minimal #status-bar #status-tokens { color: color-mix(in srgb, var(--accent) 55%, var(--text-dim)); }
 .theme-minimal #mode-badge,
 .theme-minimal #persona-badge,
+.theme-minimal #plan-badge,
 .theme-minimal #model-badge {
   border-color: var(--border);
   color: var(--text-dim);
@@ -3649,6 +3677,7 @@ body {
 .theme-nova #status-bar #status-tokens { color: color-mix(in srgb, var(--accent) 65%, #aaaaff); }
 .theme-nova #mode-badge,
 .theme-nova #persona-badge,
+.theme-nova #plan-badge,
 .theme-nova #model-badge {
   background: color-mix(in srgb, var(--accent) 8%, transparent);
   border-color: color-mix(in srgb, var(--accent) 28%, transparent);
@@ -3950,6 +3979,7 @@ body {
 .theme-codex #status-bar #status-tokens { color: color-mix(in srgb, var(--accent) 60%, var(--text-dim)); }
 .theme-codex #mode-badge,
 .theme-codex #persona-badge,
+.theme-codex #plan-badge,
 .theme-codex #model-badge {
   background: var(--surface2);
   border-color: color-mix(in srgb, var(--accent) 20%, var(--border));
@@ -4498,6 +4528,16 @@ body {
 .theme-nova #persona-badge,
 .theme-codex #persona-badge,
 .theme-crt #persona-badge,
+.theme-code-cli #plan-badge,
+.theme-cyber #plan-badge,
+.theme-fantasy #plan-badge,
+.theme-stellar #plan-badge,
+.theme-forest #plan-badge,
+.theme-hacker #plan-badge,
+.theme-minimal #plan-badge,
+.theme-nova #plan-badge,
+.theme-codex #plan-badge,
+.theme-crt #plan-badge,
 .theme-code-cli #model-badge,
 .theme-cyber #model-badge,
 .theme-fantasy #model-badge,
@@ -4622,6 +4662,7 @@ body #banner pre {
   <span id="status-left">
     <span id="mode-badge" class="general">general</span>
     <span id="persona-badge" class="none"></span>
+    <span id="plan-badge" class="off" title="Plan mode — structured sub-analysis + synthesis"></span>
     <span id="model-badge"></span>
     <span style="color:var(--border)">|</span>
   </span>
@@ -4639,6 +4680,7 @@ body #banner pre {
     <strong>Plexus</strong> — AI chat powered by OpenRouter.<br>
     Themes: <code>/finance</code> <code>/aidev</code> <code>/github</code> <code>/datascience</code> <code>/blog</code><br>
     Quick: <code>/summarize</code> <code>/explain</code> <code>/translate</code> <code>/rephrase</code> <code>/bulletise</code><br>
+    Plan mode: <code>/plan</code> breaks your query into numbered sub-questions, answers each one, then builds a final answer. <code>/research</code> runs the same pipeline once.<br>
     Click <strong>settings</strong> to set your API key. Type <code>/help</code> for all commands.
   </div>
 </div>
@@ -4652,6 +4694,7 @@ body #banner pre {
   </div>
   <div class="sp-section">
     <div class="sp-row"><span class="sp-label">Mode</span><span class="sp-value" id="sp-mode">general</span></div>
+    <div class="sp-row"><span class="sp-label">Plan</span><span class="sp-value" id="sp-plan">off</span></div>
     <div class="sp-row"><span class="sp-label">Model</span><span class="sp-value" id="sp-model">—</span></div>
     <div class="sp-row" style="padding-top:4px">
       <span class="sp-label">Temp</span>
@@ -4922,6 +4965,7 @@ function loadState() {
       messages: Array.isArray(data.messages) ? data.messages : [],
       mode: data.mode || 'general',
       persona: data.persona || 'none',
+      planMode: !!data.planMode,
       fontSize: data.fontSize || '14px',
       fontFamily: data.fontFamily || '',
       colorScheme: migrateColorScheme(data.colorScheme || data.theme),
@@ -4933,7 +4977,7 @@ function loadState() {
       lifetimeTokensIn: data.lifetimeTokensIn || 0,
       lifetimeTokensOut: data.lifetimeTokensOut || 0,
     };
-  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', fontSize: '14px', fontFamily: '', colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0 }; }
+  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '', colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0 }; }
 }
 function saveState() {
   try {
@@ -4944,6 +4988,7 @@ function saveState() {
       messages: state.messages,
       mode: state.mode || 'general',
       persona: state.persona || 'none',
+      planMode: !!state.planMode,
       fontSize: state.fontSize,
       fontFamily: state.fontFamily,
       colorScheme: state.colorScheme || 'sage',
@@ -4979,6 +5024,7 @@ function saveSessionStore() {
       messages: state.messages,
       mode: state.mode,
       persona: state.persona,
+      planMode: !!state.planMode,
       model: state.model,
       temperature: state.temperature,
       topP: state.topP,
@@ -5006,6 +5052,7 @@ function loadSession(sessionId) {
   state.messages = s.messages || [];
   state.mode = s.mode || 'general';
   state.persona = s.persona || 'none';
+  state.planMode = !!s.planMode;
   state.model = s.model || state.model;
   state.temperature = s.temperature ?? 0.7;
   state.topP = s.topP ?? 1.0;
@@ -5017,20 +5064,26 @@ function loadSession(sessionId) {
   saveState();
   restoreMessages();
   renderSessionList();
+  setMode(state.mode || 'general');
+  setPersona(state.persona || 'none');
+  updatePlanBadge();
+  updateSidePanel();
 }
 function newSession() {
   saveSessionStore();
   const store = loadSessionStore();
   const id = 'sess_' + Date.now();
-  store.sessions[id] = { name: 'New Chat', messages: [], mode: 'general', persona: 'none', model: state.model, temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, systemPrompt: '', updatedAt: Date.now() };
+  store.sessions[id] = { name: 'New Chat', messages: [], mode: 'general', persona: 'none', planMode: false, model: state.model, temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, systemPrompt: '', updatedAt: Date.now() };
   store.activeId = id;
   localStorage.setItem(SESSION_KEY, JSON.stringify(store));
   state.messages = [];
+  state.planMode = false;
   state.totalTokensIn = 0;
   state.totalTokensOut = 0;
   saveState();
   restoreMessages();
   renderSessionList();
+  updatePlanBadge();
 }
 function renderSessionList() {
   const el = document.getElementById('sp-sessions');
@@ -5082,7 +5135,7 @@ let state = loadState();
 (function initSessions() {
   const store = loadSessionStore();
   if (!store.sessions[store.activeId]) {
-    store.sessions[store.activeId] = { name: getSessionName(state.messages), messages: state.messages, mode: state.mode, persona: state.persona, model: state.model, temperature: state.temperature, topP: state.topP, totalTokensIn: state.totalTokensIn, totalTokensOut: state.totalTokensOut, systemPrompt: state.systemPrompt, updatedAt: Date.now() };
+    store.sessions[store.activeId] = { name: getSessionName(state.messages), messages: state.messages, mode: state.mode, persona: state.persona, planMode: !!state.planMode, model: state.model, temperature: state.temperature, topP: state.topP, totalTokensIn: state.totalTokensIn, totalTokensOut: state.totalTokensOut, systemPrompt: state.systemPrompt, updatedAt: Date.now() };
     localStorage.setItem(SESSION_KEY, JSON.stringify(store));
   }
   state.sessionId = store.activeId;
@@ -5299,6 +5352,7 @@ function updateSidePanel() {
   const short = state.model.split('/').pop()?.replace(/:free$/, '') || state.model;
   el('sp-model').textContent = short || '—';
   el('sp-mode').textContent = state.mode || 'general';
+  if (el('sp-plan')) el('sp-plan').textContent = state.planMode ? 'on' : 'off';
 
   const maxCtx = 8000;
   const used = Math.min(total, maxCtx);
@@ -5586,7 +5640,7 @@ function restoreMessages() {
 }
 
 // ─── Non-streaming LLM call (for research steps) ──────────────────────
-async function callLLM(messages, maxTokens = 2000) {
+async function callLLM(messages, maxTokens = 2000, signal = null) {
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -5603,6 +5657,7 @@ async function callLLM(messages, maxTokens = 2000) {
       temperature: state.temperature ?? 0.7,
       top_p: state.topP ?? 1.0,
     }),
+    signal: signal || undefined,
   });
   if (!response.ok) {
     let detail = '';
@@ -5624,85 +5679,130 @@ async function callLLM(messages, maxTokens = 2000) {
   return data.choices?.[0]?.message?.content || '';
 }
 
-// ─── Multi-step Deep Research ──────────────────────────────────────────
-async function doDeepResearch(query) {
+// ─── Structured multi-step analysis (plan mode + /research) ───────────
+async function runStructuredAnalysis(query) {
   if (isStreaming || !state.apiKey) return;
 
-  addMessage('query', query.trim());
-  state.messages.push({ role: 'user', content: query.trim() });
+  const userContent = query.trim();
+  addMessage('query', userContent);
+  state.messages.push({ role: 'user', content: userContent });
   saveState();
+
+  const fileContext = uploadedText.trim()
+    ? `\n\nAttached file context (${uploadedFile ? uploadedFile.name : 'file'}):\n${uploadedText.trim().substring(0, 50000)}`
+    : '';
 
   const { div: progressDiv, body: progressBody } = addMessage('response', '', true);
   const progressEl = progressBody.querySelector('#loading');
   isStreaming = true;
   sendBtn.disabled = true;
   stopBtn.classList.add('active');
+  abortController = new AbortController();
+  const signal = abortController.signal;
 
-  function setProgress(text) {
+  const sys = state.systemPrompt
+    ? [{ role: 'system', content: state.systemPrompt }]
+    : [];
+
+  const completedLines = [];
+
+  function renderProgress(statusText) {
     if (progressEl) progressEl.classList.remove('active');
-    progressBody.innerHTML = `<div style="color:var(--text-dim);font-size:12px;font-style:italic">${text}</div>`;
+    let md = `*${statusText}*`;
+    if (completedLines.length) {
+      md += `\n\n## Sub-analysis\n\n${completedLines.join('\n')}`;
+    }
+    updateResponseBody(progressBody, md);
     chatEl.scrollTop = chatEl.scrollHeight;
   }
 
   try {
-    // Step 1: Generate research plan
-    setProgress('Planning research strategy...');
+    renderProgress('Breaking query into sub-questions...');
 
-    const sys = state.systemPrompt
-      ? [{ role: 'system', content: state.systemPrompt }]
-      : [];
-
-    const plan = await callLLM([
+    const planRaw = await callLLM([
       ...sys,
-      { role: 'user', content: `Break this query into 4-6 specific research sub-questions that together will comprehensively answer it. Return ONLY a JSON array of strings. No markdown, no explanation, no other text.\n\nQuery: ${query}` },
-    ], 3000);
+      { role: 'system', content: 'You decompose complex questions into thorough analytical checklists. Return only valid JSON.' },
+      { role: 'user', content: `Break this query into 8–14 specific sub-questions that together would fully answer it.
+
+Rules:
+- Adapt automatically to the domain (e.g. stock/company analysis, product comparison, technical architecture, scientific topic, policy debate, career decision — whatever fits the query).
+- Each sub-question is a short phrase ending with "?" (e.g. "Business model?", "Growth drivers?", "Key risks?").
+- Order logically: context → core dimensions → metrics/evidence → risks/catalysts → outlook.
+- Do not answer yet — only list questions.
+
+Return ONLY a JSON array:
+[{"id": 1, "question": "..."}, {"id": 2, "question": "..."}, ...]
+
+Query: ${userContent}${fileContext}` },
+    ], 3000, signal);
 
     let subQuestions = [];
     try {
-      const extracted = plan.match(/\[[\s\S]*?\]/);
-      subQuestions = JSON.parse(extracted ? extracted[0] : plan);
+      const extracted = planRaw.match(/\[[\s\S]*\]/);
+      const parsed = JSON.parse(extracted ? extracted[0] : planRaw);
+      if (Array.isArray(parsed)) {
+        subQuestions = parsed.map((item, i) => {
+          if (typeof item === 'string') return { id: i + 1, question: item.replace(/^\d+[\.\)]\s*/, '') };
+          const q = item.question || item.q || item.text || '';
+          return { id: item.id || i + 1, question: String(q).replace(/^\d+[\.\)]\s*/, '') };
+        }).filter(x => x.question && x.question.trim());
+      }
     } catch {}
-    if (!Array.isArray(subQuestions) || subQuestions.length < 2) {
-      // Fallback questions
-      const topic = query.split(' ').slice(0, 4).join(' ');
+
+    if (subQuestions.length < 2) {
       subQuestions = [
-        `Give a concise overview of ${topic}. What is it and why does it matter?`,
-        `Analyze the historical performance, trends, and key developments of ${topic}.`,
-        `What are the key quantitative metrics, financials, or data points for ${topic}?`,
-        `What are experts, analysts, or the market estimating for the future of ${topic}?`,
-        `What are the key risks, challenges, criticisms, or competing viewpoints regarding ${topic}?`,
+        { id: 1, question: 'Core subject and scope?' },
+        { id: 2, question: 'Key facts and context?' },
+        { id: 3, question: 'Quantitative metrics or data?' },
+        { id: 4, question: 'Strengths and advantages?' },
+        { id: 5, question: 'Weaknesses and risks?' },
+        { id: 6, question: 'Growth drivers or opportunities?' },
+        { id: 7, question: 'Competitive or comparative position?' },
+        { id: 8, question: 'Outlook and catalysts?' },
       ];
     }
 
-    const maxSteps = Math.min(subQuestions.length, 7);
-    const results = [];
+    const maxSteps = Math.min(subQuestions.length, 14);
 
     for (let i = 0; i < maxSteps; i++) {
-      const q = subQuestions[i];
-      setProgress(`Researching step ${i + 1}/${maxSteps}: ${q.substring(0, 80)}...`);
-      const answer = await callLLM([
-        { role: 'system', content: 'You are a thorough researcher. Provide detailed, factual information with specific examples and data where possible.' },
-        { role: 'user', content: q },
-      ], 3000);
-      results.push({ question: q, answer });
+      if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+      const sq = subQuestions[i];
+      const qText = sq.question.endsWith('?') ? sq.question : sq.question + '?';
+      renderProgress(`Answering ${i + 1}/${maxSteps}: ${qText}`);
+
+      const line = await callLLM([
+        { role: 'system', content: 'You answer analytical checklist items in exactly one line. Be specific, quantitative, and concise.' },
+        { role: 'user', content: `Original query: ${userContent}${fileContext}
+
+Answer sub-question ${i + 1} of ${maxSteps} in exactly ONE line using this format:
+${i + 1}. ${qText}  [Verdict] – [key insight in a few words].  [1–3 specific data points, metrics, dates, or facts].
+
+Verdict examples: Yes / No / Neutral / Strong / Weak / Mixed / High / Low / Slightly rich / Very strong — pick what fits.
+- Start with the number and question text exactly as shown.
+- Use an en-dash (–) after the verdict.
+- Include real numbers when you know them; if uncertain, say "approx." or "estimate".
+- One line only. No markdown, no bullet lists.` },
+      ], 600, signal);
+
+      const cleaned = line.trim().replace(/^#+\s*/, '');
+      completedLines.push(cleaned || `${i + 1}. ${qText}  Neutral – Unable to retrieve data for this angle.`);
+      renderProgress(`Completed ${i + 1}/${maxSteps}`);
     }
 
-    // Step 3: Synthesize
-    setProgress('Synthesizing final report...');
+    renderProgress('Building final answer from sub-analysis...');
 
-    const contextParts = results.map((r, i) => {
-      const heading = r.question.replace(/[?\.]$/, '');
-      return `### ${heading}\n${r.answer}`;
-    });
-
+    const subAnalysisBlock = `## Sub-analysis\n\n${completedLines.join('\n')}`;
     const synthesisMessages = [
-      { role: 'system', content: (sys.length ? state.systemPrompt + '\n\n' : '') + 'You are a research synthesis expert. Combine multiple research findings into one clear, comprehensive, well-structured answer. Use markdown with headings, bold, and organized sections.' },
-      { role: 'user', content: `Original question: ${query}\n\nHere are the research findings from multiple angles:\n\n${contextParts.join('\n\n')}\n\nSynthesize these into one comprehensive answer to the original question. Structure it with sections. Include the most important facts, data, and insights.` },
+      { role: 'system', content: (state.systemPrompt ? state.systemPrompt + '\n\n' : '') + 'You synthesize multi-part analyses into one clear, comprehensive final answer. Use markdown with headings and organized sections. Lead with an executive summary, then detail. Reference insights from the sub-analysis without repeating every line verbatim.' },
+      { role: 'user', content: `Original question: ${userContent}${fileContext}
+
+Sub-analysis (each line is one answered dimension):
+${completedLines.join('\n')}
+
+Write a comprehensive **Final Answer** that integrates all sub-analysis points into a cohesive response. Structure with clear sections. Highlight the most important conclusions, trade-offs, and actionable takeaways.` },
     ];
 
-    if (progressEl) progressEl.classList.remove('active');
-    progressBody.innerHTML = '';
-    let fullResponse = '';
+    let fullResponse = subAnalysisBlock + '\n\n## Final Answer\n\n';
 
     const streamResp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -5720,6 +5820,7 @@ async function doDeepResearch(query) {
         temperature: state.temperature ?? 0.7,
         top_p: state.topP ?? 1.0,
       }),
+      signal,
     });
 
     if (!streamResp.ok) {
@@ -5752,6 +5853,7 @@ async function doDeepResearch(query) {
             state.lifetimeTokensIn = (state.lifetimeTokensIn || 0) + pi;
             state.lifetimeTokensOut = (state.lifetimeTokensOut || 0) + co;
             saveState();
+            updateStatusBar();
           }
           const delta = chunk.choices?.[0]?.delta?.content;
           if (delta) {
@@ -5768,8 +5870,18 @@ async function doDeepResearch(query) {
     addMessageButtons(progressDiv, 'response', fullResponse.trim());
 
   } catch (err) {
+    if (err.name === 'AbortError') {
+      if (completedLines.length) {
+        const partial = `## Sub-analysis\n\n${completedLines.join('\n')}\n\n*(Stopped before final synthesis)*`;
+        state.messages.push({ role: 'assistant', content: partial });
+        saveState();
+        updateResponseBody(progressBody, partial);
+        addMessageButtons(progressDiv, 'response', partial);
+      }
+      return;
+    }
     if (progressEl) progressEl.classList.remove('active');
-    let msg = err.message || 'Research failed';
+    let msg = err.message || 'Analysis failed';
     if (msg.includes('401')) msg = 'Invalid API key. Set it in settings.';
     else if (msg.includes('402')) msg = 'Model out of credits. Try a free model.';
     else if (msg.includes('Failed to fetch')) msg = 'Network error. Check your connection.';
@@ -5778,9 +5890,14 @@ async function doDeepResearch(query) {
     isStreaming = false;
     stopBtn.classList.remove('active');
     sendBtn.disabled = false;
+    abortController = null;
+    updateStatusBar();
   }
 }
 
+async function doDeepResearch(query) {
+  return runStructuredAnalysis(query);
+}
 
 // ─── OpenRouter API call ───────────────────────────────────────────────
 async function sendMessage(userText) {
@@ -6017,6 +6134,29 @@ function setPersona(name) {
   return true;
 }
 
+function setPlanMode(enabled) {
+  state.planMode = !!enabled;
+  updatePlanBadge();
+  saveState();
+  return true;
+}
+
+function updatePlanBadge() {
+  const badge = document.getElementById('plan-badge');
+  if (badge) {
+    if (state.planMode) {
+      badge.className = 'plan';
+      badge.textContent = 'plan';
+    } else {
+      badge.className = 'off';
+      badge.textContent = '';
+    }
+  }
+  const spPlan = document.getElementById('sp-plan');
+  if (spPlan) spPlan.textContent = state.planMode ? 'on' : 'off';
+  checkApiKey();
+}
+
 // ─── Slash command suggestions ─────────────────────────────────────────
 const SUGGESTIONS = [
   { cmd: '/general', desc: 'General chat mode' },
@@ -6031,10 +6171,11 @@ const SUGGESTIONS = [
   { cmd: '/deviladvocate', desc: 'Devil\'s advocate persona' },
   { cmd: '/simplify', desc: 'Simplify persona' },
   { cmd: '/nopersona', desc: 'Clear active persona' },
+  { cmd: '/plan', desc: 'Toggle structured analysis mode (sub-Q → answers → synthesis)' },
   { cmd: '/clear', desc: 'Clear conversation history' },
   { cmd: '/help', desc: 'Show all commands' },
   { cmd: '/export', desc: 'Export conversation as Markdown' },
-  { cmd: '/research', desc: 'Multi-step deep research' },
+  { cmd: '/research', desc: 'Run structured analysis once (same as plan mode)' },
   { cmd: '/deep', desc: 'Shorthand for /research' },
   { cmd: '/summarize', desc: 'Summarize text or file' },
   { cmd: '/explain', desc: 'Explain text in detail' },
@@ -6134,7 +6275,9 @@ function handleSlashCommand(cmd, args) {
         '| **Persona** | `/<name>` | `/deepresearch` | Quick persona switch |',
         '| **Persona** | `/personas` | `/personas` | List all personas |',
         '| **Persona** | `/nopersona` | `/nopersona` | Clear active persona |',
-        '| **Research** | `/research <q>` | `/research TSMC analysis` | Multi-step deep research (splits, researches, synthesizes) |',
+        '| **Plan** | `/plan` | `/plan` | Toggle plan mode — every message is split into sub-questions, answered one-by-one, then synthesized |',
+        '| **Plan** | `/plan on` / `/plan off` | `/plan on` | Enable or disable plan mode |',
+        '| **Research** | `/research <q>` | `/research analyze AAPL stock` | One-shot structured analysis (sub-questions → answers → final answer) |',
         '| **Research** | `/deep <q>` | `/deep NVDA vs AMD` | Shorthand for /research |',
         '| **Quick** | `/summarize <text>` | `/summarize ...` | Condense text preserving key info |',
         '| **Quick** | `/explain <text>` | `/explain ...` | Break down concepts with examples |',
@@ -6216,10 +6359,21 @@ function handleSlashCommand(cmd, args) {
       }
       return true;
 
+    case '/plan':
+    case '/planmode': {
+      if (args === 'on') setPlanMode(true);
+      else if (args === 'off') setPlanMode(false);
+      else setPlanMode(!state.planMode);
+      addMessage('response', state.planMode
+        ? '**Plan mode ON.** Each message will be broken into 8–14 sub-questions (e.g. "Business model?", "Key risks?"), each answered in one line with data, then combined into a **Final Answer**.\n\nUse `/plan off` or click the **plan** badge for direct answers. Use `/research <query>` for a one-shot run without keeping plan mode on.'
+        : '**Plan mode OFF.** Messages go to the model for direct answers again.');
+      return true;
+    }
+
     case '/research':
     case '/deep':
       if (!args) {
-        addMessage('response', 'Usage: `/research <query>` — e.g. `/research TSMC stock analysis`\n\nThis breaks your query into multiple sub-questions, researches each one independently, then synthesizes a comprehensive answer.');
+        addMessage('response', 'Usage: `/research <query>` — e.g. `/research analyze AAPL stock`\n\nBreaks the query into numbered sub-questions, answers each one (verdict + data), then synthesizes a final comprehensive answer.');
         return true;
       }
       doDeepResearch(args);
@@ -6315,6 +6469,12 @@ function handleSubmit() {
 
   if (!state.apiKey) {
     addMessage('response', 'Set your OpenRouter API key first. Click settings or use \`/key <key>\`.');
+    return;
+  }
+
+  if (state.planMode) {
+    runStructuredAnalysis(text);
+    if (uploadedText.trim()) clearFile();
     return;
   }
 
@@ -6600,6 +6760,8 @@ function checkApiKey() {
   sendBtn.disabled = !state.apiKey;
   if (!state.apiKey) {
     inputEl.placeholder = 'Open settings to set your OpenRouter API key...';
+  } else if (state.planMode) {
+    inputEl.placeholder = 'Plan mode — ask anything for structured sub-analysis...';
   } else {
     inputEl.placeholder = 'Type a message...';
   }
@@ -6664,6 +6826,14 @@ if (personaName === 'none') {
   personaBadge.textContent = personaName;
   personaBadge.className = personaName;
 }
+
+updatePlanBadge();
+document.getElementById('plan-badge')?.addEventListener('click', () => {
+  setPlanMode(!state.planMode);
+  addMessage('response', state.planMode
+    ? '**Plan mode ON.** Queries are split into sub-questions, answered one-by-one, then synthesized.'
+    : '**Plan mode OFF.**');
+});
 
 // Apply font, accent color, theme, and rebuild system prompt
 applyFontSettings();
