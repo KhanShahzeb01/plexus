@@ -1,6 +1,14 @@
 # Plexus
 
-Terminal-themed AI chat app powered by OpenRouter. A single HTML file — no build tools, no frameworks, no backend.
+Terminal-themed AI chat app powered by OpenRouter. Static HTML/CSS/JS — no build tools, no frameworks, no backend.
+
+```
+index.html          # App shell
+css/base.css        # Core layout and components
+css/themes.css      # Theme variants
+js/app.js           # UI, chat, settings, vision
+js/plan-pipeline.js # Plan mode and /research pipeline
+```
 
 Looks and feels like the rallies CLI terminal, works on your phone.
 
@@ -12,7 +20,7 @@ Looks and feels like the rallies CLI terminal, works on your phone.
 # 1. Create a repo on GitHub (e.g. "plexus")
 # 2. Push the file
 git init
-git add index.html
+git add index.html css/ js/
 git commit -m "plexus"
 git remote add origin https://github.com/YOUR_USERNAME/plexus.git
 git branch -M main
@@ -26,14 +34,14 @@ git push -u origin main
 ### Option 2: Vercel (drag & drop)
 
 1. Go to https://vercel.com/new
-2. Drag the `index.html` file onto the deployment area
+2. Drag the project folder (or zip `index.html`, `css/`, and `js/`) onto the deployment area
 3. Click Deploy
 4. Your site will be at `https://plexus-xxx.vercel.app`
 
 ### Option 3: Cloudflare Pages
 
 1. Go to https://dash.cloudflare.com → Pages
-2. Click "Upload assets" → Upload `index.html`
+2. Click "Upload assets" → Upload the project (`index.html`, `css/`, `js/`)
 3. Deploy — done
 
 ### Option 4: Open locally
