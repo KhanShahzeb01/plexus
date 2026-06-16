@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Share+Tech+Mono&family=MedievalSharp&family=VT323&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<link id="hljs-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -5097,6 +5097,23 @@ body #banner pre {
       <option value="60px">60</option>
     </select>
 
+    <label for="code-theme-select">Code Block Theme</label>
+    <select id="code-theme-select">
+      <optgroup label="Dark">
+        <option value="atom-one-dark">Atom One Dark</option>
+        <option value="github-dark">GitHub Dark</option>
+        <option value="monokai">Monokai</option>
+        <option value="night-owl">Night Owl</option>
+        <option value="tokyo-night-dark">Tokyo Night</option>
+      </optgroup>
+      <optgroup label="Light">
+        <option value="atom-one-light">Atom One Light</option>
+        <option value="github">GitHub Light</option>
+        <option value="vs">Visual Studio Light</option>
+        <option value="xcode">Xcode Light</option>
+      </optgroup>
+    </select>
+
     <label for="font-family-select">Font Style</label>
     <select id="font-family-select">
       <optgroup label="Monospace">
@@ -5251,8 +5268,9 @@ function loadState() {
       lifetimeTokensOut: data.lifetimeTokensOut || 0,
       researchWebSearch: data.researchWebSearch !== false,
       webSearchModel: data.webSearchModel || 'google/gemini-2.5-flash',
+      codeTheme: data.codeTheme || 'atom-one-dark',
     };
-  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '', colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0, researchWebSearch: true, webSearchModel: 'google/gemini-2.5-flash' }; }
+  } catch { return { apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [], mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '', colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0, totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0, researchWebSearch: true, webSearchModel: 'google/gemini-2.5-flash', codeTheme: 'atom-one-dark' }; }
 }
 function saveState() {
   try {
@@ -5276,6 +5294,7 @@ function saveState() {
       lifetimeTokensOut: state.lifetimeTokensOut || 0,
       researchWebSearch: state.researchWebSearch !== false,
       webSearchModel: state.webSearchModel || 'google/gemini-2.5-flash',
+      codeTheme: state.codeTheme || 'atom-one-dark',
     };
     localStorage.setItem(STATE_KEY, JSON.stringify(data));
     // Update session store
@@ -5454,6 +5473,8 @@ const clearChatBtn = document.getElementById('clear-chat-btn');
 const exportChatBtn = document.getElementById('export-chat-btn');
 const fontSizeSelect = document.getElementById('font-size-select');
 const fontFamilySelect = document.getElementById('font-family-select');
+const codeThemeSelect = document.getElementById('code-theme-select');
+const hljsThemeLink = document.getElementById('hljs-theme');
 const themeSelect = document.getElementById('theme-select');
 const colorSelect = document.getElementById('color-select');
 const researchWebSearchInput = document.getElementById('research-web-search');
@@ -5481,6 +5502,29 @@ function applyFontSettings() {
   root.style.setProperty('--font-size', state.fontSize);
   root.style.setProperty('--panel-font-size', Math.max(10, px - 1) + 'px');
   root.style.setProperty('--chat-font', state.fontFamily || defaultChat);
+}
+
+const CODE_THEME_FILES = {
+  'atom-one-dark': 'atom-one-dark',
+  'github-dark': 'github-dark',
+  'monokai': 'monokai',
+  'night-owl': 'night-owl',
+  'tokyo-night-dark': 'tokyo-night-dark',
+  'atom-one-light': 'atom-one-light',
+  'github': 'github',
+  'vs': 'vs',
+  'xcode': 'xcode',
+};
+
+function applyCodeTheme(themeId) {
+  const file = CODE_THEME_FILES[themeId] || CODE_THEME_FILES['atom-one-dark'];
+  state.codeTheme = themeId in CODE_THEME_FILES ? themeId : 'atom-one-dark';
+  if (hljsThemeLink) {
+    hljsThemeLink.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/${file}.min.css`;
+  }
+  if (codeThemeSelect && codeThemeSelect.value !== state.codeTheme) {
+    codeThemeSelect.value = state.codeTheme;
+  }
 }
 
 // ─── Accent colors (apply on top of any theme) ─────────────────────────
@@ -7848,6 +7892,7 @@ function openSettings() {
   systemPromptInput.value = state.systemPrompt;
   fontSizeSelect.value = state.fontSize;
   fontFamilySelect.value = state.fontFamily || '';
+  if (codeThemeSelect) codeThemeSelect.value = state.codeTheme || 'atom-one-dark';
   themeSelect.value = state.theme || 'cli';
   colorSelect.value = state.colorScheme || 'sage';
   if (researchWebSearchInput) researchWebSearchInput.checked = state.researchWebSearch !== false;
@@ -7907,6 +7952,11 @@ fontSizeSelect.addEventListener('change', () => {
 fontFamilySelect.addEventListener('change', () => {
   state.fontFamily = fontFamilySelect.value;
   applyFontSettings();
+  saveState();
+});
+
+codeThemeSelect?.addEventListener('change', () => {
+  applyCodeTheme(codeThemeSelect.value);
   saveState();
 });
 
@@ -8008,6 +8058,7 @@ document.getElementById('plan-badge')?.addEventListener('click', () => {
 
 // Apply font, accent color, theme, and rebuild system prompt
 applyFontSettings();
+applyCodeTheme(state.codeTheme || 'atom-one-dark');
 applyColor();
 applyTheme();
 updateStatusBar();
