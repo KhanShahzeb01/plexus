@@ -4730,7 +4730,7 @@ body #banner pre {
     <strong>Plexus</strong> — AI chat powered by OpenRouter.<br>
     Themes: <code>/finance</code> <code>/aidev</code> <code>/github</code> <code>/datascience</code> <code>/blog</code><br>
     Quick: <code>/summarize</code> <code>/explain</code> <code>/translate</code> <code>/rephrase</code> <code>/bulletise</code><br>
-    Plan mode: <code>/plan</code> runs parallel sub-answers with a quality gate, then builds a final answer. <code>/research</code> uses the same pipeline sequentially without the gate.<br>
+    Plan mode: <code>/plan</code> — AI picks 3–14 sub-questions by complexity, parallel answers, quality gate, then final answer. <code>/research</code> uses the same pipeline sequentially without the gate.<br>
     Click <strong>settings</strong> to set your API key. Type <code>/help</code> for all commands.
   </div>
 </div>
@@ -5861,6 +5861,9 @@ async function streamChatCompletion(messages, { signal, maxTokens = 8000, onDelt
 }
 
 // ─── Plan pipeline modules (planner → answerer → quality gate → synthesizer) ─
+const PLAN_MIN_QUESTIONS = 3;
+const PLAN_MAX_QUESTIONS = 14;
+
 const PlanPipeline = {
   FALLBACK_QUESTIONS: [
     { id: 1, question: 'Core subject and scope?' },
@@ -5893,28 +5896,58 @@ const PlanPipeline = {
     }
   },
 
+  applyQuestionGuardrails(subQuestions) {
+    let list = subQuestions.slice(0, PLAN_MAX_QUESTIONS);
+    if (list.length < PLAN_MIN_QUESTIONS) {
+      const fallback = this.FALLBACK_QUESTIONS.map(q => ({
+        id: q.id,
+        question: this.normalizeQuestion(q.question),
+      }));
+      const seen = new Set(list.map(q => q.question.toLowerCase()));
+      for (const fq of fallback) {
+        if (list.length >= PLAN_MIN_QUESTIONS) break;
+        if (!seen.has(fq.question.toLowerCase())) {
+          list.push({ id: list.length + 1, question: fq.question });
+          seen.add(fq.question.toLowerCase());
+        }
+      }
+      while (list.length < PLAN_MIN_QUESTIONS && fallback.length) {
+        list.push({ id: list.length + 1, question: fallback[list.length % fallback.length].question });
+      }
+    }
+    return list.map((q, i) => ({ id: i + 1, question: q.question }));
+  },
+
   async planner({ userContent, fileContext, sys, signal }) {
     const planRaw = await callLLM([
       ...(sys || []),
-      { role: 'system', content: 'You decompose complex questions into thorough analytical checklists. Return only valid JSON.' },
-      { role: 'user', content: `Break this query into 8–14 specific sub-questions that together would fully answer it.
+      { role: 'system', content: 'You decompose user queries into the optimal analytical checklist. Judge complexity yourself and return only valid JSON.' },
+      { role: 'user', content: `Analyze this query and decide the best set of sub-questions to answer it thoroughly.
+
+You choose BOTH:
+1. How many questions (between ${PLAN_MIN_QUESTIONS} and ${PLAN_MAX_QUESTIONS})
+2. Which specific questions to ask
+
+Sizing guide — pick the count that fits the query, do not pad or stretch:
+- ${PLAN_MIN_QUESTIONS}–5: simple, narrow, or factual queries (definitions, single-topic explainers, quick decisions)
+- 6–9: moderate depth (comparisons, how-to, single-domain analysis)
+- 10–${PLAN_MAX_QUESTIONS}: broad, multi-dimensional queries (investment theses, company diligence, architecture reviews, complex trade-offs)
 
 Rules:
-- Adapt automatically to the domain (e.g. stock/company analysis, product comparison, technical architecture, scientific topic, policy debate, career decision — whatever fits the query).
-- Each sub-question is a short phrase ending with "?" (e.g. "Business model?", "Growth drivers?", "Key risks?").
-- Order logically: context → core dimensions → metrics/evidence → risks/catalysts → outlook.
-- Include both upside and downside angles where relevant — avoid a one-sided checklist.
+- Adapt to the domain automatically (finance, tech, science, career, policy, etc.).
+- Each sub-question is a short phrase ending with "?".
+- Order logically: context → core analysis → evidence → risks → outlook (omit angles that do not apply).
+- Include upside and downside where relevant; skip redundant angles.
 - Do not answer yet — only list questions.
 
-Return ONLY a JSON array:
+Return ONLY a JSON array (${PLAN_MIN_QUESTIONS}–${PLAN_MAX_QUESTIONS} items):
 [{"id": 1, "question": "..."}, {"id": 2, "question": "..."}, ...]
 
 Query: ${userContent}${fileContext}` },
     ], 3000, signal);
 
     let subQuestions = this.parseSubQuestions(planRaw);
-    if (subQuestions.length < 2) subQuestions = this.FALLBACK_QUESTIONS.map(q => ({ ...q, question: this.normalizeQuestion(q.question) }));
-    return subQuestions.slice(0, 14);
+    return this.applyQuestionGuardrails(subQuestions);
   },
 
   async answerOne({ userContent, fileContext, question, index, total, signal }) {
@@ -6692,7 +6725,7 @@ function handleSlashCommand(cmd, args) {
       else if (args === 'off') setPlanMode(false);
       else setPlanMode(!state.planMode);
       addMessage('response', state.planMode
-        ? '**Plan mode ON.** Each message uses the plan pipeline: parallel sub-answers, quality review, then a polished **Final Answer**.\n\nUse `/plan off` or click the **plan** badge for direct answers. Use `/research <query>` for sequential analysis without the quality gate.'
+        ? '**Plan mode ON.** The AI picks 3–14 sub-questions based on your query, answers them in parallel, runs a quality review, then delivers a **Final Answer**.\n\nUse `/plan off` or click the **plan** badge for direct answers. Use `/research <query>` for sequential analysis without the quality gate.'
         : '**Plan mode OFF.** Messages go to the model for direct answers again.');
       return true;
     }
