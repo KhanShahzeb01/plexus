@@ -852,6 +852,71 @@ code {
 .pin-teal::after { background: radial-gradient(circle at 30% 30%, #7dd3c0, #3a9e8a); }
 .pin-coral::after { background: radial-gradient(circle at 30% 30%, #f5a89a, #d46555); }
 
+/* Hover zoom — card flies to center at 2× */
+.card-zoom-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.card-zoom-portal.is-active {
+  visibility: visible;
+}
+
+.card-zoom-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 8, 8, 0.55);
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-out);
+}
+
+.card-zoom-portal.is-active .card-zoom-backdrop {
+  opacity: 1;
+}
+
+.card-zoom-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.card-zoom-clone {
+  position: fixed;
+  margin: 0;
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center center;
+  transition:
+    left 0.42s var(--ease-out),
+    top 0.42s var(--ease-out),
+    transform 0.42s var(--ease-out);
+  z-index: 10001;
+  pointer-events: none;
+  will-change: transform, left, top;
+  -webkit-font-smoothing: antialiased;
+  backface-visibility: hidden;
+}
+
+.card-zoom-clone.is-zoomed {
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) scale(var(--zoom-scale, 2));
+}
+
+.card-zoom-clone.card-3d {
+  min-height: 0;
+}
+
+.card-zoom-clone .card-inner {
+  transition: none;
+}
+
+.card-3d.is-zoom-source,
+.carousel-card.is-zoom-source {
+  opacity: 0.12;
+}
+
 /* Carousel — horizontal row + 3D rotateY (no page scroll) */
 .carousel-wrap {
   width: 100%;

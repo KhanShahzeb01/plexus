@@ -160,7 +160,7 @@
     if (prefersReduced) return;
 
     card.addEventListener("mousemove", (e) => {
-      if (card.classList.contains("is-flipped")) return;
+      if (card.classList.contains("is-flipped") || card.classList.contains("is-zoom-source")) return;
       const rect = card.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width - 0.5;
       const y = (e.clientY - rect.top) / rect.height - 0.5;
@@ -181,6 +181,87 @@
       inner.style.transform = "";
     });
   });
+
+  // ─── Hover zoom: sticker + carousel cards → center at 2× ─────
+  const cardZoomPortal = document.getElementById("card-zoom-portal");
+  const cardZoomStage = cardZoomPortal?.querySelector(".card-zoom-stage");
+  let carouselHoverLocked = false;
+  let activeZoomCard = null;
+  let activeZoomClone = null;
+
+  function hideCardZoom() {
+    if (!activeZoomCard) return;
+    activeZoomCard.classList.remove("is-zoom-source");
+    activeZoomCard = null;
+    carouselHoverLocked = false;
+    cardZoomPortal?.classList.remove("is-active");
+    if (activeZoomClone) {
+      activeZoomClone.classList.remove("is-zoomed");
+      const clone = activeZoomClone;
+      activeZoomClone = null;
+      window.setTimeout(() => clone.remove(), 420);
+    }
+  }
+
+  function prepareZoomClone(card, clone) {
+    clone.classList.add("card-zoom-clone");
+    clone.classList.remove("is-zoom-source", "reveal", "reveal-delay-1", "reveal-delay-2", "reveal-delay-3", "reveal-delay-4", "reveal-delay-5");
+    clone.style.transform = "";
+    clone.style.zIndex = "";
+    clone.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
+
+    const inner = clone.querySelector(".card-inner");
+    if (inner) {
+      inner.style.transform = card.classList.contains("is-flipped") ? "rotateY(180deg)" : "";
+    }
+  }
+
+  function showCardZoom(card) {
+    if (prefersReduced || !cardZoomPortal || !cardZoomStage || activeZoomCard === card) return;
+
+    hideCardZoom();
+    const rect = card.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) return;
+
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const scale = Math.min(
+      2,
+      (window.innerWidth * 0.88) / rect.width,
+      (window.innerHeight * 0.78) / rect.height
+    );
+
+    const clone = card.cloneNode(true);
+    prepareZoomClone(card, clone);
+    clone.style.setProperty("--zoom-scale", scale.toFixed(3));
+    clone.style.left = `${cx}px`;
+    clone.style.top = `${cy}px`;
+    clone.style.width = `${rect.width}px`;
+    clone.style.height = `${rect.height}px`;
+
+    cardZoomStage.appendChild(clone);
+    activeZoomCard = card;
+    activeZoomClone = clone;
+    card.classList.add("is-zoom-source");
+    carouselHoverLocked = card.classList.contains("carousel-card");
+    cardZoomPortal.classList.add("is-active");
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => clone.classList.add("is-zoomed"));
+    });
+  }
+
+  function bindCardHoverZoom(selector) {
+    document.querySelectorAll(selector).forEach((card) => {
+      card.addEventListener("mouseenter", () => showCardZoom(card));
+      card.addEventListener("mouseleave", hideCardZoom);
+    });
+  }
+
+  if (cardZoomPortal && cardZoomStage && !prefersReduced) {
+    bindCardHoverZoom("#stickers .card-3d");
+    bindCardHoverZoom("#use-cases .carousel-card");
+  }
 
   // ─── Carousel: translate track + 3D rotateY + slow auto-drift ───
   const carouselViewport = document.getElementById("carousel-viewport");
@@ -258,7 +339,7 @@
           trackOffset += delta * SNAP_EASE;
         }
         applyTrackOffset();
-      } else if (AUTO_PX_PER_SEC > 0 && !isDown) {
+      } else if (AUTO_PX_PER_SEC > 0 && !isDown && !carouselHoverLocked) {
         trackOffset += AUTO_PX_PER_SEC * dt;
         applyTrackOffset();
       }
@@ -321,7 +402,7 @@
         applyTrackOffset();
         return;
       }
-      if (hoverX !== null) {
+      if (hoverX !== null && !carouselHoverLocked) {
         const dx = e.clientX - hoverX;
         if (Math.abs(dx) > 1) {
           trackOffset -= dx * HOVER_SCROLL_MULT;
