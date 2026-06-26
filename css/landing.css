@@ -885,31 +885,32 @@ code {
 .card-zoom-clone {
   position: fixed;
   margin: 0;
-  transform: translate(-50%, -50%) scale(1);
-  transform-origin: center center;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%) scale(var(--zoom-start-scale, 0.5));
   transition:
     left 0.42s var(--ease-out),
     top 0.42s var(--ease-out),
     transform 0.42s var(--ease-out);
   z-index: 10001;
   pointer-events: none;
-  will-change: transform, left, top;
   -webkit-font-smoothing: antialiased;
-  backface-visibility: hidden;
+  text-rendering: optimizeLegibility;
 }
 
 .card-zoom-clone.is-zoomed {
   left: 50% !important;
   top: 50% !important;
-  transform: translate(-50%, -50%) scale(var(--zoom-scale, 2));
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .card-zoom-clone.card-3d {
   min-height: 0;
 }
 
-.card-zoom-clone .card-inner {
+.card-zoom-clone.card-3d .card-inner {
   transition: none;
+  min-height: 100%;
+  height: 100%;
 }
 
 .card-3d.is-zoom-source,
