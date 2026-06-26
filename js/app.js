@@ -21,11 +21,11 @@ const LEGACY_COLOR_MAP = {
   green: 'sage', default: 'sage', charm: 'dusk', dracula: 'heather',
   catppuccin: 'heather', paper: 'clay', linen: 'clay', slate: 'mist', hazel: 'clay',
 };
-const VALID_COLOR_SCHEMES = new Set(['sage', 'sea', 'dusk', 'clay', 'mist', 'heather']);
+const VALID_COLOR_SCHEMES = new Set(['plexus', 'sage', 'sea', 'dusk', 'clay', 'mist', 'heather']);
 
 function migrateColorScheme(name) {
   if (name && VALID_COLOR_SCHEMES.has(name)) return name;
-  return LEGACY_COLOR_MAP[name] || 'sage';
+  return LEGACY_COLOR_MAP[name] || 'plexus';
 }
 
 function migrateTheme(data) {
@@ -40,8 +40,8 @@ function migrateTheme(data) {
 function defaultStateData() {
   return {
     apiKey: '', model: 'openai/gpt-oss-120b:free', systemPrompt: '', messages: [],
-    mode: 'general', persona: 'none', planMode: false, fontSize: '14px', fontFamily: '',
-    colorScheme: 'sage', theme: 'cli', temperature: 0.7, topP: 1.0,
+    mode: 'general', persona: 'none', planMode: false, fontSize: '15px', fontFamily: '',
+    colorScheme: 'plexus', theme: 'cli', temperature: 0.7, topP: 1.0,
     totalTokensIn: 0, totalTokensOut: 0, lifetimeTokensIn: 0, lifetimeTokensOut: 0,
     codeTheme: 'atom-one-dark',
     planMinQuestions: 3, planMaxQuestions: 14, planParallel: true, planQualityGate: true,
@@ -89,7 +89,7 @@ function buildStatePayload() {
     planMode: !!state.planMode,
     fontSize: state.fontSize,
     fontFamily: state.fontFamily,
-    colorScheme: state.colorScheme || 'sage',
+    colorScheme: state.colorScheme || 'plexus',
     theme: state.theme || 'cli',
     temperature: state.temperature ?? 0.7,
     topP: state.topP ?? 1.0,
@@ -411,6 +411,12 @@ function applyCodeTheme(themeId) {
 
 // ─── Accent colors (apply on top of any theme) ─────────────────────────
 const ACCENT_COLORS = {
+  plexus: {
+    label: 'Plexus Green',
+    accent: '#3dd68c', queryBorder: '#3dd68c', responseBorder: '#2a9d63',
+    accentDim: 'rgba(61,214,140,0.28)', focusBorder: '#3dd68c',
+    focusBg: 'rgba(61,214,140,0.1)', queryBg: 'rgba(61,214,140,0.1)',
+  },
   sage: {
     label: 'Sage',
     accent: '#6b8f71', queryBorder: '#6b8f71', responseBorder: '#4a5f4e',
@@ -451,7 +457,7 @@ const ACCENT_COLORS = {
 
 // ─── Themes (layout & arrangement only) ────────────────────────────────
 const THEMES = {
-  cli: { class: '', label: 'Plexus CLI', showStatusBar: false, sendLabel: '→' },
+  cli: { class: 'theme-plexus', label: 'Plexus', showStatusBar: true, sendLabel: '→' },
   codecli: { class: 'theme-code-cli', label: 'Code CLI', showStatusBar: true, sendLabel: '⏎ send' },
   cyber: { class: 'theme-cyber', label: 'Cyberpunk Neon', showStatusBar: true, sendLabel: '⏎ TRANSMIT' },
   fantasy: { class: 'theme-fantasy', label: 'Dark Fantasy', showStatusBar: true, sendLabel: '⚔️ CAST ⚔️' },
@@ -499,7 +505,8 @@ function setMatrixRain(active) {
 function updateBannerThemeIcon(themeId) {
   const icon = document.getElementById('banner-theme-icon');
   if (!icon) return;
-  if (themeId === 'hacker') icon.textContent = '⧫';
+  if (themeId === 'cli') icon.textContent = '▣';
+  else if (themeId === 'hacker') icon.textContent = '⧫';
   else if (themeId === 'minimal') icon.textContent = '$';
   else if (themeId === 'nova') icon.textContent = '✦';
   else if (themeId === 'codex') icon.textContent = '{ }';
@@ -507,7 +514,7 @@ function updateBannerThemeIcon(themeId) {
 }
 
 function applyColor() {
-  const c = ACCENT_COLORS[state.colorScheme] || ACCENT_COLORS.sage;
+  const c = ACCENT_COLORS[state.colorScheme] || ACCENT_COLORS.plexus;
   const root = document.documentElement;
   root.style.setProperty('--accent', c.accent);
   root.style.setProperty('--query-border', c.queryBorder);
@@ -2179,7 +2186,7 @@ function openSettings() {
   fontFamilySelect.value = state.fontFamily || '';
   if (codeThemeSelect) codeThemeSelect.value = state.codeTheme || 'atom-one-dark';
   themeSelect.value = state.theme || 'cli';
-  colorSelect.value = state.colorScheme || 'sage';
+  colorSelect.value = state.colorScheme || 'plexus';
   syncPlanPipelineInputs();
   updateEncryptionSettingsUI();
   settingsStatus.classList.remove('show');

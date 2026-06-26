@@ -333,7 +333,7 @@
 
     <label for="theme-select" style="margin-top:16px">Theme</label>
     <select id="theme-select">
-      <option value="cli">Plexus CLI</option>
+      <option value="cli">Plexus</option>
       <option value="codecli">Code CLI</option>
       <option value="cyber">Cyberpunk Neon</option>
       <option value="fantasy">Dark Fantasy</option>
@@ -348,6 +348,7 @@
 
     <label for="color-select">Accent Color</label>
     <select id="color-select">
+      <option value="plexus">Plexus Green</option>
       <option value="sage">Sage</option>
       <option value="sea">Sea</option>
       <option value="dusk">Dusk</option>
@@ -356,15 +357,15 @@
       <option value="heather">Heather</option>
     </select>
 
-    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+    <div class="plan-settings" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
       <label style="margin-bottom:8px">Plan pipeline</label>
       <div style="display:flex;gap:10px;margin-bottom:10px">
         <div style="flex:1">
-          <label for="plan-min-questions" style="font-size:11px;color:var(--text-dim)">Min sub-questions</label>
+          <label for="plan-min-questions" class="settings-sublabel">Min sub-questions</label>
           <input type="number" id="plan-min-questions" min="1" max="30" value="3">
         </div>
         <div style="flex:1">
-          <label for="plan-max-questions" style="font-size:11px;color:var(--text-dim)">Max sub-questions</label>
+          <label for="plan-max-questions" class="settings-sublabel">Max sub-questions</label>
           <input type="number" id="plan-max-questions" min="3" max="50" value="14">
         </div>
       </div>
@@ -387,7 +388,7 @@
     </div>
 
     <label for="system-prompt">System Prompt</label>
-    <textarea id="system-prompt" rows="3" placeholder="Optional: set a custom system prompt..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;resize:vertical;margin-bottom:14px;transition:border-color 0.15s"></textarea>
+    <textarea id="system-prompt" rows="3" placeholder="Optional: set a custom system prompt..." class="settings-textarea"></textarea>
 
     <div class="btn-row">
       <button class="btn primary" id="settings-close">Done</button>

@@ -4,9 +4,9 @@
   --surface: #141414;
   --surface2: #1a1a1a;
   --border: #2a2a2a;
-  --text: #e0e0e0;
-  --text-dim: #666;
-  --text-bright: #f0f0f0;
+  --text: #e8e8e8;
+  --text-dim: #8a8a8a;
+  --text-bright: #f5f5f5;
   --cyan: #6b8f71;
   --blue: #6b8f71;
   --bright-blue: #6b8f71;
@@ -24,8 +24,18 @@
   --focus-bg: rgba(107,143,113,0.08);
   --font: 'Courier New','Consolas',monospace;
   --chat-font: 'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;
-  --font-size: 14px;
-  --panel-font-size: 13px;
+  --font-size: 15px;
+  --panel-font-size: 14px;
+  --sp-font-base: 15px;
+  --sp-font-sm: 13px;
+  --sp-font-xs: 12px;
+  --chrome-kbd-label: clamp(11px, 2.4vw, 13px);
+  --chrome-kbd-key: clamp(10px, 2vw, 12px);
+  --chrome-kbd-weight: 700;
+  --chrome-btn-size: 14px;
+  --settings-label-size: 13px;
+  --settings-input-size: 14px;
+  --settings-hint-size: 13px;
 }
 html, body {
   height: 100%;
@@ -33,7 +43,7 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: 14px;
+  font-size: var(--font-size);
   line-height: 1.6;
   overflow: hidden;
 }
@@ -79,10 +89,10 @@ body {
   display: flex;
   flex-wrap: nowrap;
   align-items: stretch;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
   box-sizing: border-box;
-  padding: 0 12px 8px;
+  padding: 8px 10px 10px;
   border-top: 1px solid var(--border);
 }
 .kbd-hint {
@@ -91,34 +101,44 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 4px 6px;
+  gap: 4px;
+  min-height: 38px;
+  padding: 6px 5px;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--surface2);
-  color: var(--text-dim);
+  color: var(--text);
   font-family: var(--font);
-  font-size: 11px;
+  font-size: var(--chrome-kbd-label);
+  font-weight: var(--chrome-kbd-weight);
+  line-height: 1.15;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .kbd-hint:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface2));
 }
 .kbd-hint kbd {
   font-family: inherit;
-  font-size: 10px;
-  padding: 1px 4px;
-  border-radius: 3px;
+  font-size: var(--chrome-kbd-key);
+  font-weight: var(--chrome-kbd-weight);
+  padding: 2px 5px;
+  border-radius: 4px;
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-bright);
+  flex-shrink: 0;
+  line-height: 1.2;
 }
 .kbd-hint.active {
   border-color: var(--accent);
   color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface2));
 }
 #shortcuts-overlay,
 #cmd-palette-overlay {
@@ -147,24 +167,26 @@ body {
 #shortcuts-panel h2,
 #cmd-palette h2 {
   margin: 0 0 12px;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--text-bright);
 }
 .shortcuts-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 14px;
 }
 .shortcuts-table td {
-  padding: 6px 4px;
+  padding: 8px 4px;
   border-bottom: 1px solid var(--border);
-  color: var(--text-dim);
+  color: var(--text);
 }
 .shortcuts-table td:last-child { text-align: right; white-space: nowrap; }
 .shortcuts-table kbd {
   font-family: inherit;
-  font-size: 11px;
-  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 7px;
   border-radius: 4px;
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -174,7 +196,7 @@ body {
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 8px;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--surface2);
@@ -191,8 +213,8 @@ body {
   padding: 8px 10px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
-  color: var(--text-dim);
+  font-size: 14px;
+  color: var(--text);
 }
 .cmd-item.selected,
 .cmd-item:hover {
@@ -201,12 +223,13 @@ body {
 }
 .cmd-item kbd {
   font-family: inherit;
-  font-size: 10px;
-  padding: 2px 5px;
-  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 4px;
   background: var(--surface);
   border: 1px solid var(--border);
-  color: var(--text-dim);
+  color: var(--text-bright);
   white-space: nowrap;
 }
 /* Scrollbar */
@@ -237,7 +260,7 @@ body {
 }
 #mode-badge {
   display: inline-block;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -254,7 +277,7 @@ body {
 #mode-badge.blog { color: #f472b6; border-color: rgba(244,114,182,0.3); background: rgba(244,114,182,0.06); }
 #persona-badge {
   display: inline-block;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -273,7 +296,7 @@ body {
 #persona-badge.none { display: none; }
 #plan-badge {
   display: inline-block;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -294,7 +317,7 @@ body {
 }
 #model-badge {
   display: inline-block;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   padding: 2px 10px;
   border-radius: 3px;
@@ -322,9 +345,9 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px 16px;
-  font-size: 12px;
-  color: var(--text-dim);
-  line-height: 1.8;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.75;
   margin-bottom: 4px;
 }
 #tips strong { color: var(--text); }
@@ -347,14 +370,14 @@ body {
   background: var(--surface);
 }
 .panel-title {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 6px 12px 0;
 }
 .message.query .panel-title { color: var(--accent); }
-.message.response .panel-title { color: var(--text-dim); }
+.message.response .panel-title { color: var(--text); }
 .panel-body {
   padding: 8px 12px 12px;
   font-family: var(--chat-font);
@@ -692,21 +715,23 @@ body {
 #settings-toggle {
   width: 100%;
   margin-top: 8px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 6px;
-  color: var(--text-dim);
-  font-size: var(--sp-font-sm, 12px);
+  color: var(--text);
+  font-size: var(--chrome-btn-size);
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font);
   text-transform: lowercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.06em;
   flex-shrink: 0;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  min-height: 40px;
 }
 #settings-toggle:hover { border-color: var(--cyan); color: var(--cyan); }
 #lock-overlay {
@@ -750,9 +775,9 @@ body {
 #lock-status.err { color: #f87171; }
 #lock-status.ok { color: var(--green); }
 #settings-panel .hint {
-  font-size: 11px;
-  color: var(--text-dim);
-  line-height: 1.45;
+  font-size: var(--settings-hint-size);
+  color: var(--text);
+  line-height: 1.5;
   margin: 6px 0 10px;
 }
 #settings-panel .encryption-actions {
@@ -762,8 +787,8 @@ body {
   margin-top: 8px;
 }
 #encryption-status {
-  font-size: 12px;
-  color: var(--text-dim);
+  font-size: var(--settings-input-size);
+  color: var(--text);
   margin-bottom: 8px;
 }
 #encryption-status.on { color: var(--green); }
@@ -791,18 +816,27 @@ body {
 }
 #settings-panel h2 {
   color: var(--text-bright);
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 700;
   margin-bottom: 16px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 #settings-panel label {
   display: block;
-  font-size: 12px;
-  color: var(--text-dim);
+  font-size: var(--settings-label-size);
+  font-weight: 600;
+  color: var(--text);
   margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+#settings-panel .settings-sublabel {
+  font-size: var(--settings-label-size);
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 6px;
 }
 #settings-panel input,
 #settings-panel select {
@@ -813,13 +847,28 @@ body {
   padding: 10px 12px;
   color: var(--text);
   font-family: var(--font);
-  font-size: 13px;
+  font-size: var(--settings-input-size);
   outline: none;
   margin-bottom: 14px;
   transition: border-color 0.15s;
 }
 #settings-panel input:focus,
 #settings-panel select:focus { border-color: var(--cyan); }
+#settings-panel .settings-textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--settings-input-size);
+  outline: none;
+  resize: vertical;
+  margin-bottom: 14px;
+  transition: border-color 0.15s;
+}
+#settings-panel .settings-textarea:focus { border-color: var(--cyan); }
 #settings-panel input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -849,9 +898,9 @@ body {
 }
 #settings-panel .range-row label { margin-bottom: 0; }
 #settings-panel .range-value {
-  font-size: 12px;
+  font-size: var(--settings-label-size);
   color: var(--text-bright);
-  font-weight: 600;
+  font-weight: 700;
   font-family: var(--font);
 }
 #settings-panel .btn-row {
@@ -861,11 +910,11 @@ body {
 }
 #settings-panel .btn {
   flex: 1;
-  padding: 10px;
+  padding: 11px;
   border-radius: 6px;
   font-family: var(--font);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--settings-input-size);
+  font-weight: 700;
   cursor: pointer;
   border: 1px solid var(--border);
   background: var(--surface2);
@@ -955,7 +1004,7 @@ body {
 /* Side panel */
 #side-panel {
   flex-shrink: 0;
-  width: 240px;
+  width: 252px;
   padding: 14px;
   border-left: 2px solid var(--text-dim);
   background: var(--surface);
@@ -965,9 +1014,6 @@ body {
   overflow: hidden;
   min-height: 0;
   align-self: stretch;
-  --sp-font-base: 14px;
-  --sp-font-sm: 12px;
-  --sp-font-xs: 11px;
   font-size: var(--sp-font-base);
 }
 @media (max-width: 800px) {
@@ -1023,8 +1069,8 @@ body {
   padding: 2px 0;
   font-size: var(--sp-font-sm);
 }
-#side-panel .sp-row .sp-label { color: var(--text); }
-#side-panel .sp-row .sp-value { color: var(--accent); font-weight: 500; }
+#side-panel .sp-row .sp-label { color: var(--text); font-weight: 600; }
+#side-panel .sp-row .sp-value { color: var(--accent); font-weight: 700; }
 #side-panel .sp-bar { height: 4px; border-radius: 2px; background: var(--border); margin: 4px 0; overflow: hidden; }
 #side-panel .sp-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.3s; }
 #side-panel input[type="range"]::-webkit-slider-thumb {
@@ -1070,9 +1116,9 @@ body {
   padding: 4px 0;
 }
 #side-panel .sp-chart-legend {
-  font-size: var(--sp-font-xs);
+  font-size: var(--sp-font-sm);
   line-height: 1.5;
-  color: var(--text-dim);
+  color: var(--text);
 }
 #side-panel .sp-chart-legend .dot {
   display: inline-block;
@@ -1094,15 +1140,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 6px;
+  padding: 6px 8px;
   font-size: var(--sp-font-sm);
+  font-weight: 500;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 4px;
   margin-bottom: 1px;
-  color: var(--text-dim);
+  color: var(--text);
 }
 .sp-sess:hover { background: rgba(255,255,255,0.04); }
-.sp-sess.active { color: var(--accent); background: var(--query-bg); }
+.sp-sess.active { color: var(--accent); background: var(--query-bg); font-weight: 700; }
 .sp-sess-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 .sp-sess-del { color: var(--red); font-size: var(--sp-font-xs); padding: 0 4px; opacity: 0; }
 .sp-sess:hover .sp-sess-del { opacity: 1; }
@@ -1111,11 +1158,12 @@ body {
   width: 100%;
   background: transparent;
   border: 1px dashed var(--border);
-  border-radius: 3px;
+  border-radius: 4px;
   color: var(--accent);
   font-family: var(--font);
   font-size: var(--sp-font-sm);
-  padding: 4px;
+  font-weight: 700;
+  padding: 8px;
   cursor: pointer;
   margin-bottom: 6px;
   flex-shrink: 0;
@@ -1124,23 +1172,28 @@ body {
 .sp-new-btn:hover { border-color: var(--accent); }
 /* Mobile responsive */
 @media (max-width: 600px) {
-  :root { --font-size: 13px; }
+  :root {
+    --font-size: 14px;
+    --chrome-kbd-label: clamp(10px, 2.6vw, 12px);
+    --chrome-kbd-key: clamp(9px, 2.2vw, 11px);
+  }
   #banner { padding: 6px 10px; gap: 8px; }
   #banner pre { font-size: clamp(8px, 1.5vw, 13px); }
   #chat { padding: 8px; gap: 8px; }
   #side-panel { bottom: 64px; right: 8px; }
   #input-area { padding: 6px 8px; gap: 6px; }
-  #input { font-size: 13px; padding: 8px 10px; }
+  #input { font-size: 14px; padding: 8px 10px; }
   #send-btn { width: 36px; height: 36px; font-size: 16px; }
-  .panel-body { font-size: 12px; padding: 6px 10px 10px; }
+  .panel-body { font-size: 13px; padding: 6px 10px 10px; }
   #settings-panel { padding: 16px; }
-  #settings-toggle { min-width: 80px; font-size: var(--sp-font-sm, 12px); padding: 7px 12px; }
+  #settings-toggle { min-width: 88px; font-size: var(--chrome-btn-size); padding: 9px 12px; }
+  .kbd-hint { min-height: 36px; padding: 5px 4px; gap: 3px; }
   #prompt { font-size: 14px; }
 }
 @media (max-width: 480px) {
   #banner pre { display: none; }
   #banner { padding: 8px 10px; gap: 6px; }
   #chat { padding: 6px; gap: 6px; }
-  #tips { font-size: 10px; padding: 8px 10px; }
-  #tips code { font-size: 9px; }
+  #tips { font-size: 12px; padding: 8px 10px; }
+  #tips code { font-size: 11px; }
 }

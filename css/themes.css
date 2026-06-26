@@ -365,6 +365,539 @@
 .theme-crt #suggestions .suggestion { color: color-mix(in srgb, var(--accent) 75%, #5eff9e); }
 .theme-crt #suggestions .suggestion.selected { background: var(--query-bg); }
 
+/* Plexus default — matches landing page terminal aesthetic */
+.theme-plexus {
+  --panel-font-size: 15px;
+  --font-size: 15px;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(61, 214, 140, 0.12), transparent 55%),
+    linear-gradient(165deg, #0a0f0d 0%, #060908 100%);
+  font-family: 'IBM Plex Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+.theme-plexus::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(61, 214, 140, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 214, 140, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+.theme-plexus #app-row {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  background: linear-gradient(160deg, #141a17 0%, #0a0f0d 55%, #060908 100%);
+  border: 1px solid rgba(61, 214, 140, 0.2);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 0 40px rgba(61, 214, 140, 0.08);
+}
+.theme-plexus #banner {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent);
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(61, 214, 140, 0.16);
+  display: grid;
+  grid-template-columns: auto max-content minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 14px;
+}
+.theme-plexus #banner::before {
+  content: '';
+  grid-column: 1;
+  width: 52px;
+  height: 12px;
+  background:
+    radial-gradient(circle, #ff5f57 5.5px, transparent 5.5px) 0 50%,
+    radial-gradient(circle, #febc2e 5.5px, transparent 5.5px) 20px 50%,
+    radial-gradient(circle, #28c840 5.5px, transparent 5.5px) 40px 50%;
+  background-repeat: no-repeat;
+}
+.theme-plexus #banner pre {
+  grid-column: 2;
+  justify-self: start;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  font-size: clamp(12px, 2.2vw, 17px);
+  line-height: 1.3;
+  white-space: pre;
+  letter-spacing: 0;
+  text-align: left;
+  margin: 0;
+  width: max-content;
+  max-width: 100%;
+  color: var(--accent);
+  text-shadow: 0 0 18px rgba(61, 214, 140, 0.25);
+}
+.theme-plexus #banner::after {
+  content: 'plexus · openrouter';
+  grid-column: 4;
+  color: rgba(232, 255, 244, 0.72);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  background: rgba(61, 214, 140, 0.1);
+  padding: 0.35rem 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(61, 214, 140, 0.22);
+  white-space: nowrap;
+  font-family: 'IBM Plex Mono', monospace;
+  justify-self: end;
+}
+.theme-plexus #status-bar {
+  display: flex;
+  background: rgba(10, 15, 13, 0.92);
+  border-bottom: 1px solid rgba(61, 214, 140, 0.14);
+  padding: 0.45rem 1.2rem;
+  font-size: 0.8rem;
+  min-height: 30px;
+  gap: 10px;
+  color: rgba(61, 214, 140, 0.75);
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.theme-plexus #status-bar #status-model,
+.theme-plexus #status-bar #status-tokens {
+  color: rgba(143, 220, 255, 0.7);
+}
+.theme-plexus #chat-row { min-height: 0; flex: 1; }
+.theme-plexus #chat {
+  background: #0a0f0d;
+  font-family: 'IBM Plex Mono', 'Fira Code', monospace;
+}
+.theme-plexus #chat::-webkit-scrollbar { width: 8px; }
+.theme-plexus #chat::-webkit-scrollbar-track { background: #0d1411; }
+.theme-plexus #chat::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 60%, #1a2620);
+  border-radius: 6px;
+}
+.theme-plexus #tips {
+  background: rgba(61, 214, 140, 0.04);
+  border: none;
+  border-left: 2px solid rgba(61, 214, 140, 0.35);
+  border-radius: 0;
+  padding: 14px 16px 14px 14px;
+  color: rgba(61, 214, 140, 0.65);
+  font-size: 14px;
+}
+.theme-plexus #tips strong {
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(61, 214, 140, 0.2);
+}
+.theme-plexus #tips code {
+  background: rgba(61, 214, 140, 0.12);
+  color: #b8f5d4;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.theme-plexus .message { margin-bottom: 0; animation: plexusFade 0.18s ease; }
+@keyframes plexusFade {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.theme-plexus .message .panel {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  border-left: 2px solid;
+  padding-left: 14px;
+  margin: 4px 0;
+}
+.theme-plexus .message.query .panel {
+  border-left-color: var(--query-border);
+}
+.theme-plexus .message.response .panel {
+  border-left-color: var(--response-border);
+}
+.theme-plexus .panel-title {
+  font-size: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 0 0 6px;
+  font-weight: 600;
+}
+.theme-plexus .message.query .panel-title::before {
+  content: '┌─[user]─$';
+  font-size: 0.92rem;
+  color: #8fdcff;
+  text-shadow: 0 0 10px rgba(143, 220, 255, 0.2);
+}
+.theme-plexus .message.response .panel-title::before {
+  content: '└─[plexus]─>';
+  font-size: 0.92rem;
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(61, 214, 140, 0.25);
+}
+.theme-plexus .panel-body {
+  color: #d4f5e4;
+  font-family: 'IBM Plex Mono', 'Fira Code', monospace;
+  font-size: var(--panel-font-size);
+  line-height: 1.65;
+}
+.theme-plexus .message.query .panel-body {
+  color: #e8fff4;
+  font-weight: 500;
+}
+.theme-plexus .message.response .panel-body { color: #c8ead8; }
+.theme-plexus .panel-body code {
+  background: rgba(61, 214, 140, 0.12);
+  color: #9ef5c8;
+  border-radius: 6px;
+  font-size: 0.92em;
+}
+.theme-plexus .panel-body a { color: #8fdcff; }
+.theme-plexus .panel-body pre {
+  background: rgba(10, 20, 16, 0.9);
+  border-color: rgba(61, 214, 140, 0.2);
+}
+.theme-plexus .code-wrap { border-color: rgba(61, 214, 140, 0.2); }
+.theme-plexus .code-hdr {
+  background: rgba(20, 26, 23, 0.95);
+  border-color: rgba(61, 214, 140, 0.2);
+  font-size: 13px;
+}
+.theme-plexus #loading .dot { background: var(--accent); }
+.theme-plexus #side-panel {
+  --sp-font-base: 16px;
+  --sp-font-sm: 14px;
+  --sp-font-xs: 13px;
+  width: 268px;
+  padding: 16px;
+  background: linear-gradient(180deg, #121916 0%, #0a100e 100%);
+  border-left: 1px solid rgba(61, 214, 140, 0.28);
+  box-shadow: inset 1px 0 0 rgba(61, 214, 140, 0.06);
+  font-family: 'IBM Plex Mono', 'Fira Code', monospace;
+  color: #e8fff4;
+}
+.theme-plexus #side-panel .sp-title {
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 12px rgba(61, 214, 140, 0.25);
+}
+.theme-plexus #side-panel .sp-desc,
+.theme-plexus #side-panel .sp-footer {
+  color: rgba(232, 255, 244, 0.88);
+  font-size: var(--sp-font-sm);
+}
+.theme-plexus #side-panel .sp-footer {
+  border-top-color: rgba(61, 214, 140, 0.22);
+  padding-top: 10px;
+}
+.theme-plexus #side-panel .sp-row {
+  font-size: var(--sp-font-sm);
+  padding: 3px 0;
+}
+.theme-plexus #side-panel .sp-row .sp-label {
+  color: #8fdcff;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.theme-plexus #side-panel .sp-row .sp-value {
+  color: #e8fff4;
+  font-weight: 600;
+  font-size: var(--sp-font-base);
+}
+.theme-plexus #side-panel .sp-chart-legend {
+  font-size: var(--sp-font-sm);
+  color: rgba(232, 255, 244, 0.82);
+  line-height: 1.5;
+}
+.theme-plexus #side-panel .sp-ring-inner {
+  font-size: var(--sp-font-sm);
+  color: #e8fff4;
+  font-weight: 700;
+}
+.theme-plexus #side-panel .sp-bar {
+  background: rgba(61, 214, 140, 0.15);
+  height: 5px;
+}
+.theme-plexus #side-panel .sp-bar-fill {
+  background: linear-gradient(90deg, var(--accent), #8fdcff);
+}
+.theme-plexus #side-panel .sp-new-btn {
+  border: 1px solid rgba(61, 214, 140, 0.35);
+  background: rgba(61, 214, 140, 0.1);
+  color: #e8fff4;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 14px;
+}
+.theme-plexus #side-panel .sp-new-btn:hover {
+  border-color: var(--accent);
+  background: rgba(61, 214, 140, 0.2);
+}
+.theme-plexus .sp-sess {
+  font-size: 14px;
+  color: rgba(232, 255, 244, 0.9);
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+.theme-plexus .sp-sess:hover {
+  background: rgba(61, 214, 140, 0.08);
+  color: #e8fff4;
+}
+.theme-plexus .sp-sess.active {
+  background: rgba(61, 214, 140, 0.16);
+  color: var(--accent);
+  font-weight: 600;
+}
+.theme-plexus .sp-sess-del {
+  font-size: 13px;
+}
+.theme-plexus #settings-toggle {
+  background: rgba(61, 214, 140, 0.12);
+  border: 1px solid rgba(61, 214, 140, 0.35);
+  color: #e8fff4;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 14px;
+  min-width: 96px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.theme-plexus #settings-toggle:hover {
+  border-color: var(--accent);
+  background: rgba(61, 214, 140, 0.22);
+  color: #fff;
+}
+.theme-plexus #input-area {
+  background: #0a0f0d;
+  border-top: 1px solid rgba(61, 214, 140, 0.18);
+  padding: 12px 14px;
+  gap: 10px;
+}
+.theme-plexus #prompt {
+  font-size: 0;
+  line-height: 1;
+}
+.theme-plexus #prompt::before {
+  content: '└─$';
+  font-size: 1rem;
+  font-weight: 700;
+  color: #8fdcff;
+  background: rgba(61, 214, 140, 0.1);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(143, 220, 255, 0.25);
+  text-shadow: 0 0 10px rgba(143, 220, 255, 0.2);
+}
+.theme-plexus #input {
+  background: rgba(12, 20, 16, 0.95);
+  border: none;
+  border-bottom: 2px solid rgba(61, 214, 140, 0.35);
+  border-radius: 0;
+  color: #e8fff4;
+  font-family: 'IBM Plex Mono', 'Fira Code', monospace;
+  font-size: 16px;
+  padding: 10px 12px;
+  caret-color: var(--accent);
+}
+.theme-plexus #input:focus {
+  border-bottom-color: var(--accent);
+  box-shadow: 0 2px 0 rgba(61, 214, 140, 0.45);
+  background: rgba(12, 20, 16, 0.98);
+}
+.theme-plexus #input::placeholder { color: rgba(61, 214, 140, 0.45); }
+.theme-plexus #send-btn {
+  background: rgba(61, 214, 140, 0.14);
+  border: 1px solid rgba(61, 214, 140, 0.45);
+  border-radius: 28px;
+  width: auto;
+  height: auto;
+  min-height: 40px;
+  padding: 8px 22px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #e8fff4;
+  text-shadow: 0 0 8px rgba(61, 214, 140, 0.2);
+}
+.theme-plexus #send-btn:not(:disabled):hover {
+  background: rgba(61, 214, 140, 0.28);
+  border-color: var(--accent);
+  opacity: 1;
+}
+.theme-plexus #stop-btn {
+  border-radius: 28px;
+  width: auto;
+  height: auto;
+  min-height: 40px;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.theme-plexus #file-btn {
+  color: rgba(61, 214, 140, 0.55);
+  font-size: 1.1rem;
+}
+.theme-plexus #file-btn:hover,
+.theme-plexus #file-btn.has-file { color: var(--accent); }
+.theme-plexus #kbd-hints {
+  border-top: 1px solid rgba(61, 214, 140, 0.22);
+  background: rgba(10, 15, 13, 0.95);
+  padding: 10px 14px 12px;
+  gap: 8px;
+}
+.theme-plexus .kbd-hint {
+  min-height: 42px;
+  padding: 8px 6px;
+  color: #e8fff4 !important;
+  background: rgba(61, 214, 140, 0.1);
+  border: 1px solid rgba(61, 214, 140, 0.32);
+  border-radius: 8px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+.theme-plexus .kbd-hint:hover,
+.theme-plexus .kbd-hint.active {
+  border-color: var(--accent);
+  color: #fff !important;
+  background: rgba(61, 214, 140, 0.22);
+  box-shadow: 0 0 16px rgba(61, 214, 140, 0.15);
+}
+.theme-plexus .kbd-hint kbd {
+  background: rgba(6, 9, 8, 0.95);
+  border: 1px solid rgba(61, 214, 140, 0.45);
+  color: var(--accent) !important;
+  border-radius: 5px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.theme-plexus #settings-panel {
+  background: linear-gradient(160deg, #141a17 0%, #0a0f0d 55%, #060908 100%);
+  border: 1px solid rgba(61, 214, 140, 0.28);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 0 48px rgba(61, 214, 140, 0.12),
+    0 24px 64px rgba(0, 0, 0, 0.55);
+  padding: 28px;
+  font-family: 'IBM Plex Mono', 'Fira Code', monospace;
+}
+.theme-plexus #settings-panel h2 {
+  color: var(--accent);
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 14px rgba(61, 214, 140, 0.25);
+  margin-bottom: 20px;
+}
+.theme-plexus #settings-panel label {
+  color: #b8f5d4;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.theme-plexus #settings-panel .hint {
+  font-size: 13px;
+  color: rgba(200, 234, 216, 0.88);
+  line-height: 1.55;
+}
+.theme-plexus #settings-panel #encryption-status {
+  font-size: 14px;
+  color: rgba(232, 255, 244, 0.9);
+  margin-bottom: 10px;
+}
+.theme-plexus #settings-panel #encryption-status.on { color: var(--accent); }
+.theme-plexus #settings-panel input,
+.theme-plexus #settings-panel select,
+.theme-plexus #settings-panel textarea {
+  font-size: 15px;
+  background: rgba(6, 9, 8, 0.92);
+  border: 1px solid rgba(61, 214, 140, 0.28);
+  color: #e8fff4;
+  padding: 11px 13px;
+}
+.theme-plexus #settings-panel input:focus,
+.theme-plexus #settings-panel select:focus,
+.theme-plexus #settings-panel textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(61, 214, 140, 0.15);
+}
+.theme-plexus #settings-panel input::placeholder,
+.theme-plexus #settings-panel textarea::placeholder {
+  color: rgba(61, 214, 140, 0.45);
+}
+.theme-plexus #settings-panel .range-value {
+  font-size: 14px;
+  color: #e8fff4;
+}
+.theme-plexus #settings-panel .btn {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 14px;
+  background: rgba(61, 214, 140, 0.08);
+  border-color: rgba(61, 214, 140, 0.28);
+  color: #e8fff4;
+}
+.theme-plexus #settings-panel .btn:hover {
+  border-color: var(--accent);
+  background: rgba(61, 214, 140, 0.16);
+}
+.theme-plexus #settings-panel .btn.primary {
+  background: rgba(61, 214, 140, 0.85);
+  border-color: var(--accent);
+  color: #04120c;
+}
+.theme-plexus #settings-panel .btn.primary:hover {
+  background: var(--accent);
+  opacity: 1;
+}
+.theme-plexus #settings-panel .plan-settings label {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 14px;
+  color: #d4f5e4;
+  font-weight: 500;
+}
+.theme-plexus #settings-panel .plan-settings .settings-sublabel {
+  font-size: 13px;
+  color: #8fdcff;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 6px;
+}
+.theme-plexus #settings-panel #settings-status {
+  font-size: 14px;
+  color: rgba(232, 255, 244, 0.9);
+}
+.theme-plexus #shortcuts-panel,
+.theme-plexus #cmd-palette {
+  background: linear-gradient(160deg, #141a17, #0a0f0d);
+  border: 1px solid rgba(61, 214, 140, 0.28);
+  box-shadow: 0 0 40px rgba(61, 214, 140, 0.1);
+  padding: 20px;
+}
+.theme-plexus #shortcuts-panel h2,
+.theme-plexus #cmd-palette h2 {
+  font-size: 16px;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+.theme-plexus .shortcuts-table {
+  font-size: 14px;
+}
+.theme-plexus .shortcuts-table td {
+  color: #d4f5e4;
+  padding: 8px 6px;
+}
+.theme-plexus .shortcuts-table kbd {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 8px;
+  background: rgba(6, 9, 8, 0.95);
+  border-color: rgba(61, 214, 140, 0.4);
+  color: var(--accent);
+}
+.theme-plexus #cmd-palette-input {
+  font-size: 15px;
+  padding: 11px 12px;
+  background: rgba(6, 9, 8, 0.92);
+  border-color: rgba(61, 214, 140, 0.28);
+  color: #e8fff4;
+}
+
 /* Code CLI theme — Claude Code inspired, full-viewport layout */
 .theme-code-cli {
   background: linear-gradient(145deg, #0c1117 0%, #080b0f 100%);
@@ -3641,6 +4174,7 @@
   background: var(--surface2) !important;
 }
 .theme-code-cli #mode-badge,
+.theme-plexus #mode-badge,
 .theme-cyber #mode-badge,
 .theme-fantasy #mode-badge,
 .theme-stellar #mode-badge,
@@ -3651,6 +4185,7 @@
 .theme-codex #mode-badge,
 .theme-crt #mode-badge,
 .theme-code-cli #persona-badge,
+.theme-plexus #persona-badge,
 .theme-cyber #persona-badge,
 .theme-fantasy #persona-badge,
 .theme-stellar #persona-badge,
@@ -3661,6 +4196,7 @@
 .theme-codex #persona-badge,
 .theme-crt #persona-badge,
 .theme-code-cli #plan-badge,
+.theme-plexus #plan-badge,
 .theme-cyber #plan-badge,
 .theme-fantasy #plan-badge,
 .theme-stellar #plan-badge,
@@ -3671,6 +4207,7 @@
 .theme-codex #plan-badge,
 .theme-crt #plan-badge,
 .theme-code-cli #model-badge,
+.theme-plexus #model-badge,
 .theme-cyber #model-badge,
 .theme-fantasy #model-badge,
 .theme-stellar #model-badge,
@@ -3695,6 +4232,7 @@
   background: var(--surface2) !important;
 }
 .theme-code-cli #suggestions,
+.theme-plexus #suggestions,
 .theme-cyber #suggestions,
 .theme-fantasy #suggestions,
 .theme-stellar #suggestions,
@@ -3739,6 +4277,10 @@ body #banner pre {
   font-family: 'Courier New', 'Consolas', monospace !important;
   font-size: clamp(10px, 2vw, 16px) !important;
 }
+body.theme-plexus #banner pre {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace !important;
+  font-size: clamp(12px, 2.2vw, 17px) !important;
+}
 
 /* Slash command autocomplete */
 #suggestions {
@@ -3769,9 +4311,107 @@ body #banner pre {
   transition: background 0.1s;
 }
 #suggestions .suggestion .desc {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-dim);
 }
 #suggestions .suggestion.selected {
   background: rgba(34,197,94,0.12);
+}
+
+/* ─── Console chrome readability (all themes) ─── */
+body #kbd-hints .kbd-hint,
+body .kbd-hint {
+  font-size: var(--chrome-kbd-label) !important;
+  font-weight: var(--chrome-kbd-weight) !important;
+  color: var(--text) !important;
+  min-height: 38px;
+}
+body .kbd-hint kbd {
+  font-size: var(--chrome-kbd-key) !important;
+  font-weight: var(--chrome-kbd-weight) !important;
+}
+body #settings-toggle {
+  font-size: var(--chrome-btn-size) !important;
+  font-weight: 700 !important;
+  min-height: 40px;
+}
+body #side-panel {
+  --sp-font-base: 15px;
+  --sp-font-sm: 13px;
+  --sp-font-xs: 12px;
+}
+body #side-panel .sp-title,
+body #side-panel .sp-row,
+body #side-panel .sp-desc,
+body #side-panel .sp-footer,
+body #side-panel .sp-chart-legend,
+body .sp-sess,
+body .sp-new-btn {
+  font-size: var(--sp-font-sm);
+}
+body #side-panel .sp-row .sp-label {
+  color: var(--text) !important;
+  font-weight: 600 !important;
+}
+body #side-panel .sp-row .sp-value {
+  font-weight: 700 !important;
+}
+body #settings-panel label,
+body #settings-panel .settings-sublabel {
+  font-size: var(--settings-label-size) !important;
+  color: var(--text) !important;
+  font-weight: 600 !important;
+}
+body #settings-panel .hint,
+body #settings-panel #encryption-status,
+body #settings-panel #settings-status {
+  font-size: var(--settings-hint-size) !important;
+  color: var(--text) !important;
+}
+body #settings-panel input,
+body #settings-panel select,
+body #settings-panel textarea,
+body #settings-panel .settings-textarea {
+  font-size: var(--settings-input-size) !important;
+  color: var(--text) !important;
+}
+body #settings-panel .btn {
+  font-size: var(--settings-input-size) !important;
+  font-weight: 700 !important;
+}
+body #settings-panel .range-value {
+  font-size: var(--settings-label-size) !important;
+  font-weight: 700 !important;
+}
+body #status-bar {
+  font-size: 0.8rem !important;
+}
+body #tips {
+  font-size: 13px !important;
+  color: var(--text) !important;
+}
+body .shortcuts-table {
+  font-size: 14px !important;
+}
+body .shortcuts-table td {
+  color: var(--text) !important;
+}
+body .shortcuts-table kbd {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+body #cmd-palette-input {
+  font-size: var(--settings-input-size) !important;
+}
+body #cmd-palette h2,
+body #shortcuts-panel h2 {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+body .cmd-item {
+  font-size: 14px !important;
+}
+body .cmd-item kbd {
+  font-size: 12px !important;
+  font-weight: 700 !important;
 }
