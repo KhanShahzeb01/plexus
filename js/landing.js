@@ -155,55 +155,58 @@
     });
   }
 
-  // ─── Sticker tilt + flip ──────────────────────────────────────
-  document.querySelectorAll("[data-tilt]").forEach((card) => {
-    if (prefersReduced) return;
-
-    card.addEventListener("mousemove", (e) => {
-      if (card.classList.contains("is-flipped") || card.classList.contains("is-zoom-source")) return;
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      const inner = card.querySelector(".card-inner");
-      inner.style.transform = `rotateY(${x * 14}deg) rotateX(${-y * 14}deg)`;
-    });
-
-    card.addEventListener("mouseleave", () => {
-      const inner = card.querySelector(".card-inner");
-      if (!card.classList.contains("is-flipped")) {
-        inner.style.transform = "";
-      }
-    });
-
-    card.addEventListener("click", () => {
-      card.classList.toggle("is-flipped");
-      const inner = card.querySelector(".card-inner");
-      inner.style.transform = "";
-    });
-  });
-
-  // ─── Hover zoom: sticker + carousel cards → center at 2× ─────
+  // ─── Click zoom: sticker + carousel cards → center at 2× ───
   const cardZoomPortal = document.getElementById("card-zoom-portal");
   const cardZoomStage = cardZoomPortal?.querySelector(".card-zoom-stage");
+  const cardZoomBackdrop = cardZoomPortal?.querySelector(".card-zoom-backdrop");
   let carouselHoverLocked = false;
-  let carouselInteracting = false;
   let activeZoomCard = null;
   let activeZoomClone = null;
-  const zoomTimers = new WeakMap();
 
-  function cancelZoomTimer(card) {
-    const timer = zoomTimers.get(card);
-    if (timer) {
-      clearTimeout(timer);
-      zoomTimers.delete(card);
-    }
+  const CRISP_PROPS = [
+    "fontSize",
+    "paddingTop",
+    "paddingRight",
+    "paddingBottom",
+    "paddingLeft",
+    "marginTop",
+    "marginRight",
+    "marginBottom",
+    "marginLeft",
+    "borderRadius",
+    "borderTopWidth",
+    "borderRightWidth",
+    "borderBottomWidth",
+    "borderLeftWidth",
+    "gap",
+    "rowGap",
+    "columnGap",
+    "letterSpacing",
+    "minHeight",
+  ];
+
+  function scalePx(value, factor) {
+    const num = parseFloat(value);
+    if (!num || Number.isNaN(num)) return null;
+    if (value.endsWith("px")) return `${num * factor}px`;
+    if (value.endsWith("rem")) return `${num * factor}rem`;
+    return null;
+  }
+
+  function applyCrispScale(sourceEl, targetEl, factor) {
+    const cs = getComputedStyle(sourceEl);
+    CRISP_PROPS.forEach((prop) => {
+      const scaled = scalePx(cs[prop], factor);
+      if (scaled) targetEl.style[prop] = scaled;
+    });
+    const lineHeight = scalePx(cs.lineHeight, factor);
+    if (lineHeight) targetEl.style.lineHeight = lineHeight;
   }
 
   function hideCardZoom() {
     if (!activeZoomCard && !cardZoomPortal?.classList.contains("is-active")) return;
     if (activeZoomCard) {
       activeZoomCard.classList.remove("is-zoom-source");
-      cancelZoomTimer(activeZoomCard);
       activeZoomCard = null;
     }
     carouselHoverLocked = false;
@@ -216,6 +219,15 @@
     }
   }
 
+  function toggleCardZoom(card) {
+    if (prefersReduced || !cardZoomPortal || !cardZoomStage) return;
+    if (activeZoomCard === card) {
+      hideCardZoom();
+      return;
+    }
+    showCardZoom(card);
+  }
+
   function prepareZoomClone(card, clone, scale) {
     clone.classList.add("card-zoom-clone");
     clone.classList.remove("is-zoom-source", "reveal", "reveal-delay-1", "reveal-delay-2", "reveal-delay-3", "reveal-delay-4", "reveal-delay-5");
@@ -223,8 +235,12 @@
     clone.style.zIndex = "";
     clone.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
 
-    const baseFont = parseFloat(getComputedStyle(card).fontSize) || 16;
-    clone.style.fontSize = `${baseFont * scale}px`;
+    applyCrispScale(card, clone, scale);
+    const sourceNodes = card.querySelectorAll("*");
+    const cloneNodes = clone.querySelectorAll("*");
+    for (let i = 0; i < sourceNodes.length && i < cloneNodes.length; i++) {
+      applyCrispScale(sourceNodes[i], cloneNodes[i], scale);
+    }
 
     const inner = clone.querySelector(".card-inner");
     if (inner) {
@@ -233,8 +249,7 @@
   }
 
   function showCardZoom(card) {
-    if (prefersReduced || !cardZoomPortal || !cardZoomStage || activeZoomCard === card) return;
-    if (card.classList.contains("carousel-card") && carouselInteracting) return;
+    if (prefersReduced || !cardZoomPortal || !cardZoomStage) return;
 
     hideCardZoom();
     const rect = card.getBoundingClientRect();
@@ -271,53 +286,38 @@
     });
   }
 
-  function scheduleCardZoom(card, delay, moveThreshold, startX, startY) {
-    cancelZoomTimer(card);
-    let originX = startX;
-    let originY = startY;
-
-    const onMove = (e) => {
-      const dx = Math.abs(e.clientX - originX);
-      const dy = Math.abs(e.clientY - originY);
-      if (dx > moveThreshold || dy > moveThreshold * 0.75) {
-        cancelZoomTimer(card);
-        card.removeEventListener("mousemove", onMove);
-      }
-    };
-
-    card.addEventListener("mousemove", onMove);
-
-    const timer = window.setTimeout(() => {
-      zoomTimers.delete(card);
-      card.removeEventListener("mousemove", onMove);
-      if (!card.matches(":hover")) return;
-      if (card.classList.contains("carousel-card") && carouselInteracting) return;
-      showCardZoom(card);
-    }, delay);
-
-    zoomTimers.set(card, timer);
-  }
-
-  function bindCardHoverZoom(selector, { delay = 0, moveThreshold = 0 } = {}) {
-    document.querySelectorAll(selector).forEach((card) => {
-      card.addEventListener("mouseenter", (e) => {
-        if (delay > 0) {
-          scheduleCardZoom(card, delay, moveThreshold, e.clientX, e.clientY);
-          return;
-        }
-        showCardZoom(card);
-      });
-      card.addEventListener("mouseleave", () => {
-        cancelZoomTimer(card);
-        if (activeZoomCard === card) hideCardZoom();
-      });
+  if (cardZoomPortal && cardZoomStage && !prefersReduced) {
+    cardZoomBackdrop?.addEventListener("click", hideCardZoom);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") hideCardZoom();
     });
   }
 
-  if (cardZoomPortal && cardZoomStage && !prefersReduced) {
-    bindCardHoverZoom("#stickers .card-3d", { delay: 220, moveThreshold: 14 });
-    bindCardHoverZoom("#use-cases .carousel-card", { delay: 650, moveThreshold: 10 });
-  }
+  // ─── Sticker tilt + click zoom ────────────────────────────────
+  document.querySelectorAll("[data-tilt]").forEach((card) => {
+    if (prefersReduced) return;
+
+    card.addEventListener("mousemove", (e) => {
+      if (card.classList.contains("is-zoom-source")) return;
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      const inner = card.querySelector(".card-inner");
+      inner.style.transform = `rotateY(${x * 14}deg) rotateX(${-y * 14}deg)`;
+    });
+
+    card.addEventListener("mouseleave", () => {
+      const inner = card.querySelector(".card-inner");
+      if (!card.classList.contains("is-zoom-source")) {
+        inner.style.transform = "";
+      }
+    });
+
+    card.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleCardZoom(card);
+    });
+  });
 
   // ─── Carousel: translate track + 3D rotateY + slow auto-drift ───
   const carouselViewport = document.getElementById("carousel-viewport");
@@ -377,11 +377,6 @@
       });
     }
 
-    function scrollCardToCenter(card) {
-      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-      snapTarget = cardCenter - carouselViewport.clientWidth / 2;
-    }
-
     function tick(now) {
       const dt = Math.min(0.05, (now - lastTime) / 1000);
       lastTime = now;
@@ -430,9 +425,7 @@
 
     carouselViewport.addEventListener("mousedown", (e) => {
       if (e.button !== 0) return;
-      carouselInteracting = true;
       hideCardZoom();
-      document.querySelectorAll("#use-cases .carousel-card").forEach(cancelZoomTimer);
       isDown = true;
       dragMoved = 0;
       snapTarget = null;
@@ -444,19 +437,16 @@
     carouselViewport.addEventListener("mouseleave", () => {
       isDown = false;
       hoverX = null;
-      carouselInteracting = false;
       carouselViewport.classList.remove("is-dragging");
     });
 
     carouselViewport.addEventListener("mouseup", () => {
       isDown = false;
-      carouselInteracting = false;
       carouselViewport.classList.remove("is-dragging");
     });
 
     carouselViewport.addEventListener("mousemove", (e) => {
       if (isDown) {
-        carouselInteracting = true;
         e.preventDefault();
         const dx = e.clientX - startX;
         dragMoved += Math.abs(dx);
@@ -467,8 +457,6 @@
       if (hoverX !== null && !carouselHoverLocked) {
         const dx = e.clientX - hoverX;
         if (Math.abs(dx) > 1) {
-          document.querySelectorAll("#use-cases .carousel-card").forEach(cancelZoomTimer);
-          if (activeZoomCard?.classList.contains("carousel-card")) hideCardZoom();
           trackOffset -= dx * HOVER_SCROLL_MULT;
           snapTarget = null;
           applyTrackOffset();
@@ -480,9 +468,7 @@
     carouselViewport.addEventListener(
       "touchstart",
       (e) => {
-        carouselInteracting = true;
         hideCardZoom();
-        document.querySelectorAll("#use-cases .carousel-card").forEach(cancelZoomTimer);
         isDown = true;
         dragMoved = 0;
         snapTarget = null;
@@ -507,14 +493,14 @@
 
     carouselViewport.addEventListener("touchend", () => {
       isDown = false;
-      carouselInteracting = false;
       carouselViewport.classList.remove("is-dragging");
     });
 
     carouselViewport.addEventListener("click", (e) => {
       const card = e.target.closest(".carousel-card");
       if (!card || dragMoved > 8) return;
-      scrollCardToCenter(card);
+      e.stopPropagation();
+      toggleCardZoom(card);
     });
   }
 
