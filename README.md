@@ -3,12 +3,15 @@
 Terminal-themed AI chat app powered by OpenRouter. Static HTML/CSS/JS — no build tools, no frameworks, no backend.
 
 ```
-index.html          # App shell
+index.html          # Marketing landing page (feature/landing-page branch)
+chat.html           # Full Plexus chat app (unchanged from original index)
 css/base.css        # Core layout and components
 css/themes.css      # Theme variants
+css/landing.css     # Landing page only
 js/app.js           # UI, chat, settings, vision
 js/plan-pipeline.js # Plan mode and /research pipeline
 js/storage-crypto.js # Optional passphrase encryption for localStorage
+js/landing.js       # Landing scroll motion & carousel
 ```
 
 Looks and feels like the rallies CLI terminal, works on your phone.
@@ -47,7 +50,10 @@ git push -u origin main
 
 ### Option 4: Open locally
 
-Just open `index.html` in your browser. Everything works offline except AI responses.
+- **Landing:** open `index.html` in your browser for the marketing page.
+- **Chat:** open `chat.html` (or click **Launch Plexus** on the landing page).
+
+Everything works offline except AI responses.
 
 ## Usage
 
@@ -65,6 +71,7 @@ Get an API key: https://openrouter.ai/keys
 - Streaming AI responses via OpenRouter
 - Chat history saved in your browser (localStorage)
 - Export conversations as Markdown
+- Optional passphrase encryption for local chats and API key (AES-GCM)
 - Works offline for previous messages
 - Mobile-responsive
 - No tracking, no servers, no accounts

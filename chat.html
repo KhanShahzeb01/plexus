@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Plexus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Share+Tech+Mono&family=MedievalSharp&family=VT323&display=swap" rel="stylesheet">
+<link id="hljs-theme" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/themes.css">
+</head>
+<body>
+
+
+<div id="matrix-rain" aria-hidden="true"></div>
+
+<div id="app-row">
+
+<!-- Banner -->
+<div id="banner">
+  <span id="banner-theme-icon" aria-hidden="true"></span>
+  <pre id="banner-art"></pre>
+</div>
+
+<!-- Status bar: badges + model + tokens -->
+<div id="status-bar">
+  <span id="status-left">
+    <span id="mode-badge" class="general">general</span>
+    <span id="persona-badge" class="none"></span>
+    <span id="plan-badge" class="off" title="Plan mode — structured sub-analysis + synthesis"></span>
+    <span id="model-badge"></span>
+    <span style="color:var(--border)">|</span>
+  </span>
+  <span id="status-right">
+    <span id="status-model"></span>
+    <span style="color:var(--border)">|</span>
+    <span id="status-tokens"></span>
+  </span>
+</div>
+
+<!-- Chat area + side panel -->
+<div id="chat-row">
+<div id="main-col">
+<div id="chat" role="log" aria-live="polite">
+  <div id="tips">
+    <strong>Plexus</strong> — AI chat powered by OpenRouter.<br>
+    Themes: <code>/finance</code> <code>/aidev</code> <code>/github</code> <code>/datascience</code> <code>/blog</code><br>
+    Quick: <code>/summarize</code> <code>/explain</code> <code>/translate</code> <code>/rephrase</code> <code>/bulletise</code><br>
+    Plan mode: <code>/plan</code> — structured sub-questions, synthesis, and optional quality gate (configure in settings). <code>/research</code> runs the same pipeline with its own options.<br>
+    Click <strong>settings</strong> to set your API key. Attach files or images via 📎. Type <code>/help</code> for all commands.
+  </div>
+</div>
+
+<!-- Input area -->
+<div id="input-footer">
+<div id="input-area">
+  <div id="input-extras">
+    <button id="file-btn" title="Attach file">📎</button>
+    <input type="file" id="file-input" accept=".pdf,.docx,.pptx,.md,.txt,.png,.jpg,.jpeg,.webp,.gif,image/*" hidden>
+  </div>
+  <span id="prompt">›</span>
+  <div id="input-wrapper">
+    <div id="file-info" style="display:none"></div>
+    <div id="suggestions"></div>
+    <textarea id="input" rows="1" placeholder="Type a message..." enterkeyhint="send"></textarea>
+  </div>
+  <button id="stop-btn" aria-label="Stop">⏹</button>
+  <button id="send-btn" disabled aria-label="Send">→</button>
+</div>
+<div id="kbd-hints">
+  <button type="button" class="kbd-hint" data-action="new-chat"><kbd id="kbd-new"></kbd> New</button>
+  <button type="button" class="kbd-hint" data-action="export"><kbd id="kbd-export"></kbd> Export</button>
+  <button type="button" class="kbd-hint" data-action="plan" id="kbd-plan-btn"><kbd id="kbd-plan"></kbd> <span id="kbd-plan-label">Plan</span></button>
+  <button type="button" class="kbd-hint" data-action="palette"><kbd id="kbd-palette"></kbd> Commands</button>
+  <button type="button" class="kbd-hint" data-action="shortcuts"><kbd id="kbd-help"></kbd> Keys</button>
+</div>
+</div>
+</div><!-- /main-col -->
+
+<!-- Side panel -->
+<div id="side-panel">
+  <div class="sp-section sp-chats-section">
+    <div class="sp-title">Chats</div>
+    <button class="sp-new-btn" id="sp-new-sess">+ New</button>
+    <div id="sp-sessions"></div>
+  </div>
+  <div class="sp-section">
+    <div class="sp-row"><span class="sp-label">Mode</span><span class="sp-value" id="sp-mode">general</span></div>
+    <div class="sp-row"><span class="sp-label">Plan</span><span class="sp-value" id="sp-plan">off</span></div>
+    <div class="sp-row"><span class="sp-label">Model</span><span class="sp-value" id="sp-model">—</span></div>
+    <div class="sp-row" style="padding-top:4px">
+      <span class="sp-label">Temp</span>
+      <input type="range" id="sp-temp" min="0" max="2" step="0.05" style="flex:1;height:3px;margin:0 4px;-webkit-appearance:none;appearance:none;background:var(--border);border-radius:2px;outline:none;cursor:pointer">
+      <span class="sp-value" id="sp-temp-val" style="min-width:28px;text-align:right">0.70</span>
+    </div>
+  </div>
+  <div class="sp-section">
+    <div class="sp-chart-row">
+      <div class="sp-ring" id="sp-ring">
+        <div class="sp-ring-inner" id="sp-ring-label">0%</div>
+      </div>
+      <div class="sp-chart-legend">
+        <span class="dot" style="background:var(--accent)"></span>Output<br>
+        <span class="dot" style="background:var(--border)"></span>Input
+      </div>
+    </div>
+    <div class="sp-row"><span class="sp-label">In</span><span class="sp-value" id="sp-tokens-in">0</span></div>
+    <div class="sp-row"><span class="sp-label">Out</span><span class="sp-value" id="sp-tokens-out">0</span></div>
+    <div class="sp-row"><span class="sp-label">Total</span><span class="sp-value" id="sp-tokens-total">0</span></div>
+  </div>
+  <div class="sp-section">
+    <div class="sp-row"><span class="sp-label">Lifetime in</span><span class="sp-value" id="sp-lt-in">0</span></div>
+    <div class="sp-row"><span class="sp-label">Lifetime out</span><span class="sp-value" id="sp-lt-out">0</span></div>
+  </div>
+  <div class="sp-footer"><span id="sp-cost">$0.00</span> est.</div>
+  <button id="settings-toggle" type="button" aria-label="Settings">settings</button>
+</div>
+</div><!-- /chat-row -->
+
+</div><!-- /app-row -->
+
+<!-- Command palette -->
+<div id="cmd-palette-overlay">
+  <div id="cmd-palette">
+    <h2>Command palette</h2>
+    <input type="text" id="cmd-palette-input" placeholder="Search commands…" autocomplete="off">
+    <div id="cmd-palette-list"></div>
+  </div>
+</div>
+
+<!-- Keyboard shortcuts help -->
+<div id="shortcuts-overlay">
+  <div id="shortcuts-panel">
+    <h2>Keyboard shortcuts</h2>
+    <table class="shortcuts-table" id="shortcuts-table"></table>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn primary" id="shortcuts-close" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lock screen (encrypted local storage) -->
+<div id="lock-overlay">
+  <div id="lock-panel">
+    <h2>Unlock Plexus</h2>
+    <p>Your chats and API key are encrypted in this browser. Enter your passphrase to continue.</p>
+    <label for="lock-passphrase">Passphrase</label>
+    <input type="password" id="lock-passphrase" placeholder="Passphrase" autocomplete="current-password">
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn primary" id="lock-unlock-btn" type="button">Unlock</button>
+    </div>
+    <div id="lock-status"></div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div id="settings-overlay">
+  <div id="settings-panel">
+    <h2>Settings</h2>
+
+    <label>Local storage encryption</label>
+    <div id="encryption-status">Off — chats stored as plain JSON in this browser.</div>
+    <p class="hint">Encrypts your API key and chat history with a passphrase (AES-GCM + PBKDF2). If you forget the passphrase, encrypted data cannot be recovered.</p>
+    <div id="encryption-enable-fields">
+      <label for="encrypt-passphrase">New passphrase</label>
+      <input type="password" id="encrypt-passphrase" placeholder="At least 8 characters" autocomplete="new-password">
+      <label for="encrypt-passphrase-confirm">Confirm passphrase</label>
+      <input type="password" id="encrypt-passphrase-confirm" placeholder="Repeat passphrase" autocomplete="new-password">
+      <div class="encryption-actions">
+        <button class="btn primary" id="enable-encryption-btn" type="button">Enable encryption</button>
+      </div>
+    </div>
+    <div id="encryption-manage-fields" style="display:none">
+      <label for="change-passphrase-old">Current passphrase</label>
+      <input type="password" id="change-passphrase-old" autocomplete="current-password">
+      <label for="change-passphrase-new">New passphrase</label>
+      <input type="password" id="change-passphrase-new" autocomplete="new-password">
+      <label for="change-passphrase-confirm">Confirm new passphrase</label>
+      <input type="password" id="change-passphrase-confirm" autocomplete="new-password">
+      <div class="encryption-actions">
+        <button class="btn" id="change-passphrase-btn" type="button">Change passphrase</button>
+        <button class="btn" id="lock-now-btn" type="button">Lock now</button>
+        <button class="btn" id="disable-encryption-btn" type="button">Disable encryption</button>
+      </div>
+      <label for="disable-passphrase" style="margin-top:10px">Passphrase to disable encryption</label>
+      <input type="password" id="disable-passphrase" placeholder="Required to decrypt and store plain JSON" autocomplete="current-password">
+    </div>
+
+    <label for="api-key" style="margin-top:16px">OpenRouter API Key</label>
+    <input type="password" id="api-key" placeholder="sk-or-v1-..." autocomplete="off">
+    <div class="btn-row">
+      <button class="btn primary" id="save-key-btn">Save</button>
+      <button class="btn" id="clear-key-btn">Clear</button>
+    </div>
+
+    <label for="model-select" style="margin-top:16px">Model</label>
+    <select id="model-select">
+      <optgroup label="Free Models">
+        <option value="openai/gpt-oss-120b:free">GPT-OSS 120B (free)</option>
+        <option value="openai/gpt-oss-20b:free">GPT-OSS 20B (free)</option>
+        <option value="google/gemma-4-31b-it:free">Gemma 4 31B (free)</option>
+        <option value="google/gemma-4-26b-a4b-it:free">Gemma 4 26B (free)</option>
+        <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (free)</option>
+        <option value="meta-llama/llama-3.2-3b-instruct:free">Llama 3.2 3B (free)</option>
+        <option value="qwen/qwen3-coder:free">Qwen3 Coder 480B (free)</option>
+        <option value="qwen/qwen3-next-80b-a3b-instruct:free">Qwen3 Next 80B (free)</option>
+        <option value="nousresearch/hermes-3-llama-3.1-405b:free">Hermes 3 405B (free)</option>
+        <option value="cognitivecomputations/dolphin-mistral-24b-venice-edition:free">Dolphin Mistral 24B (free)</option>
+        <option value="liquid/lfm-2.5-1.2b-instruct:free">LFM 2.5 1.2B (free)</option>
+      </optgroup>
+      <optgroup label="Paid — Recommended">
+        <option value="openai/gpt-4o">OpenAI GPT-4o</option>
+        <option value="openai/gpt-4o-mini">OpenAI GPT-4o Mini</option>
+        <option value="openai/o3-mini">OpenAI o3-mini</option>
+        <option value="openai/o4-mini">OpenAI o4-mini</option>
+        <option value="openai/gpt-4.1">OpenAI GPT-4.1</option>
+        <option value="openai/gpt-4.1-mini">OpenAI GPT-4.1 Mini</option>
+        <option value="openai/gpt-4.1-nano">OpenAI GPT-4.1 Nano</option>
+        <option value="anthropic/claude-sonnet-4">Claude Sonnet 4</option>
+        <option value="anthropic/claude-haiku-4.5">Claude Haiku 4.5</option>
+        <option value="anthropic/claude-opus-4">Claude Opus 4</option>
+        <option value="anthropic/claude-opus-4.5">Claude Opus 4.5</option>
+        <option value="anthropic/claude-opus-4.7">Claude Opus 4.7</option>
+        <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+        <option value="google/gemini-2.5-pro">Gemini 2.5 Pro</option>
+        <option value="google/gemini-2.5-flash">Gemini 2.5 Flash</option>
+        <option value="google/gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+        <option value="google/gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+        <option value="google/gemini-3.5-flash">Gemini 3.5 Flash</option>
+        <option value="deepseek/deepseek-v4-pro">DeepSeek V4 Pro</option>
+        <option value="deepseek/deepseek-v4-flash">DeepSeek V4 Flash</option>
+        <option value="deepseek/deepseek-chat">DeepSeek V3</option>
+        <option value="deepseek/deepseek-chat-v3.1">DeepSeek V3.1</option>
+        <option value="deepseek/deepseek-r1">DeepSeek R1</option>
+        <option value="deepseek/deepseek-v3.2">DeepSeek V3.2</option>
+        <option value="meta-llama/llama-4-maverick">Llama 4 Maverick</option>
+        <option value="meta-llama/llama-4-scout">Llama 4 Scout</option>
+        <option value="qwen/qwen3-235b-a22b">Qwen3 235B A22B</option>
+        <option value="qwen/qwen3-30b-a3b">Qwen3 30B A3B</option>
+        <option value="qwen/qwen-2.5-72b-instruct">Qwen 2.5 72B</option>
+        <option value="mistralai/mistral-large">Mistral Large</option>
+        <option value="mistralai/mistral-small-3.1-24b-instruct">Mistral Small 3.1 24B</option>
+        <option value="cohere/command-a">Cohere Command A</option>
+        <option value="cohere/command-r-plus-08-2024">Cohere Command R+</option>
+        <option value="bytedance-seed/seed-2.0-mini">Seed 2.0 Mini</option>
+        <option value="bytedance-seed/seed-1.6">Seed 1.6</option>
+        <option value="amazon/nova-pro-v1">Nova Pro</option>
+        <option value="amazon/nova-lite-v1">Nova Lite</option>
+        <option value="x-ai/grok-4.20">Grok 4.20</option>
+        <option value="microsoft/phi-4-mini-instruct">Phi-4 Mini</option>
+      </optgroup>
+    </select>
+
+    <label for="font-size-select" style="margin-top:16px">Font Size</label>
+    <select id="font-size-select">
+      <option value="10px">10</option>
+      <option value="12px">12</option>
+      <option value="14px" selected>14</option>
+      <option value="16px">16</option>
+      <option value="18px">18</option>
+      <option value="20px">20</option>
+      <option value="24px">24</option>
+      <option value="28px">28</option>
+      <option value="32px">32</option>
+      <option value="36px">36</option>
+      <option value="40px">40</option>
+      <option value="44px">44</option>
+      <option value="48px">48</option>
+      <option value="52px">52</option>
+      <option value="56px">56</option>
+      <option value="60px">60</option>
+    </select>
+
+    <label for="code-theme-select">Code Block Theme</label>
+    <select id="code-theme-select">
+      <optgroup label="Dark">
+        <option value="atom-one-dark">Atom One Dark</option>
+        <option value="github-dark">GitHub Dark</option>
+        <option value="monokai">Monokai</option>
+        <option value="night-owl">Night Owl</option>
+        <option value="tokyo-night-dark">Tokyo Night</option>
+      </optgroup>
+      <optgroup label="Light">
+        <option value="atom-one-light">Atom One Light</option>
+        <option value="github">GitHub Light</option>
+        <option value="vs">Visual Studio Light</option>
+        <option value="xcode">Xcode Light</option>
+      </optgroup>
+    </select>
+
+    <label for="font-family-select">Font Style</label>
+    <select id="font-family-select">
+      <optgroup label="Monospace">
+        <option value="'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace">JetBrains Mono (default)</option>
+        <option value="'Fira Code','Cascadia Code','Consolas',monospace">Fira Code</option>
+        <option value="'Cascadia Code','Consolas',monospace">Cascadia Code</option>
+        <option value="'Source Code Pro',monospace">Source Code Pro</option>
+        <option value="'IBM Plex Mono',monospace">IBM Plex Mono</option>
+        <option value="'Courier New',monospace">Courier New</option>
+        <option value="'Consolas',monospace">Consolas</option>
+        <option value="'SF Mono','Menlo','Monaco',monospace">SF Mono / Menlo</option>
+        <option value="monospace">System Monospace</option>
+      </optgroup>
+      <optgroup label="Sans-Serif">
+        <option value="Arial,'Helvetica Neue',Helvetica,sans-serif">Arial</option>
+        <option value="'Helvetica Neue',Helvetica,Arial,sans-serif">Helvetica Neue</option>
+        <option value="'Segoe UI','Roboto','Helvetica Neue',Arial,sans-serif">Segoe UI</option>
+        <option value="'Roboto','Helvetica Neue',Arial,sans-serif">Roboto</option>
+        <option value="'Open Sans','Helvetica Neue',Arial,sans-serif">Open Sans</option>
+        <option value="'Inter','Roboto','Helvetica Neue',Arial,sans-serif">Inter</option>
+        <option value="'SF Pro Display','-apple-system','BlinkMacSystemFont','Segoe UI',Roboto,sans-serif">SF Pro / System</option>
+        <option value="'Trebuchet MS','Helvetica Neue',Arial,sans-serif">Trebuchet MS</option>
+        <option value="'Verdana',Geneva,sans-serif">Verdana</option>
+        <option value="'Lucida Grande','Lucida Sans Unicode',Geneva,Verdana,sans-serif">Lucida Grande</option>
+        <option value="'Calibri','Candara','Segoe','Segoe UI',Optima,sans-serif">Calibri</option>
+        <option value="sans-serif">System Sans-Serif</option>
+      </optgroup>
+      <optgroup label="Serif">
+        <option value="'Times New Roman',Times,serif">Times New Roman</option>
+        <option value="Georgia,'Times New Roman',Times,serif">Georgia</option>
+        <option value="'Palatino Linotype','Book Antiqua',Palatino,serif">Palatino</option>
+        <option value="'Garamond','EB Garamond','Times New Roman',serif">Garamond</option>
+        <option value="'Bookman','Palatino Linotype',Palatino,serif">Bookman</option>
+        <option value="'Cambria','Georgia','Times New Roman',serif">Cambria</option>
+        <option value="serif">System Serif</option>
+      </optgroup>
+    </select>
+
+    <label for="theme-select" style="margin-top:16px">Theme</label>
+    <select id="theme-select">
+      <option value="cli">Plexus CLI</option>
+      <option value="codecli">Code CLI</option>
+      <option value="cyber">Cyberpunk Neon</option>
+      <option value="fantasy">Dark Fantasy</option>
+      <option value="stellar">Stellar Nebula</option>
+      <option value="forest">Forest Canopy</option>
+      <option value="hacker">Hacker Root</option>
+      <option value="minimal">Minimal CLI</option>
+      <option value="nova">Dark Nova</option>
+      <option value="codex">Codex Terminal</option>
+      <option value="crt">CRT Retro</option>
+    </select>
+
+    <label for="color-select">Accent Color</label>
+    <select id="color-select">
+      <option value="sage">Sage</option>
+      <option value="sea">Sea</option>
+      <option value="dusk">Dusk</option>
+      <option value="clay">Clay</option>
+      <option value="mist">Mist</option>
+      <option value="heather">Heather</option>
+    </select>
+
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+      <label style="margin-bottom:8px">Plan pipeline</label>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div style="flex:1">
+          <label for="plan-min-questions" style="font-size:11px;color:var(--text-dim)">Min sub-questions</label>
+          <input type="number" id="plan-min-questions" min="1" max="30" value="3">
+        </div>
+        <div style="flex:1">
+          <label for="plan-max-questions" style="font-size:11px;color:var(--text-dim)">Max sub-questions</label>
+          <input type="number" id="plan-max-questions" min="3" max="50" value="14">
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px">
+        <input type="checkbox" id="plan-parallel" style="width:auto;margin:0">
+        Parallel sub-answers (<code>/plan</code> mode)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px">
+        <input type="checkbox" id="plan-quality-gate" style="width:auto;margin:0">
+        Quality gate before synthesis (<code>/plan</code> mode)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px">
+        <input type="checkbox" id="research-parallel" style="width:auto;margin:0">
+        Parallel sub-answers (<code>/research</code>)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="research-quality-gate" style="width:auto;margin:0">
+        Quality gate (<code>/research</code>)
+      </label>
+    </div>
+
+    <label for="system-prompt">System Prompt</label>
+    <textarea id="system-prompt" rows="3" placeholder="Optional: set a custom system prompt..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;resize:vertical;margin-bottom:14px;transition:border-color 0.15s"></textarea>
+
+    <div class="btn-row">
+      <button class="btn primary" id="settings-close">Done</button>
+      <button class="btn" id="clear-chat-btn">Clear Chat</button>
+      <button class="btn" id="export-chat-btn">Export</button>
+    </div>
+
+    <div id="settings-status"></div>
+  </div>
+</div>
+
+<script src="js/storage-crypto.js"></script>
+<script src="js/app.js"></script>
+<script src="js/plan-pipeline.js"></script>
+</body>
+</html>
