@@ -26,16 +26,16 @@
   --chat-font: 'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;
   --font-size: 15px;
   --panel-font-size: 14px;
-  --sp-font-base: 15px;
-  --sp-font-sm: 13px;
-  --sp-font-xs: 12px;
-  --chrome-kbd-label: clamp(11px, 2.4vw, 13px);
-  --chrome-kbd-key: clamp(10px, 2vw, 12px);
-  --chrome-kbd-weight: 700;
-  --chrome-btn-size: 14px;
-  --settings-label-size: 13px;
-  --settings-input-size: 14px;
-  --settings-hint-size: 13px;
+  --sp-font-base: 17px;
+  --sp-font-sm: 15px;
+  --sp-font-xs: 14px;
+  --chrome-kbd-label: 15px;
+  --chrome-kbd-key: 13px;
+  --chrome-kbd-weight: 800;
+  --chrome-btn-size: 16px;
+  --settings-label-size: 15px;
+  --settings-input-size: 16px;
+  --settings-hint-size: 15px;
 }
 html, body {
   height: 100%;
@@ -1174,8 +1174,8 @@ body {
 @media (max-width: 600px) {
   :root {
     --font-size: 14px;
-    --chrome-kbd-label: clamp(10px, 2.6vw, 12px);
-    --chrome-kbd-key: clamp(9px, 2.2vw, 11px);
+    --chrome-kbd-label: 13px;
+    --chrome-kbd-key: 11px;
   }
   #banner { padding: 6px 10px; gap: 8px; }
   #banner pre { font-size: clamp(8px, 1.5vw, 13px); }

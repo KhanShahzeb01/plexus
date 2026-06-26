@@ -1,0 +1,155 @@
+/* Console chrome readability — loaded LAST after themes.css.
+   Targets: hotkey bar, side panel, settings button, settings modal. */
+
+:root {
+  --chrome-kbd-label: 15px;
+  --chrome-kbd-key: 13px;
+  --chrome-kbd-weight: 800;
+  --chrome-btn-size: 16px;
+  --sp-font-base: 17px;
+  --sp-font-sm: 15px;
+  --sp-font-xs: 14px;
+  --settings-label-size: 15px;
+  --settings-input-size: 16px;
+  --settings-hint-size: 15px;
+}
+
+/* Bottom hotkey bar: New | Export | Plan | Commands | Keys */
+html body #kbd-hints .kbd-hint,
+html body .kbd-hint {
+  min-height: 46px !important;
+  padding: 8px 6px !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #f5f5f5 !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+html body .kbd-hint kbd {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  padding: 3px 7px !important;
+  color: #ffffff !important;
+  border-color: color-mix(in srgb, var(--accent) 65%, #aaaaaa) !important;
+  background: color-mix(in srgb, var(--accent) 22%, #0d0d0d) !important;
+}
+
+/* Right side panel */
+html body #side-panel {
+  --sp-font-base: 17px !important;
+  --sp-font-sm: 15px !important;
+  --sp-font-xs: 14px !important;
+  width: 284px !important;
+}
+
+html body #side-panel .sp-title {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+}
+
+html body #side-panel .sp-row {
+  font-size: 15px !important;
+  padding: 5px 0 !important;
+}
+
+html body #side-panel .sp-row .sp-label {
+  color: #f2f2f2 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+html body #side-panel .sp-row .sp-value {
+  color: var(--accent) !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+}
+
+html body #side-panel .sp-chart-legend,
+html body #side-panel .sp-footer,
+html body #side-panel .sp-desc {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #ececec !important;
+}
+
+html body #side-panel .sp-ring-inner {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+
+html body .sp-sess,
+html body .sp-new-btn {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #f2f2f2 !important;
+}
+
+html body .sp-sess.active {
+  font-weight: 800 !important;
+}
+
+/* Settings button (bottom of side panel) */
+html body #settings-toggle {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  min-height: 46px !important;
+  padding: 12px 14px !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+/* Settings modal */
+html body #settings-panel h2 {
+  font-size: 19px !important;
+  font-weight: 800 !important;
+}
+
+html body #settings-panel label,
+html body #settings-panel .settings-sublabel,
+html body #settings-panel .plan-settings label {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #f2f2f2 !important;
+}
+
+html body #settings-panel .hint,
+html body #settings-panel #encryption-status,
+html body #settings-panel #settings-status {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  color: #e4e4e4 !important;
+}
+
+html body #settings-panel input,
+html body #settings-panel select,
+html body #settings-panel textarea,
+html body #settings-panel .settings-textarea {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+}
+
+html body #settings-panel .btn {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+html body #settings-panel .range-value {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+@media (max-width: 720px) {
+  html body .kbd-hint {
+    font-size: 13px !important;
+    min-height: 42px !important;
+    padding: 7px 4px !important;
+  }
+
+  html body .kbd-hint kbd {
+    font-size: 11px !important;
+    padding: 2px 5px !important;
+  }
+}
