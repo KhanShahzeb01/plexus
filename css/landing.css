@@ -933,24 +933,11 @@ code {
   height: 28px;
 }
 
-.card-zoom-clone.carousel-card {
-  flex: none;
-  border-width: 2px;
-}
-
-.card-zoom-clone.carousel-card::before {
-  font-size: 8rem;
-  top: 2rem;
-  right: 2rem;
-}
-
-.card-3d.is-zoom-source,
-.carousel-card.is-zoom-source {
+.card-3d.is-zoom-source {
   opacity: 0.12;
 }
 
-#stickers .card-3d,
-#use-cases .carousel-card {
+#stickers .card-3d {
   cursor: pointer;
 }
 

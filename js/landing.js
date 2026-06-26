@@ -155,11 +155,10 @@
     });
   }
 
-  // ─── Click zoom: sticker + carousel cards → center at 2× ───
+  // ─── Click zoom: stickers only → center at 2× ────────────────
   const cardZoomPortal = document.getElementById("card-zoom-portal");
   const cardZoomStage = cardZoomPortal?.querySelector(".card-zoom-stage");
   const cardZoomBackdrop = cardZoomPortal?.querySelector(".card-zoom-backdrop");
-  let carouselHoverLocked = false;
   let activeZoomCard = null;
   let activeZoomClone = null;
 
@@ -209,7 +208,6 @@
       activeZoomCard.classList.remove("is-zoom-source");
       activeZoomCard = null;
     }
-    carouselHoverLocked = false;
     cardZoomPortal?.classList.remove("is-active");
     if (activeZoomClone) {
       activeZoomClone.classList.remove("is-zoomed");
@@ -221,6 +219,7 @@
 
   function toggleCardZoom(card) {
     if (prefersReduced || !cardZoomPortal || !cardZoomStage) return;
+    if (!card.closest("#stickers")) return;
     if (activeZoomCard === card) {
       hideCardZoom();
       return;
@@ -250,6 +249,7 @@
 
   function showCardZoom(card) {
     if (prefersReduced || !cardZoomPortal || !cardZoomStage) return;
+    if (!card.closest("#stickers")) return;
 
     hideCardZoom();
     const rect = card.getBoundingClientRect();
@@ -278,7 +278,6 @@
     activeZoomCard = card;
     activeZoomClone = clone;
     card.classList.add("is-zoom-source");
-    carouselHoverLocked = card.classList.contains("carousel-card");
     cardZoomPortal.classList.add("is-active");
 
     requestAnimationFrame(() => {
@@ -390,7 +389,7 @@
           trackOffset += delta * SNAP_EASE;
         }
         applyTrackOffset();
-      } else if (AUTO_PX_PER_SEC > 0 && !isDown && !carouselHoverLocked) {
+      } else if (AUTO_PX_PER_SEC > 0 && !isDown) {
         trackOffset += AUTO_PX_PER_SEC * dt;
         applyTrackOffset();
       }
@@ -425,7 +424,6 @@
 
     carouselViewport.addEventListener("mousedown", (e) => {
       if (e.button !== 0) return;
-      hideCardZoom();
       isDown = true;
       dragMoved = 0;
       snapTarget = null;
@@ -454,7 +452,7 @@
         applyTrackOffset();
         return;
       }
-      if (hoverX !== null && !carouselHoverLocked) {
+      if (hoverX !== null) {
         const dx = e.clientX - hoverX;
         if (Math.abs(dx) > 1) {
           trackOffset -= dx * HOVER_SCROLL_MULT;
@@ -468,7 +466,6 @@
     carouselViewport.addEventListener(
       "touchstart",
       (e) => {
-        hideCardZoom();
         isDown = true;
         dragMoved = 0;
         snapTarget = null;
@@ -499,8 +496,8 @@
     carouselViewport.addEventListener("click", (e) => {
       const card = e.target.closest(".carousel-card");
       if (!card || dragMoved > 8) return;
-      e.stopPropagation();
-      toggleCardZoom(card);
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      snapTarget = cardCenter - carouselViewport.clientWidth / 2;
     });
   }
 
