@@ -731,11 +731,23 @@ code {
 /* Sticker grid + 3D flip */
 .sticker-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 clamp(1rem, 5vw, 4rem) clamp(4rem, 8vw, 6rem);
+}
+
+@media (min-width: 640px) {
+  .sticker-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .sticker-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .card-3d {
@@ -781,8 +793,12 @@ code {
   background: #fff9e5;
 }
 
-.sticker-green .card-front { background: #e8f5ef; }
+.sticker-cream .card-front { background: #fff9e5; }
+.sticker-clay .card-front { background: #f2e0d4; }
+.sticker-mint .card-front { background: #dff5ec; }
 .sticker-lavender .card-front { background: #ede8f4; }
+.sticker-sky .card-front { background: #dceef8; }
+.sticker-blush .card-front { background: #f8e4ec; }
 
 .card-back {
   background: var(--ink);
@@ -834,6 +850,7 @@ code {
 
 .pin-gold::after { background: radial-gradient(circle at 30% 30%, #f5d76e, #c9a227); }
 .pin-teal::after { background: radial-gradient(circle at 30% 30%, #7dd3c0, #3a9e8a); }
+.pin-coral::after { background: radial-gradient(circle at 30% 30%, #f5a89a, #d46555); }
 
 /* Carousel — horizontal row + 3D rotateY (no page scroll) */
 .carousel-wrap {
@@ -1036,6 +1053,8 @@ code {
 .reveal-delay-1 { transition-delay: 0.1s; }
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal {
