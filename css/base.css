@@ -24,18 +24,18 @@
   --focus-bg: rgba(107,143,113,0.08);
   --font: 'Courier New','Consolas',monospace;
   --chat-font: 'JetBrains Mono','Fira Code','Cascadia Code','Consolas',monospace;
-  --font-size: 15px;
-  --panel-font-size: 14px;
-  --sp-font-base: 17px;
-  --sp-font-sm: 15px;
-  --sp-font-xs: 14px;
-  --chrome-kbd-label: 15px;
-  --chrome-kbd-key: 13px;
-  --chrome-kbd-weight: 800;
-  --chrome-btn-size: 16px;
-  --settings-label-size: 15px;
-  --settings-input-size: 16px;
-  --settings-hint-size: 15px;
+  --font-size: 13px;
+  --panel-font-size: 13px;
+  --sp-font-base: 11px;
+  --sp-font-sm: 11px;
+  --sp-font-xs: 10px;
+  --chrome-kbd-label: 11px;
+  --chrome-kbd-key: 10px;
+  --chrome-kbd-weight: 700;
+  --chrome-btn-size: 11px;
+  --settings-label-size: 11px;
+  --settings-input-size: 11px;
+  --settings-hint-size: 11px;
 }
 html, body {
   height: 100%;
@@ -102,8 +102,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: 38px;
-  padding: 6px 5px;
+  min-height: 34px;
+  padding: 5px 4px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--surface2);
@@ -345,7 +345,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px 16px;
-  font-size: 13px;
+  font-size: 11px;
   color: var(--text);
   line-height: 1.75;
   margin-bottom: 4px;

@@ -3,227 +3,220 @@
    Stellar, Forest, Hacker, Minimal, Nova, Codex, CRT). */
 
 :root {
-  --chrome-kbd-label: 15px;
-  --chrome-kbd-key: 13px;
-  --chrome-kbd-weight: 800;
-  --chrome-btn-size: 16px;
-  --sp-font-base: 17px;
-  --sp-font-sm: 15px;
-  --sp-font-xs: 14px;
-  --settings-label-size: 15px;
-  --settings-input-size: 16px;
-  --settings-hint-size: 15px;
-  --tips-font-size: 15px;
-  --tips-code-size: 14px;
+  --chrome-size: 11px;
+  --chrome-size-sm: 10px;
+  --chrome-size-lg: 12px;
+  --chrome-weight: 700;
+  --chrome-weight-bold: 800;
+  --chrome-kbd-label: 11px;
+  --chrome-kbd-key: 10px;
+  --chrome-btn-size: 11px;
+  --sp-font-base: 11px;
+  --sp-font-sm: 11px;
+  --sp-font-xs: 10px;
+  --settings-label-size: 11px;
+  --settings-input-size: 11px;
+  --settings-hint-size: 11px;
+  --tips-font-size: 11px;
+  --tips-code-size: 11px;
 }
 
-/* Welcome / tips intro block */
-html body #chat #tips {
+/* All theme body classes — tips intro, left-aligned */
+html body #chat #tips,
+html body.theme-plexus #chat #tips,
+html body.theme-code-cli #chat #tips,
+html body.theme-cyber #chat #tips,
+html body.theme-fantasy #chat #tips,
+html body.theme-stellar #chat #tips,
+html body.theme-forest #chat #tips,
+html body.theme-hacker #chat #tips,
+html body.theme-minimal #chat #tips,
+html body.theme-nova #chat #tips,
+html body.theme-codex #chat #tips,
+html body.theme-crt #chat #tips {
   text-align: left !important;
   font-size: var(--tips-font-size) !important;
-  font-weight: 500 !important;
-  line-height: 1.8 !important;
+  font-weight: var(--chrome-weight) !important;
+  line-height: 1.7 !important;
   color: #ececec !important;
 }
 
 html body #chat #tips strong {
-  font-weight: 800 !important;
+  font-weight: var(--chrome-weight-bold) !important;
   color: #ffffff !important;
 }
 
 html body #chat #tips code {
   font-size: var(--tips-code-size) !important;
-  font-weight: 700 !important;
+  font-weight: var(--chrome-weight) !important;
   color: var(--accent) !important;
-  padding: 2px 6px !important;
+  padding: 1px 5px !important;
 }
 
-/* Bottom hotkey bar: New | Export | Plan | Commands | Keys */
+/* Hotkey bar */
 html body #kbd-hints .kbd-hint,
 html body .kbd-hint {
-  min-height: 46px !important;
-  padding: 8px 6px !important;
-  font-size: 15px !important;
-  font-weight: 800 !important;
-  color: #f5f5f5 !important;
-  -webkit-font-smoothing: antialiased;
+  min-height: 34px !important;
+  padding: 5px 4px !important;
+  font-size: var(--chrome-kbd-label) !important;
+  font-weight: var(--chrome-weight-bold) !important;
+  color: #f0f0f0 !important;
 }
 
 html body .kbd-hint kbd {
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  padding: 3px 7px !important;
+  font-size: var(--chrome-kbd-key) !important;
+  font-weight: var(--chrome-weight-bold) !important;
+  padding: 1px 5px !important;
   color: #ffffff !important;
   border-color: color-mix(in srgb, var(--accent) 65%, #aaaaaa) !important;
   background: color-mix(in srgb, var(--accent) 22%, #0d0d0d) !important;
 }
 
-/* Right side panel */
+/* Side panel */
 html body #side-panel {
-  --sp-font-base: 17px !important;
-  --sp-font-sm: 15px !important;
-  --sp-font-xs: 14px !important;
-  width: 284px !important;
+  --sp-font-base: 11px !important;
+  --sp-font-sm: 11px !important;
+  --sp-font-xs: 10px !important;
+  width: 252px !important;
 }
 
 html body #side-panel .sp-title {
-  font-size: 16px !important;
-  font-weight: 800 !important;
+  font-size: var(--chrome-size-lg) !important;
+  font-weight: var(--chrome-weight-bold) !important;
 }
 
 html body #side-panel .sp-row {
-  font-size: 15px !important;
-  padding: 5px 0 !important;
+  font-size: var(--chrome-size) !important;
+  padding: 3px 0 !important;
 }
 
 html body #side-panel .sp-row .sp-label {
-  color: #f2f2f2 !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
+  color: #f0f0f0 !important;
+  font-size: var(--chrome-size) !important;
+  font-weight: var(--chrome-weight) !important;
 }
 
 html body #side-panel .sp-row .sp-value {
   color: var(--accent) !important;
-  font-size: 16px !important;
-  font-weight: 800 !important;
+  font-size: var(--chrome-size) !important;
+  font-weight: var(--chrome-weight-bold) !important;
 }
 
 html body #side-panel .sp-chart-legend,
 html body #side-panel .sp-footer,
 html body #side-panel .sp-desc {
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  color: #ececec !important;
+  font-size: var(--chrome-size) !important;
+  font-weight: var(--chrome-weight) !important;
+  color: #e8e8e8 !important;
 }
 
 html body #side-panel .sp-ring-inner {
-  font-size: 14px !important;
-  font-weight: 800 !important;
+  font-size: var(--chrome-size-sm) !important;
+  font-weight: var(--chrome-weight-bold) !important;
   color: #ffffff !important;
 }
 
 html body .sp-sess,
 html body .sp-new-btn {
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  color: #f2f2f2 !important;
+  font-size: var(--chrome-size) !important;
+  font-weight: var(--chrome-weight) !important;
+  color: #f0f0f0 !important;
 }
 
 html body .sp-sess.active {
-  font-weight: 800 !important;
+  font-weight: var(--chrome-weight-bold) !important;
 }
 
-/* Settings button (bottom of side panel) */
+/* Settings button */
 html body #settings-toggle {
-  font-size: 16px !important;
-  font-weight: 800 !important;
+  font-size: var(--chrome-btn-size) !important;
+  font-weight: var(--chrome-weight-bold) !important;
   color: #ffffff !important;
-  min-height: 46px !important;
-  padding: 12px 14px !important;
-  letter-spacing: 0.08em !important;
+  min-height: 34px !important;
+  padding: 8px 10px !important;
+  letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
 }
 
 /* Settings modal */
 html body #settings-panel h2 {
-  font-size: 19px !important;
-  font-weight: 800 !important;
+  font-size: var(--chrome-size-lg) !important;
+  font-weight: var(--chrome-weight-bold) !important;
 }
 
 html body #settings-panel label,
 html body #settings-panel .settings-sublabel,
 html body #settings-panel .plan-settings label {
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  color: #f2f2f2 !important;
+  font-size: var(--settings-label-size) !important;
+  font-weight: var(--chrome-weight) !important;
+  color: #f0f0f0 !important;
 }
 
 html body #settings-panel .hint,
 html body #settings-panel #encryption-status,
 html body #settings-panel #settings-status {
-  font-size: 15px !important;
-  font-weight: 500 !important;
-  color: #e4e4e4 !important;
+  font-size: var(--settings-hint-size) !important;
+  font-weight: var(--chrome-weight) !important;
+  color: #e0e0e0 !important;
 }
 
 html body #settings-panel input,
 html body #settings-panel select,
 html body #settings-panel textarea,
 html body #settings-panel .settings-textarea {
-  font-size: 16px !important;
-  font-weight: 600 !important;
+  font-size: var(--settings-input-size) !important;
+  font-weight: var(--chrome-weight) !important;
   color: #ffffff !important;
 }
 
 html body #settings-panel .btn {
-  font-size: 15px !important;
-  font-weight: 800 !important;
+  font-size: var(--settings-input-size) !important;
+  font-weight: var(--chrome-weight-bold) !important;
 }
 
 html body #settings-panel .range-value {
-  font-size: 15px !important;
-  font-weight: 800 !important;
+  font-size: var(--settings-label-size) !important;
+  font-weight: var(--chrome-weight-bold) !important;
 }
 
-/* Status bar, shortcuts, command palette — all themes */
+/* Status bar, shortcuts, command palette */
 html body #status-bar {
-  font-size: 0.85rem !important;
-  font-weight: 600 !important;
+  font-size: var(--chrome-size) !important;
+  font-weight: var(--chrome-weight) !important;
 }
 
 html body .shortcuts-table {
-  font-size: 14px !important;
+  font-size: var(--chrome-size) !important;
 }
 
 html body .shortcuts-table td {
   color: #ececec !important;
-  font-weight: 500 !important;
+  font-weight: var(--chrome-weight) !important;
 }
 
 html body .shortcuts-table kbd {
-  font-size: 12px !important;
-  font-weight: 800 !important;
+  font-size: var(--chrome-size-sm) !important;
+  font-weight: var(--chrome-weight-bold) !important;
 }
 
 html body #cmd-palette-input {
-  font-size: 16px !important;
-  font-weight: 600 !important;
+  font-size: var(--chrome-size) !important;
+  font-weight: var(--chrome-weight) !important;
 }
 
 html body #cmd-palette h2,
 html body #shortcuts-panel h2 {
-  font-size: 16px !important;
-  font-weight: 800 !important;
+  font-size: var(--chrome-size-lg) !important;
+  font-weight: var(--chrome-weight-bold) !important;
 }
 
 html body .cmd-item {
-  font-size: 14px !important;
-  font-weight: 600 !important;
+  font-size: var(--chrome-size) !important;
+  font-weight: var(--chrome-weight) !important;
   color: #ececec !important;
 }
 
 html body .cmd-item kbd {
-  font-size: 12px !important;
-  font-weight: 800 !important;
-}
-
-@media (max-width: 720px) {
-  html body .kbd-hint {
-    font-size: 13px !important;
-    min-height: 42px !important;
-    padding: 7px 4px !important;
-  }
-
-  html body .kbd-hint kbd {
-    font-size: 11px !important;
-    padding: 2px 5px !important;
-  }
-
-  html body #chat #tips {
-    font-size: 14px !important;
-  }
-
-  html body #chat #tips code {
-    font-size: 13px !important;
-  }
+  font-size: var(--chrome-size-sm) !important;
+  font-weight: var(--chrome-weight-bold) !important;
 }
