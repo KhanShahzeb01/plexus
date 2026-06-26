@@ -1,5 +1,6 @@
 /* Console chrome readability — loaded LAST after themes.css.
-   Targets: hotkey bar, side panel, settings button, settings modal. */
+   Applies to every Plexus theme (Plexus, Code CLI, Cyberpunk, Fantasy,
+   Stellar, Forest, Hacker, Minimal, Nova, Codex, CRT). */
 
 :root {
   --chrome-kbd-label: 15px;
@@ -12,6 +13,29 @@
   --settings-label-size: 15px;
   --settings-input-size: 16px;
   --settings-hint-size: 15px;
+  --tips-font-size: 15px;
+  --tips-code-size: 14px;
+}
+
+/* Welcome / tips intro block */
+html body #chat #tips {
+  text-align: left !important;
+  font-size: var(--tips-font-size) !important;
+  font-weight: 500 !important;
+  line-height: 1.8 !important;
+  color: #ececec !important;
+}
+
+html body #chat #tips strong {
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+
+html body #chat #tips code {
+  font-size: var(--tips-code-size) !important;
+  font-weight: 700 !important;
+  color: var(--accent) !important;
+  padding: 2px 6px !important;
 }
 
 /* Bottom hotkey bar: New | Export | Plan | Commands | Keys */
@@ -141,6 +165,48 @@ html body #settings-panel .range-value {
   font-weight: 800 !important;
 }
 
+/* Status bar, shortcuts, command palette — all themes */
+html body #status-bar {
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+}
+
+html body .shortcuts-table {
+  font-size: 14px !important;
+}
+
+html body .shortcuts-table td {
+  color: #ececec !important;
+  font-weight: 500 !important;
+}
+
+html body .shortcuts-table kbd {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+
+html body #cmd-palette-input {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+}
+
+html body #cmd-palette h2,
+html body #shortcuts-panel h2 {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+}
+
+html body .cmd-item {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #ececec !important;
+}
+
+html body .cmd-item kbd {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+
 @media (max-width: 720px) {
   html body .kbd-hint {
     font-size: 13px !important;
@@ -151,5 +217,13 @@ html body #settings-panel .range-value {
   html body .kbd-hint kbd {
     font-size: 11px !important;
     padding: 2px 5px !important;
+  }
+
+  html body #chat #tips {
+    font-size: 14px !important;
+  }
+
+  html body #chat #tips code {
+    font-size: 13px !important;
   }
 }

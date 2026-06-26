@@ -349,6 +349,7 @@ body {
   color: var(--text);
   line-height: 1.75;
   margin-bottom: 4px;
+  text-align: left;
 }
 #tips strong { color: var(--text); }
 #tips code {

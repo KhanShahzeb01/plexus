@@ -2025,7 +2025,6 @@
   border-radius: 20px;
   padding: 12px 16px;
   color: #d0e4ff;
-  text-align: center;
   font-size: 12px;
 }
 .theme-stellar #tips strong { color: color-mix(in srgb, var(--accent) 80%, #7ab8ff); }
@@ -2361,7 +2360,6 @@
   border-radius: 24px;
   padding: 12px 16px;
   color: color-mix(in srgb, var(--accent) 55%, #daf5c0);
-  text-align: center;
   font-size: 12px;
 }
 .theme-forest #tips strong { color: color-mix(in srgb, var(--accent) 80%, #bde88a); }
@@ -3360,7 +3358,6 @@
 .theme-nova #tips {
   border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
   border-radius: 24px;
-  text-align: center;
   font-size: 12px;
 }
 .theme-nova #tips strong { color: color-mix(in srgb, var(--accent) 75%, #f0f0ff); }
@@ -4002,6 +3999,7 @@
   background: var(--focus-bg) !important;
 }
 .theme-code-cli #tips,
+.theme-plexus #tips,
 .theme-cyber #tips,
 .theme-fantasy #tips,
 .theme-stellar #tips,
@@ -4012,11 +4010,13 @@
 .theme-codex #tips,
 .theme-crt #tips {
   background: var(--surface2) !important;
-  color: var(--text-dim) !important;
+  color: var(--text) !important;
+  text-align: left !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 .theme-code-cli #tips strong,
+.theme-plexus #tips strong,
 .theme-cyber #tips strong,
 .theme-fantasy #tips strong,
 .theme-stellar #tips strong,
@@ -4316,102 +4316,4 @@ body.theme-plexus #banner pre {
 }
 #suggestions .suggestion.selected {
   background: rgba(34,197,94,0.12);
-}
-
-/* ─── Console chrome readability (all themes) ─── */
-body #kbd-hints .kbd-hint,
-body .kbd-hint {
-  font-size: var(--chrome-kbd-label) !important;
-  font-weight: var(--chrome-kbd-weight) !important;
-  color: var(--text) !important;
-  min-height: 38px;
-}
-body .kbd-hint kbd {
-  font-size: var(--chrome-kbd-key) !important;
-  font-weight: var(--chrome-kbd-weight) !important;
-}
-body #settings-toggle {
-  font-size: var(--chrome-btn-size) !important;
-  font-weight: 700 !important;
-  min-height: 40px;
-}
-body #side-panel {
-  --sp-font-base: 15px;
-  --sp-font-sm: 13px;
-  --sp-font-xs: 12px;
-}
-body #side-panel .sp-title,
-body #side-panel .sp-row,
-body #side-panel .sp-desc,
-body #side-panel .sp-footer,
-body #side-panel .sp-chart-legend,
-body .sp-sess,
-body .sp-new-btn {
-  font-size: var(--sp-font-sm);
-}
-body #side-panel .sp-row .sp-label {
-  color: var(--text) !important;
-  font-weight: 600 !important;
-}
-body #side-panel .sp-row .sp-value {
-  font-weight: 700 !important;
-}
-body #settings-panel label,
-body #settings-panel .settings-sublabel {
-  font-size: var(--settings-label-size) !important;
-  color: var(--text) !important;
-  font-weight: 600 !important;
-}
-body #settings-panel .hint,
-body #settings-panel #encryption-status,
-body #settings-panel #settings-status {
-  font-size: var(--settings-hint-size) !important;
-  color: var(--text) !important;
-}
-body #settings-panel input,
-body #settings-panel select,
-body #settings-panel textarea,
-body #settings-panel .settings-textarea {
-  font-size: var(--settings-input-size) !important;
-  color: var(--text) !important;
-}
-body #settings-panel .btn {
-  font-size: var(--settings-input-size) !important;
-  font-weight: 700 !important;
-}
-body #settings-panel .range-value {
-  font-size: var(--settings-label-size) !important;
-  font-weight: 700 !important;
-}
-body #status-bar {
-  font-size: 0.8rem !important;
-}
-body #tips {
-  font-size: 13px !important;
-  color: var(--text) !important;
-}
-body .shortcuts-table {
-  font-size: 14px !important;
-}
-body .shortcuts-table td {
-  color: var(--text) !important;
-}
-body .shortcuts-table kbd {
-  font-size: 12px !important;
-  font-weight: 700 !important;
-}
-body #cmd-palette-input {
-  font-size: var(--settings-input-size) !important;
-}
-body #cmd-palette h2,
-body #shortcuts-panel h2 {
-  font-size: 15px !important;
-  font-weight: 700 !important;
-}
-body .cmd-item {
-  font-size: 14px !important;
-}
-body .cmd-item kbd {
-  font-size: 12px !important;
-  font-weight: 700 !important;
 }
